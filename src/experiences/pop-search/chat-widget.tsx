@@ -2,60 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchBox } from 'react-instantsearch';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
+import { API_KEY, APPLICATION_ID, ASSISTANT_ID, BASE_ASKAI_URL, INDEX_NAME } from './constants';
+import { getCachedToken, getOrCreateToken, clearToken } from './token';
 
-type QATurn = {
-  question: string;
-  answer: string;
-};
-
-type Message = {
-  role: 'user' | 'assistant';
-  content?: string | any[];
-  parts?: any[];
-};
-
-function extractTextFromMessage(message: Message): string {
-  if (Array.isArray(message.parts)) {
-    return message.parts
-      .map((p: any) => {
-        if (!p) return '';
-        if (typeof p === 'string') return p;
-        if (p.type === 'text') return p.text ?? '';
-        if (p.type && p[p.type]) return String(p[p.type]);
-        return '';
-      })
-      .join('');
-  }
-  if (typeof message.content === 'string') return message.content;
-  if (Array.isArray(message.content)) {
-    return message.content
-      .map((c: any) => (typeof c === 'string' ? c : c?.text ?? ''))
-      .join('');
-  }
-  return '';
-}
-
-function groupMessagesIntoTurns(messages: Message[]): QATurn[] {
-  const turns: QATurn[] = [];
-  let current: QATurn | null = null;
-
-  for (const msg of messages) {
-    if (msg.role === 'user') {
-      current = { question: extractTextFromMessage(msg), answer: '' };
-      turns.push(current);
-    } else if (msg.role === 'assistant') {
-      const text = extractTextFromMessage(msg);
-      if (!current) {
-        current = { question: '', answer: text };
-        turns.push(current);
-      } else {
-        current.answer += text;
-      }
-    }
-  }
-
-  return turns;
-}
 
 function useClipboard() {
   const copyText = useCallback(async (text: string) => {
@@ -76,33 +25,78 @@ function useKeyboardListener(callback: (e: KeyboardEvent) => void, dependencies:
   }, dependencies);
 }
 
-function useMessageTurns(messages: any[]) {
-  return useMemo(() => groupMessagesIntoTurns(messages as Message[]), [messages]);
-}
-
 interface ChatWidgetProps {
   initialQuestion?: string;
+  refine: (query: string) => void;
+  query: string;
 }
 
+interface Exchange {
+  id: string;
+  userMessage: any;
+  assistantMessage: any | null;
+}
+
+
 export function ChatWidget({ initialQuestion }: ChatWidgetProps) {
-  const { query, refine } = useSearchBox();
   const { copyText } = useClipboard();
-  
-  const { messages, sendMessage, status, error } = useChat({
-    transport: new DefaultChatTransport({
-      api: 'https://beta-askai.algolia.com/chat',
-    }),
-  });
+  const [authToken, setAuthToken] = useState<string | null>(getCachedToken());
+  const { query, refine } = useSearchBox();
+
+  console.log('query', query);
+
+  useEffect(() => {
+    if (!authToken) {
+      getOrCreateToken().then(setAuthToken).catch(() => {
+        // Let the hook error display handle any visible errors
+      });
+    }
+  }, [authToken]);
+
+
+  const transport = useMemo(() => new DefaultChatTransport({
+    api: `${BASE_ASKAI_URL}/chat`,
+    headers: {
+      'x-algolia-api-key': API_KEY,
+      'x-algolia-application-id': APPLICATION_ID,
+      'x-algolia-index-name': INDEX_NAME,
+      'x-algolia-assistant-id': ASSISTANT_ID,
+      'x-ai-sdk-version': 'v5',
+      'authorization': `TOKEN ${authToken}`,
+    },
+  }), [authToken]);
+
+  const { messages, sendMessage, status, error } = useChat({ transport });
 
   const [lastSentQuery, setLastSentQuery] = useState('');
-  const qaTurns = useMessageTurns(messages);
+
+
+  // Group messages into exchanges (user + assistant pairs)
+  const exchanges = () => {
+    const grouped: Exchange[] = [];
+    for (let i = 0; i < messages.length; i++) {
+      if (messages[i].role === 'user') {
+        const userMessage = messages[i];
+        const assistantMessage = messages[i + 1]?.role === 'assistant' ? messages[i + 1] : null;
+        if (assistantMessage) {
+          grouped.push({
+            id: userMessage.id,
+            userMessage,
+            assistantMessage
+          });
+          i++; // Skip the assistant message since we've already processed it
+        }
+      }
+    }
+    return grouped;
+  };
+
 
   const handleSendMessage = useCallback((text: string) => {
     const trimmed = text.trim();
     if (trimmed && trimmed !== lastSentQuery) {
       sendMessage({ text: trimmed });
       setLastSentQuery(trimmed);
-      refine("");
     }
   }, [lastSentQuery, sendMessage, refine]);
 
@@ -111,8 +105,20 @@ export function ChatWidget({ initialQuestion }: ChatWidgetProps) {
     const trimmed = (initialQuestion ?? '').trim();
     if (trimmed && trimmed !== lastSentQuery) {
       handleSendMessage(trimmed);
+      refine("");
     }
   }, [initialQuestion, lastSentQuery, handleSendMessage]);
+
+  // If unauthorized, clear token and refetch
+  useEffect(() => {
+    if (!error) return;
+    console.log('error', error);
+    const msg = String(error.message || '').toLowerCase();
+    if (msg.includes('401') || msg.includes('unauthorized')) {
+      clearToken();
+      setAuthToken(null);
+    }
+  }, [error]);
 
   // Listen for Enter key presses
   useKeyboardListener(
@@ -128,73 +134,63 @@ export function ChatWidget({ initialQuestion }: ChatWidgetProps) {
 
   return (
     <div className="qs-chat-root">
-      {error && <div className="qs-error-banner">{error.message}</div>}
-
       <div className="qs-qa-list">
-        {qaTurns.length === 0 && (
-          <div className="qs-hint">
-            <p>Answers are generated with AI which can make mistakes. Verify responses.</p>
-          </div>
-        )}
+        <p className="qs-hint">Answers are generated with AI which can make mistakes. Verify responses.</p>
+        {/* errors */}
+        {error && <div className="qs-error-banner">{error.message}</div>}
 
-        {qaTurns.map((turn, i) => (
-          <article key={i} className="qs-qa-card">
-            <header className="qs-qa-header">
-              <div className="qs-qa-label">Q</div>
-              <div className="qs-qa-question">{turn.question}</div>
-            </header>
+        {/* exchanges */}
+        {exchanges()
+          .slice()
+          .reverse()
+          .map((exchange, index) => {
+            const isLastExchange = index === 0;
 
-            <section className="qs-qa-answer">
-              <div className="qs-qa-label">A</div>
-              <div className="qs-qa-answer-content">
-                {turn.answer ? (
-                  <div className="qs-qa-markdown">{turn.answer}</div>
-                ) : (
-                  <div className="qs-qa-generating">{isGenerating ? '…' : ''}</div>
-                )}
+            return (
+              <article key={exchange.id} className="qs-qa-card">
+                <header className="qs-qa-header">
+                  <div className="qs-qa-question">{
+                    exchange.userMessage.parts.map((part, index) =>
+                      part.type === 'text' ? <span key={index}>{part.text}</span> : null,
+                    )
+                  }</div>
+                </header>
 
-                <div className="qs-qa-sources">
-                  <span className="qs-qa-sources-title">Sources</span>
-                  <ul className="qs-qa-sources-list">
-                    <li className="qs-qa-source-pill">example.com</li>
-                    <li className="qs-qa-source-pill">docs.example</li>
-                    <li className="qs-qa-source-pill">wikipedia.org</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
+                <section className="qs-qa-answer">
+                  <div className="qs-qa-answer-content">
+                    {exchange.assistantMessage ? (
+                      <div className="qs-qa-markdown">{
+                        exchange.assistantMessage.parts.map((part, index) =>
+                          part.type === 'text' ? <span key={index}>{part.text}</span> : null,
+                        )
+                      }</div>
+                    ) : (
+                      <div className="qs-qa-generating">{isGenerating && isLastExchange ? '…' : ''}</div>
+                    )}
+                  </div>
+                </section>
 
-            <footer className="qs-qa-actions">
-              <button
-                className="qs-qa-action-btn"
-                onClick={() => copyText(`${turn.question}\n\n${turn.answer}`)}
-              >
-                Copy
-              </button>
-              <button className="qs-qa-action-btn" disabled>
-                Export
-              </button>
-              <button className="qs-qa-action-btn" disabled>
-                Rewrite
-              </button>
-            </footer>
-          </article>
-        ))}
-
-        {isGenerating && qaTurns.length > 0 && (
-          <article className="qs-qa-card qs-qa-card-generating">
-            <header className="qs-qa-header">
-              <div className="qs-qa-label">Q</div>
-              <div className="qs-qa-question">{qaTurns[qaTurns.length - 1]?.question}</div>
-            </header>
-            <section className="qs-qa-answer">
-              <div className="qs-qa-label">A</div>
-              <div className="qs-qa-answer-content">
-                <div className="qs-qa-generating">…</div>
-              </div>
-            </section>
-          </article>
-        )}
+                <footer className="qs-qa-actions">
+                  <button
+                    className="qs-qa-action-btn"
+                    onClick={() => copyText(
+                      exchange.assistantMessage.parts.map((part, index) =>
+                        part.type === 'text' ? <span key={index}>{part.text}</span> : null,
+                      )
+                    )}
+                  >
+                    Copy
+                  </button>
+                  <button className="qs-qa-action-btn" disabled>
+                    Like
+                  </button>
+                  <button className="qs-qa-action-btn" disabled>
+                    Dislike
+                  </button>
+                </footer>
+              </article>
+            );
+          })}
       </div>
     </div>
   );

@@ -17,8 +17,8 @@ import { SparklesIcon, SearchIcon, ArrowLeftIcon, AlgoliaLogo, CloseIcon } from 
 import "./index.css";
 
 const searchClient = algoliasearch(
-  "latency",
-  "6be0576ff61c053d5f9a3225e2a90f76"
+  "betaHAXPMHIMMC",
+  "8b00405cba281a7d800ccec393e9af24"
 );
 
 const future = { preserveSharedStateOnUnmount: true };
@@ -118,19 +118,21 @@ function SearchBox(props: SearchBoxProps) {
           }}
           autoFocus
         />
-        <button
-          type="reset"
-          className="qs-search-clear-button"
-          hidden={!inputValue || inputValue.length === 0 || isSearchStalled}
-        >
-          Clear
-        </button>
-        <button hidden={true} className="qs-search-clear-button">
-          X
-        </button>
-        <button className="qs-search-close-button">
-          <CloseIcon />
-        </button>
+        <div className="qs-search-action-buttons-container">
+          <button
+            type="reset"
+            className="qs-search-clear-button"
+            hidden={!inputValue || inputValue.length === 0 || isSearchStalled}
+          >
+            Clear
+          </button>
+          <button hidden={true} className="qs-search-clear-button">
+            X
+          </button>
+          <button className="qs-search-close-button">
+            <CloseIcon />
+          </button>
+        </div>
       </form>
     </div>
   );
@@ -225,9 +227,10 @@ interface ResultsPanelProps {
   query: string;
   initialQuestion?: string;
   selectedIndex: number;
+  refine: (query: string) => void;
 }
 
-function ResultsPanel({ showChat, setShowChat, query, initialQuestion, selectedIndex }: ResultsPanelProps) {
+function ResultsPanel({ showChat, setShowChat, query, initialQuestion, selectedIndex, refine }: ResultsPanelProps) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -250,7 +253,7 @@ function ResultsPanel({ showChat, setShowChat, query, initialQuestion, selectedI
   }, [selectedIndex, showChat, items.length]);
 
   if (showChat) {
-    return <ChatWidget initialQuestion={initialQuestion} />;
+    return <ChatWidget initialQuestion={initialQuestion} refine={refine} query={query} />;
   }
 
   return (
@@ -268,8 +271,8 @@ function ResultsPanel({ showChat, setShowChat, query, initialQuestion, selectedI
             role="option"
             aria-selected={isSel}
           >
-            <p className="qs-infinite-hits-item-title"><Highlight attribute="name" hit={hit} /></p>
-            <p className="qs-infinite-hits-item-description"><Highlight attribute="description" hit={hit} /></p>
+            <p className="qs-infinite-hits-item-title"><Highlight attribute="title" hit={hit} /></p>
+            <p className="qs-infinite-hits-item-description"><Highlight attribute="text" hit={hit} /></p>
           </a>
         );
       })}
@@ -287,7 +290,7 @@ export default function App() {
       <div className="container">
         <InstantSearch
           searchClient={searchClient}
-          indexName="instant_search"
+          indexName="crawler_markdown-index"
           future={future}
           insights
         >
@@ -398,6 +401,7 @@ export function QuickSearch() {
             query={query}
             initialQuestion={initialQuestion}
             selectedIndex={selectedIndex}
+            refine={refine}
           />
         )}
         {noResults && query && (
@@ -436,7 +440,9 @@ function Footer() {
         </div>
       </div>
       <div className="qs-footer-right">
-        {/* 🚧 DO NOT REMOVE the logo if you are on Build Plan */}
+        {/* 🚧 DO NOT REMOVE the logo if you are on a Free plan 
+        * https://support.algolia.com/hc/en-us/articles/17226079853073-Is-displaying-the-Algolia-logo-required
+        */}
         <a className="qs-footer-powered-by" href="https://www.algolia.com" target="_blank" rel="quicksearch">
           <span>Powered by </span>
           <AlgoliaLogo />
