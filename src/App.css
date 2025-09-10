@@ -1,0 +1,98 @@
+/* Landing */
+.qs-landing {
+	min-height: 100dvh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 32px;
+	font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+		Helvetica, Arial, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji";
+	color: #111827;
+	background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+	padding: 24px;
+}
+
+.qs-landing-header {
+	text-align: center;
+}
+.qs-landing-header h1 {
+	margin: 0 0 6px;
+	font-size: 28px;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+.qs-landing-header p {
+	margin: 0;
+	color: #64748b;
+	font-size: 14px;
+}
+
+.qs-landing-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: 16px;
+	width: min(960px, 100%);
+}
+
+.qs-card {
+	border: 1px solid #e5e7eb;
+	background: #ffffff;
+	border-radius: 12px;
+	padding: 20px;
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+.qs-card h2 {
+	margin: 0 0 8px;
+	font-size: 18px;
+}
+.qs-card p {
+	margin: 0 0 16px;
+	color: #4b5563;
+}
+
+.qs-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 36px;
+	padding: 0 14px;
+	background: #111827;
+	color: white;
+	border-radius: 8px;
+	text-decoration: none;
+}
+
+/* Experience layout */
+.qs-topbar {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	padding: 12px 16px;
+	border-bottom: 1px solid #e5e7eb;
+	background: #ffffff;
+	text-align: center;
+}
+.qs-back {
+	color: #64748b;
+	text-decoration: none;
+	transition: color 120ms ease-in-out;
+	font-size: 12px;
+	line-height: 1.2;
+	margin-top: 2px;
+}
+.qs-back:hover {
+	color: #475569;
+	text-decoration: underline;
+}
+.qs-topbar-title {
+	font-weight: 500;
+	color: #334155;
+	letter-spacing: -0.01em;
+	text-align: center;
+}
+
+.qs-experience-content {
+	padding: 16px;
+}
