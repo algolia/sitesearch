@@ -1,16 +1,19 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useRef, useCallback, memo, useEffect } from "react";
 import algoliasearch from "algoliasearch/lite";
 import {
   Configure,
   InstantSearch,
   useSearchBox,
   useInstantSearch,
-  Highlight,
   useHits,
 } from "react-instantsearch";
 
 import { ChatWidget } from "./chat-widget";
-import { SparklesIcon, SearchIcon, ArrowLeftIcon, AlgoliaLogo, CloseIcon } from "./icons";
+import { useSearchState } from "./useSearchState";
+import { useKeyboardNavigation } from "./useKeyboardNavigation";
+import { SearchInput } from "./search-input";
+import { HitsList } from "./hits-list";
+import { SparklesIcon, SearchIcon, AlgoliaLogo } from "./icons";
 
 import "./index.css";
 import { API_KEY, APPLICATION_ID } from "./constants";
@@ -31,157 +34,23 @@ interface SearchBoxProps {
   onEnter?: () => boolean;
 }
 
-function SearchBox(props: SearchBoxProps) {
-  const { status } = useInstantSearch();
-  const { query, refine } = useSearchBox();
-  const [inputValue, setInputValue] = useState(query || '');
-
-  const isSearchStalled = status === 'stalled';
-
-  function setQuery(newQuery) {
-    setInputValue(newQuery);
-    refine(newQuery);
-  }
-
-
+const SearchBox = memo(function SearchBox(props: SearchBoxProps) {
   return (
-    <div>
-      <form
-        role="search"
-        className={props.className}
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-        }}
-        onReset={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-
-          setQuery('');
-          if (props.inputRef.current) {
-            props.inputRef.current.focus();
-          }
-        }}
-      >
-        <SearchLeftButton showChat={props.showChat} setShowChat={props.setShowChat} />
-        <input
-          ref={props.inputRef}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          placeholder={props.placeholder}
-          spellCheck={false}
-          maxLength={512}
-          type="search"
-          value={inputValue}
-          onChange={(event) => {
-            setQuery(event.currentTarget.value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              props.onArrowDown?.();
-              return;
-            }
-            if (e.key === 'ArrowUp') {
-              e.preventDefault();
-              props.onArrowUp?.();
-              return;
-            }
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              if (props.onEnter?.()) {
-                return;
-              }
-              const trimmed = inputValue.trim();
-              if (trimmed) {
-                props.setShowChat(true);
-                props.setInitialQuestion(trimmed);
-              }
-            }
-          }}
-          autoFocus
-        />
-        <div className="qs-search-action-buttons-container">
-          <button
-            type="reset"
-            className="qs-search-clear-button"
-            hidden={!inputValue || inputValue.length === 0 || isSearchStalled}
-          >
-            Clear
-          </button>
-          <button hidden={true} className="qs-search-clear-button">
-            X
-          </button>
-          <button className="qs-search-close-button">
-            <CloseIcon />
-          </button>
-        </div>
-      </form>
-    </div>
+    <SearchInput
+      className={props.className}
+      placeholder={props.placeholder}
+      showChat={props.showChat}
+      inputRef={props.inputRef}
+      setShowChat={props.setShowChat}
+      setInitialQuestion={props.setInitialQuestion}
+      onArrowDown={props.onArrowDown}
+      onArrowUp={props.onArrowUp}
+      onEnter={props.onEnter}
+    />
   );
-}
+});
 
-interface SearchLeftButtonProps {
-  query: string;
-  showChat: boolean;
-  setShowChat: (showChat: boolean) => void;
-}
 
-function SearchLeftButton({ showChat, setShowChat }: Omit<SearchLeftButtonProps, 'query'>) {
-  if (showChat) {
-    return (
-      <>
-        <button
-          onClick={() => setShowChat(false)}
-          className="qs-search-left-button"
-          aria-label="Back to search"
-          title="Back to search"
-        >
-          <ArrowLeftIcon />
-        </button>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <div
-        tabIndex={-1}
-        className="qs-search-left-button"
-        aria-label="Search"
-        title="Search"
-      >
-        <SearchIcon />
-      </div>
-    </>
-  );
-}
-
-interface HitsActionsProps {
-  query: string;
-  isSelected: boolean;
-  onAskAI: () => void;
-}
-
-function HitsActions({ query, isSelected, onAskAI }: HitsActionsProps) {
-  return (
-    <div className="qs-infinite-hits-list">
-      <article
-        onClick={onAskAI}
-        className="qs-infinite-hits-item qs-ask-ai-btn"
-        aria-label="Ask AI"
-        title="Ask AI"
-        role="option"
-        aria-selected={isSelected}
-      >
-        <SparklesIcon />
-        <p className="qs-infinite-hits-item-title">Ask AI: <span className="ais-Highlight-highlighted">"{query}"</span></p>
-      </article>
-    </div>
-  );
-}
 
 interface NoResultsProps {
   query: string;
@@ -189,7 +58,7 @@ interface NoResultsProps {
   onClear: () => void;
 }
 
-function NoResults({ query, onAskAI, onClear }: NoResultsProps) {
+const NoResults = memo(function NoResults({ query, onAskAI, onClear }: NoResultsProps) {
   return (
     <div className="qs-no-results">
       <div className="qs-no-results-icon"><SearchIcon /></div>
@@ -204,7 +73,7 @@ function NoResults({ query, onAskAI, onClear }: NoResultsProps) {
       </div>
     </div>
   );
-}
+});
 
 interface ResultsPanelProps {
   showChat: boolean;
@@ -216,7 +85,7 @@ interface ResultsPanelProps {
   refine: (query: string) => void;
 }
 
-function ResultsPanel({ showChat, inputRef, setShowChat, query, initialQuestion, selectedIndex, refine }: ResultsPanelProps) {
+const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowChat, query, initialQuestion, selectedIndex, refine }: ResultsPanelProps) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -244,78 +113,17 @@ function ResultsPanel({ showChat, inputRef, setShowChat, query, initialQuestion,
 
   return (
     <div ref={containerRef} className="qs-hits-container" role="listbox">
-      <HitsActions query={query} isSelected={selectedIndex === 0} onAskAI={() => { setShowChat(true); }} />
-      {items.map((hit: any, idx: number) => {
-        const isSel = selectedIndex === idx + 1;
-        return (
-          <a
-            key={hit.objectID}
-            href={hit.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="qs-infinite-hits-item qs-infinite-hits-anchor"
-            role="option"
-            aria-selected={isSel}
-          >
-            <p className="qs-infinite-hits-item-title"><Highlight attribute="title" hit={hit} /></p>
-            <p className="qs-infinite-hits-item-description"><Highlight attribute="text" hit={hit} /></p>
-          </a>
-        );
-      })}
+      <HitsList
+        hits={items as any[]}
+        query={query}
+        selectedIndex={selectedIndex}
+        onAskAI={() => setShowChat(true)}
+      />
     </div>
   );
-}
+});
 
 
-function useKeyboardNavigation(showChat: boolean, totalItems: number, hits: any[], query: string) {
-  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
-
-  const moveDown = useCallback(() => {
-    if (showChat || totalItems === 0) return;
-    setSelectedIndex((prev) => (prev + 1) % totalItems);
-  }, [showChat, totalItems]);
-
-  const moveUp = useCallback(() => {
-    if (showChat || totalItems === 0) return;
-    setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems);
-  }, [showChat, totalItems]);
-
-  const activateSelection = useCallback((): boolean => {
-    if (showChat) return false;
-    if (selectedIndex === 0) {
-      return true; // Let parent handle AI activation
-    }
-    if (selectedIndex > 0) {
-      const hit = hits[selectedIndex - 1];
-      if (hit && hit.url) {
-        window.open(hit.url, '_blank', 'noopener,noreferrer');
-        return true;
-      }
-    }
-    return false;
-  }, [showChat, selectedIndex, hits]);
-
-  // Reset selection on query change
-  useEffect(() => {
-    setSelectedIndex(-1);
-  }, [query, showChat]);
-
-  return { selectedIndex, moveDown, moveUp, activateSelection };
-}
-
-function useChatState() {
-  const [showChat, setShowChat] = useState(false);
-  const [initialQuestion, setInitialQuestion] = useState<string | undefined>(undefined);
-
-  const handleShowChat = useCallback((show: boolean, question?: string) => {
-    setShowChat(show);
-    if (show && question) {
-      setInitialQuestion(question);
-    }
-  }, []);
-
-  return { showChat, initialQuestion, setShowChat, setInitialQuestion, handleShowChat };
-}
 
 export function PopSearch() {
   const { query, refine } = useSearchBox();
@@ -323,11 +131,10 @@ export function PopSearch() {
 
   const results = useInstantSearch();
   const { items } = useHits();
-  const { showChat, initialQuestion, setShowChat, setInitialQuestion, handleShowChat } = useChatState();
+  const { showChat, initialQuestion, setShowChat, setInitialQuestion, handleShowChat } = useSearchState();
 
   const noResults = results.results?.nbHits === 0;
-  const totalItems = items.length + 1; // +1 for Ask AI
-  const { selectedIndex, moveDown, moveUp, activateSelection } = useKeyboardNavigation(showChat, totalItems, items, query);
+  const { selectedIndex, moveDown, moveUp, activateSelection } = useKeyboardNavigation(showChat, items, query);
 
   const handleActivateSelection = useCallback((): boolean => {
     if (activateSelection()) {
@@ -347,7 +154,7 @@ export function PopSearch() {
       <div className="search-panel">
         <SearchBox
           query={query}
-          placeholder="Search for products"
+          placeholder="Search through Algolia documentation"
           className="qs-searchbox-form"
           refine={refine}
           showChat={showChat}
@@ -372,7 +179,7 @@ export function PopSearch() {
             refine={refine}
           />
         )}
-        {noResults && query && (
+        {noResults && query && !showChat && (
           <NoResults
             query={query}
             onAskAI={() => {
@@ -387,7 +194,7 @@ export function PopSearch() {
   );
 }
 
-function Footer() {
+const Footer = memo(function Footer() {
   return (
     <div className="qs-footer">
       <div className="qs-footer-left">
@@ -419,7 +226,7 @@ function Footer() {
     </div>
 
   );
-}
+});
 
 
 export default function PopSearchExperience() {

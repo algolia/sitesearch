@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from "react";
 import { useSearchBox } from "react-instantsearch";
 import { useChat } from "@ai-sdk/react";
 import {
@@ -42,13 +42,24 @@ interface ChatWidgetProps {
   inputRef: React.RefObject<HTMLInputElement | null>;
 }
 
-interface Exchange {
-  id: string;
-  userMessage: any;
-  assistantMessage: any | null;
+interface MessagePart {
+  type: string;
+  text: string;
 }
 
-export function ChatWidget({ initialQuestion, inputRef }: ChatWidgetProps) {
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  parts: MessagePart[];
+}
+
+interface Exchange {
+  id: string;
+  userMessage: Message;
+  assistantMessage: Message | null;
+}
+
+export const ChatWidget = memo(function ChatWidget({ initialQuestion, inputRef }: ChatWidgetProps) {
   const { copyText } = useClipboard();
   const { refine } = useSearchBox();
 
@@ -73,15 +84,16 @@ export function ChatWidget({ initialQuestion, inputRef }: ChatWidgetProps) {
   });
 
   const [lastSentQuery, setLastSentQuery] = useState("");
+  const hasAutoSent = useRef(false);
 
   // Group messages into exchanges (user + assistant pairs)
-  const exchanges = () => {
+  const exchanges = useMemo(() => {
     const grouped: Exchange[] = [];
     for (let i = 0; i < messages.length; i++) {
       if (messages[i].role === "user") {
-        const userMessage = messages[i];
+        const userMessage = messages[i] as Message;
         const assistantMessage =
-          messages[i + 1]?.role === "assistant" ? messages[i + 1] : null;
+          messages[i + 1]?.role === "assistant" ? (messages[i + 1] as Message) : null;
         if (assistantMessage) {
           grouped.push({
             id: userMessage.id,
@@ -93,7 +105,7 @@ export function ChatWidget({ initialQuestion, inputRef }: ChatWidgetProps) {
       }
     }
     return grouped;
-  };
+  }, [messages]);
 
   const handleSendMessage = useCallback(
     (text: string) => {
@@ -109,14 +121,14 @@ export function ChatWidget({ initialQuestion, inputRef }: ChatWidgetProps) {
   // Auto-send initial question
   useEffect(() => {
     const trimmed = (initialQuestion ?? "").trim();
-    if (trimmed && trimmed !== lastSentQuery) {
+    if (trimmed && !hasAutoSent.current && trimmed !== lastSentQuery) {
       handleSendMessage(trimmed);
+      hasAutoSent.current = true;
       refine("");
       inputRef.current?.focus();
-      // clear the input
       inputRef.current!.value = "";
     }
-  }, [initialQuestion, lastSentQuery, handleSendMessage]);
+  }, [initialQuestion, handleSendMessage, refine, inputRef, lastSentQuery]);
 
   // Listen for Enter key presses
   useKeyboardListener(
@@ -149,7 +161,7 @@ export function ChatWidget({ initialQuestion, inputRef }: ChatWidgetProps) {
         {error && <div className="qs-error-banner">{error.message}</div>}
 
         {/* exchanges */}
-        {exchanges()
+        {exchanges
           .slice()
           .reverse()
           .map((exchange, index) => {
@@ -188,15 +200,13 @@ export function ChatWidget({ initialQuestion, inputRef }: ChatWidgetProps) {
                 <footer className="qs-qa-actions">
                   <button
                     className="qs-qa-action-btn"
-                    onClick={() =>
-                      copyText(
-                        exchange.assistantMessage.parts.map((part, index) =>
-                          part.type === "text" ? (
-                            <span key={index}>{part.text}</span>
-                          ) : null
-                        )
-                      )
-                    }
+                    onClick={() => {
+                      const textContent = exchange.assistantMessage!.parts
+                        .filter(part => part.type === "text")
+                        .map(part => part.text)
+                        .join("");
+                      copyText(textContent);
+                    }}
                   >
                     Copy
                   </button>
@@ -213,4 +223,4 @@ export function ChatWidget({ initialQuestion, inputRef }: ChatWidgetProps) {
       </div>
     </div>
   );
-}
+});
