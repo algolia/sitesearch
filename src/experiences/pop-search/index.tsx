@@ -5,8 +5,6 @@ import {
   InstantSearch,
   useSearchBox,
   useInstantSearch,
-  InfiniteHits,
-  Hits,
   Highlight,
   useHits,
 } from "react-instantsearch";
@@ -15,19 +13,16 @@ import { ChatWidget } from "./chat-widget";
 import { SparklesIcon, SearchIcon, ArrowLeftIcon, AlgoliaLogo, CloseIcon } from "./icons";
 
 import "./index.css";
+import { API_KEY, APPLICATION_ID } from "./constants";
 
-const searchClient = algoliasearch(
-  "betaHAXPMHIMMC",
-  "8b00405cba281a7d800ccec393e9af24"
-);
-
-const future = { preserveSharedStateOnUnmount: true };
+const searchClient = algoliasearch(APPLICATION_ID, API_KEY);
 
 interface SearchBoxProps {
   query?: string;
   className?: string;
   placeholder?: string;
   showChat: boolean;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   refine: (query: string) => void;
   setShowChat: (show: boolean) => void;
   setInitialQuestion: (question: string) => void;
@@ -36,52 +31,42 @@ interface SearchBoxProps {
   onEnter?: () => boolean;
 }
 
-function useSearchInput(initialQuery?: string, refine?: (query: string) => void) {
-  const [inputValue, setInputValue] = useState(initialQuery || '');
-
-  const setQuery = useCallback((newQuery: string) => {
-    setInputValue(newQuery);
-    refine?.(newQuery);
-  }, [refine]);
-
-  return { inputValue, setQuery };
-}
-
 function SearchBox(props: SearchBoxProps) {
   const { status } = useInstantSearch();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { inputValue, setQuery } = useSearchInput(props.query, props.refine);
+  const { query, refine } = useSearchBox();
+  const [inputValue, setInputValue] = useState(query || '');
+
   const isSearchStalled = status === 'stalled';
+
+  function setQuery(newQuery) {
+    setInputValue(newQuery);
+    refine(newQuery);
+  }
+
 
   return (
     <div>
       <form
-        action=""
         role="search"
         className={props.className}
         noValidate
         onSubmit={(event) => {
           event.preventDefault();
           event.stopPropagation();
-          const trimmed = inputValue.trim();
-          if (trimmed) {
-            props.setShowChat(true);
-            props.setInitialQuestion(trimmed);
-          }
         }}
         onReset={(event) => {
           event.preventDefault();
           event.stopPropagation();
 
           setQuery('');
-          if (inputRef.current) {
-            inputRef.current.focus();
+          if (props.inputRef.current) {
+            props.inputRef.current.focus();
           }
         }}
       >
         <SearchLeftButton showChat={props.showChat} setShowChat={props.setShowChat} />
         <input
-          ref={inputRef}
+          ref={props.inputRef}
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
@@ -223,6 +208,7 @@ function NoResults({ query, onAskAI, onClear }: NoResultsProps) {
 
 interface ResultsPanelProps {
   showChat: boolean;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   setShowChat: (showChat: boolean) => void;
   query: string;
   initialQuestion?: string;
@@ -230,7 +216,7 @@ interface ResultsPanelProps {
   refine: (query: string) => void;
 }
 
-function ResultsPanel({ showChat, setShowChat, query, initialQuestion, selectedIndex, refine }: ResultsPanelProps) {
+function ResultsPanel({ showChat, inputRef, setShowChat, query, initialQuestion, selectedIndex, refine }: ResultsPanelProps) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -253,7 +239,7 @@ function ResultsPanel({ showChat, setShowChat, query, initialQuestion, selectedI
   }, [selectedIndex, showChat, items.length]);
 
   if (showChat) {
-    return <ChatWidget initialQuestion={initialQuestion} refine={refine} query={query} />;
+    return <ChatWidget initialQuestion={initialQuestion} inputRef={inputRef} />;
   }
 
   return (
@@ -276,28 +262,6 @@ function ResultsPanel({ showChat, setShowChat, query, initialQuestion, selectedI
           </a>
         );
       })}
-    </div>
-  );
-}
-
-
-
-export default function App() {
-  return (
-    <div style={{
-      backgroundColor: '#faeeea',
-    }} className="qs-exp-pop">
-      <div className="container">
-        <InstantSearch
-          searchClient={searchClient}
-          indexName="crawler_markdown-index"
-          future={future}
-          insights
-        >
-          <QuickSearch />
-        </InstantSearch>
-        <Footer />
-      </div>
     </div>
   );
 }
@@ -353,8 +317,10 @@ function useChatState() {
   return { showChat, initialQuestion, setShowChat, setInitialQuestion, handleShowChat };
 }
 
-export function QuickSearch() {
+export function PopSearch() {
   const { query, refine } = useSearchBox();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
   const results = useInstantSearch();
   const { items } = useHits();
   const { showChat, initialQuestion, setShowChat, setInitialQuestion, handleShowChat } = useChatState();
@@ -390,10 +356,12 @@ export function QuickSearch() {
           onArrowDown={moveDown}
           onArrowUp={moveUp}
           onEnter={handleActivateSelection}
+          inputRef={inputRef}
         />
         {showResultsPanel && (
           <ResultsPanel
             showChat={showChat}
+            inputRef={inputRef}
             setShowChat={(v) => {
               setShowChat(v);
               if (v) setInitialQuestion(query);
@@ -450,5 +418,26 @@ function Footer() {
       </div>
     </div>
 
+  );
+}
+
+
+export default function PopSearchExperience() {
+  return (
+    <div style={{
+      backgroundColor: '#faeeea',
+    }} className="qs-exp-pop">
+      <div className="container">
+        <InstantSearch
+          searchClient={searchClient}
+          indexName="crawler_markdown-index"
+          future={{ preserveSharedStateOnUnmount: true }}
+          insights
+        >
+          <PopSearch />
+        </InstantSearch>
+        <Footer />
+      </div>
+    </div>
   );
 }
