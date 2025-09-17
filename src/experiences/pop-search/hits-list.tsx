@@ -64,7 +64,7 @@ export const HitsList = memo(function HitsList({
               <Highlight attribute="title" hit={hit} />
             </p>
             <p className="qs-infinite-hits-item-description">
-              <Highlight attribute="text" hit={hit} />
+              <Highlight attribute="description" hit={hit} />
             </p>
           </a>
         );

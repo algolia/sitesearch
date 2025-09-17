@@ -7,6 +7,7 @@ interface SearchInputProps {
   className?: string;
   showChat: boolean;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  onClose: () => void;
   setShowChat: (show: boolean) => void;
   setInitialQuestion: (question: string) => void;
   onArrowDown?: () => void;
@@ -129,10 +130,7 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
         >
           Clear
         </button>
-        <button hidden={true} className="qs-search-clear-button">
-          X
-        </button>
-        <button className="qs-search-close-button">
+        <button className="qs-search-close-button" onClick={props.onClose}>
           <CloseIcon />
         </button>
       </div>

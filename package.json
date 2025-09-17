@@ -13,11 +13,9 @@
     "@ai-sdk/react": "^2.0.4",
     "ai": "^5.0.30",
     "algoliasearch": "4",
-    "instantsearch.js": "4.7.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-instantsearch": "7.16.2",
-    "react-router": "^7.8.2",
     "streamdown": "^1.2.0"
   },
   "devDependencies": {
