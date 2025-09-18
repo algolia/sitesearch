@@ -15,13 +15,6 @@ import {
   UIDataTypes,
   UIMessagePart,
 } from "ai";
-import {
-  API_KEY,
-  APPLICATION_ID,
-  ASSISTANT_ID,
-  BASE_ASKAI_URL,
-  INDEX_NAME,
-} from "./constants";
 import { getValidToken } from "./askai";
 import { Streamdown } from "streamdown";
 import { CopyIcon, LikeIcon, DislikeIcon, SearchIcon, BrainIcon, CheckIcon } from "./icons";
@@ -51,6 +44,13 @@ function useKeyboardListener(
 interface ChatWidgetProps {
   initialQuestion?: string;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  config: {
+    applicationId: string;
+    apiKey: string;
+    indexName: string;
+    assistantId: string;
+    baseAskaiUrl?: string;
+  };
 }
 
 export interface SearchIndexTool {
@@ -87,21 +87,23 @@ interface Exchange {
 export const ChatWidget = memo(function ChatWidget({
   initialQuestion,
   inputRef,
+  config,
 }: ChatWidgetProps) {
   const { copyText } = useClipboard();
   const { refine } = useSearchBox();
   const [copiedExchangeId, setCopiedExchangeId] = useState<string | null>(null);
   const copyResetTimeoutRef = useRef<number | null>(null);
 
+  const baseUrl = config.baseAskaiUrl || "https://beta-askai.algolia.com";
   const transport = new DefaultChatTransport({
-    api: `${BASE_ASKAI_URL}/chat`,
+    api: `${baseUrl}/chat`,
     headers: async () => {
-      const token = await getValidToken({ assistantId: ASSISTANT_ID });
+      const token = await getValidToken({ assistantId: config.assistantId });
       return {
-        "x-algolia-api-key": API_KEY,
-        "x-algolia-application-id": APPLICATION_ID,
-        "x-algolia-index-name": INDEX_NAME,
-        "x-algolia-assistant-id": ASSISTANT_ID,
+        "x-algolia-api-key": config.apiKey,
+        "x-algolia-application-id": config.applicationId,
+        "x-algolia-index-name": config.indexName,
+        "x-algolia-assistant-id": config.assistantId,
         "x-ai-sdk-version": "v5",
         authorization: `TOKEN ${token}`,
       };

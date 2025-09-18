@@ -18,11 +18,31 @@ import { HitsList } from "./hits-list";
 import { SparklesIcon, SearchIcon, AlgoliaLogo } from "./icons";
 
 import "./index.css";
-import { API_KEY, APPLICATION_ID, INDEX_NAME } from "./constants";
 import { Modal } from "./search-modal";
 import { SearchButton } from "./search-button";
 
-const searchClient = algoliasearch(APPLICATION_ID, API_KEY);
+export interface SearchExperienceConfig {
+  /** Algolia Application ID (required) */
+  applicationId: string;
+  /** Algolia API Key (required) */
+  apiKey: string;
+  /** Algolia Index Name (required) */
+  indexName: string;
+  /** AI Assistant ID (required for chat functionality) */
+  assistantId: string;
+  /** Base URL for AI chat API (optional, defaults to beta endpoint) */
+  baseAskaiUrl?: string;
+  /** Placeholder text for search input (optional, defaults to "What are you looking for?") */
+  placeholder?: string;
+  /** Number of hits per page (optional, defaults to 8) */
+  hitsPerPage?: number;
+  /** Keyboard shortcut to open search (optional, defaults to "cmd+k") */
+  keyboardShortcut?: string;
+  /** Custom search button text (optional) */
+  buttonText?: string;
+  /** Custom search button props (optional) */
+  buttonProps?: React.ComponentProps<typeof SearchButton>;
+}
 
 interface SearchBoxProps {
   query?: string;
@@ -89,9 +109,10 @@ interface ResultsPanelProps {
   initialQuestion?: string;
   selectedIndex: number;
   refine: (query: string) => void;
+  config: SearchExperienceConfig;
 }
 
-const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowChat, query, initialQuestion, selectedIndex, refine }: ResultsPanelProps) {
+const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowChat, query, initialQuestion, selectedIndex, refine, config }: ResultsPanelProps) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -114,7 +135,7 @@ const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowCha
   }, [selectedIndex, showChat, items.length]);
 
   if (showChat) {
-    return <ChatWidget initialQuestion={initialQuestion} inputRef={inputRef} />;
+    return <ChatWidget initialQuestion={initialQuestion} inputRef={inputRef} config={config} />;
   }
 
   return (
@@ -135,9 +156,10 @@ const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowCha
 
 interface PopSearchProps {
   onClose?: () => void;
+  config: SearchExperienceConfig;
 }
 
-export function PopSearch({ onClose }: PopSearchProps = {}) {
+export function PopSearch({ onClose, config }: PopSearchProps) {
   const { query, refine } = useSearchBox();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -162,11 +184,11 @@ export function PopSearch({ onClose }: PopSearchProps = {}) {
 
   return (
     <>
-      <Configure hitsPerPage={8} />
+      <Configure hitsPerPage={config.hitsPerPage || 8} />
       <div className="search-panel">
         <SearchBox
           query={query}
-          placeholder="What are you looking for?"
+          placeholder={config.placeholder || "What are you looking for?"}
           className="qs-searchbox-form"
           refine={refine}
           showChat={showChat}
@@ -190,6 +212,7 @@ export function PopSearch({ onClose }: PopSearchProps = {}) {
             initialQuestion={initialQuestion}
             selectedIndex={selectedIndex}
             refine={refine}
+            config={config}
           />
         )}
         {noResults && query && !showChat && (
@@ -238,16 +261,24 @@ const Footer = memo(function Footer({ showResultsPanel, showChat }: { showResult
 });
 
 
-export default function SearchExperience() {
-
+export default function SearchExperience(config: SearchExperienceConfig) {
+  const searchClient = algoliasearch(config.applicationId, config.apiKey);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  // Parse keyboard shortcut (defaults to cmd+k)
+  const shortcut = config.keyboardShortcut || "cmd+k";
+  const [modifierKey, key] = shortcut.toLowerCase().split("+");
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+      const isModifierPressed = modifierKey === "cmd"
+        ? (event.metaKey || event.ctrlKey)
+        : event.getModifierState(modifierKey.charAt(0).toUpperCase() + modifierKey.slice(1));
+
+      if (isModifierPressed && event.key.toLowerCase() === key) {
         event.preventDefault();
         openModal();
       }
@@ -255,19 +286,26 @@ export default function SearchExperience() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [modifierKey, key]);
+
+  const buttonProps = {
+    ...config.buttonProps,
+    onClick: openModal,
+  };
 
   return (
     <>
-      <SearchButton onClick={openModal} />
+      <SearchButton {...buttonProps}>
+        {config.buttonText}
+      </SearchButton>
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <InstantSearch
           searchClient={searchClient}
-          indexName={INDEX_NAME}
+          indexName={config.indexName}
           future={{ preserveSharedStateOnUnmount: true }}
           insights
         >
-          <PopSearch onClose={closeModal} />
+          <PopSearch onClose={closeModal} config={config} />
         </InstantSearch>
       </Modal>
     </>
