@@ -154,12 +154,12 @@ const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowCha
 
 
 
-interface PopSearchProps {
+interface SearchModalProps {
   onClose?: () => void;
   config: SearchExperienceConfig;
 }
 
-export function PopSearch({ onClose, config }: PopSearchProps) {
+export function SearchModal({ onClose, config }: SearchModalProps) {
   const { query, refine } = useSearchBox();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -305,7 +305,7 @@ export default function SearchExperience(config: SearchExperienceConfig) {
           future={{ preserveSharedStateOnUnmount: true }}
           insights
         >
-          <PopSearch onClose={closeModal} config={config} />
+          <SearchModal onClose={closeModal} config={config} />
         </InstantSearch>
       </Modal>
     </>

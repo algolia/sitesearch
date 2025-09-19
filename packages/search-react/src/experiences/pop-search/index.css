@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+
+* {
+	font-family: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
 .qs-exp-pop, .modal-backdrop, .pop-search-button {
 	/* Core Colors */
 	--search-primary-color: #003DFF;
@@ -55,12 +61,6 @@
 	/* Animations */
 	--search-transition-duration: 150ms;
 	--search-transform-hover: translateY(-1px);
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
-
-* {
-	font-family: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 
