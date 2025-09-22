@@ -27,7 +27,7 @@ Visit [StackBlitz Demo](https://stackblitz.com/~/github.com/algolia/sitesearch) 
 ### 2. Install Dependencies
 
 ```bash
-npm install @ai-sdk/react ai algoliasearch react-instantsearch streamdown react react-dom
+npm install @ai-sdk/react ai algoliasearch react-instantsearch marked
 ```
 
 ### 3. Use in Your Project
