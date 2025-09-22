@@ -1,25 +1,33 @@
-# Algolia SiteSearch Components
+# Algolia SiteSearch
 
-> Copy-paste React components for instant search experiences, powered by Algolia. Just like shadcn/ui, but for search.
+Drop-in search components for modern web applications, powered by Algolia's instant search technology
 
-[![StackBlitz](https://img.shields.io/badge/StackBlitz-Open%20Demo-blue)](https://stackblitz.com/~/github.com/algolia/quick-search?file=src%2FApp.tsx)
+<div align="center">
 
-## ✨ What is this?
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![Demo](https://img.shields.io/badge/Demo-Live-green)](https://stackblitz.com/~/github.com/algolia/sitesearch?file=src%2FApp.tsx)
 
-This is a [WIP] collection of **copy-paste React components** that provide beautiful, accessible site search experiences powered by Algolia's instant search. Unlike traditional libraries, you don't install packages - you **copy the component code** and paste it into your project.
+</div>
 
-- 🎯 **Copy & Paste**: Just like shadcn/ui - copy component code, install dependencies, done
-- ⚡ **Instant**: Built on Algolia's lightning-fast search API
-- 🤖 **AI-Powered**: Includes conversational AI chat for complex queries
-- 🎨 **Customizable**: Full CSS custom properties for easy theming
-- ♿ **Accessible**: WCAG compliant with keyboard navigation
-- 📱 **Responsive**: Works perfectly on all screen sizes
+## Overview
 
-## 🚀 Quick Start
+SiteSearch provides production-ready search components that combine Algolia's lightning-fast search capabilities with intelligent AI chat functionality. Available as both vanilla JavaScript and React implementations, it offers a complete search solution that can be integrated into any modern web application.
+
+### Key Features
+
+- **⚡ Instant Search** - Sub-50ms search powered by Algolia's global infrastructure
+- **🤖 AI-Enhanced** - Conversational chat interface for complex queries using [Ask AI](https://www.algolia.com/products/ai/ask-ai)
+- **⌨️ Keyboard-First** - Full keyboard navigation with customizable shortcuts
+- **🎨 Extensible** - UI with comprehensive theming system
+- **♿ Accessible** - WCAG 2.1 AA compliant with screen reader support
+- **📦 Framework Agnostic** - Works with React and bundles to vanilla JS, or any framework
+- **🔧 Developer Experience** - TypeScript support with comprehensive documentation
+
+## Quick Start
 
 ### 1. Copy Component Code
 
-Visit [StackBlitz Demo](https://stackblitz.com/~/github.com/algolia/quick-search) or copy from the examples below:
+Visit [StackBlitz Demo](https://stackblitz.com/~/github.com/algolia/sitesearch) or copy from the examples below:
 
 ### 2. Install Dependencies
 
@@ -47,9 +55,9 @@ function App() {
 
 That's it! No complex setup, no configuration files, no build processes.
 
-## 📦 Available Components
+## Available Components
 
-### 🔍 SiteSearchExperience
+### SiteSearchExperience
 
 The main search experience component with modal, keyboard shortcuts, and AI chat.
 
@@ -68,7 +76,7 @@ import { SiteSearchExperience } from './sitesearch-experience';
 />
 ```
 
-### 🎯 Individual Components
+### Individual Components
 
 You can also use individual components for more control:
 
@@ -84,7 +92,7 @@ import {
 import './sitesearch.css';
 ```
 
-## 🎨 Theming
+## Theming
 
 All components use CSS custom properties for easy theming:
 
@@ -107,7 +115,7 @@ All components use CSS custom properties for easy theming:
 
 ### Copy Component Code
 
-1. Go to [StackBlitz](https://stackblitz.com/~/github.com/algolia/quick-search)
+1. Go to [StackBlitz](https://stackblitz.com/~/github.com/algolia/sitesearch)
 2. Navigate to `src/experiences/sitesearch/`
 3. Copy the component files you need
 4. Paste into your project
@@ -132,7 +140,7 @@ pnpm build
 pnpm build:js-bundle
 ```
 
-## 📚 Component API
+## Component API
 
 ### Individual Components
 
@@ -144,7 +152,7 @@ Each component can be used independently:
 - **HitsList**: Search results with highlighting
 - **ChatWidget**: AI chat interface
 
-## 🚀 Examples
+## Examples
 
 ### Basic Search
 
@@ -195,7 +203,7 @@ function CustomSearch() {
 }
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Algolia Setup
 
@@ -216,17 +224,17 @@ function CustomSearch() {
 }
 ```
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Add your component to `/src/experiences/`
 3. Update the StackBlitz examples
 4. Submit a PR
 
-## 📄 License
+## License
 
 MIT License - see LICENSE file for details.
 
 ---
 
-**Made with ❤️ by Algolia** | [View on GitHub](https://github.com/algolia/instant-sitesearch) | [StackBlitz Demo](https://stackblitz.com/~/github.com/algolia/quick-search)
+**Made with ❤️ by Algolia** | [View on GitHub](https://github.com/algolia/instant-sitesearch) | [StackBlitz Demo](https://stackblitz.com/~/github.com/algolia/sitesearch)
