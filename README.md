@@ -1,6 +1,6 @@
 # Algolia SiteSearch
 
-Drop-in search components for modern web applications, powered by Algolia's instant search technology
+🫆 Opinionated InstantSearch experience for your Site search needs, powered by Algolia's [Instant Search](https://www.algolia.com/doc/guides/building-search-ui/what-is-instantsearch/js/) and [AskAI](https://www.algolia.com/products/ai/ask-ai)
 
 <div align="center">
 
@@ -220,7 +220,7 @@ function CustomSearch() {
   "ai": "^5.0.30",
   "algoliasearch": "4",
   "react-instantsearch": "7.16.2",
-  "streamdown": "^1.2.0",
+  "marked": "^16.3.0",
 }
 ```
 
@@ -233,8 +233,4 @@ function CustomSearch() {
 
 ## License
 
-MIT License - see LICENSE file for details.
-
----
-
-**Made with ❤️ by Algolia** | [View on GitHub](https://github.com/algolia/instant-sitesearch) | [StackBlitz Demo](https://stackblitz.com/~/github.com/algolia/sitesearch)
+MIT License - see LICENSE.md file for details.
