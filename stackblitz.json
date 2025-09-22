@@ -1,0 +1,9 @@
+{
+  "template": "node",
+  "title": "Algolia Copy-Paste Site search components",
+  "description": "Copy-paste React components for instant search experiences, powered by Algolia. Just like shadcn/ui, but for search.",
+  "tags": ["react", "algolia", "search", "components", "copy-paste", "typescript"],
+  "files": {
+    "README.md": "README.md"
+  }
+}

@@ -1,5 +1,4 @@
-import { BASE_ASKAI_URL } from "./constants";
-
+const BASE_ASKAI_URL = "https://beta-askai.algolia.com";
 const TOKEN_KEY = "askai_token";
 
 type TokenPayload = { exp: number };

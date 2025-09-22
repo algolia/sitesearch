@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "turbo dev",
-    "build": "turbo build"
+    "build:react": "turbo build --filter=@algolia/sitesearch-react",
+    "build:js-bundle": "pnpm build:react && turbo build --filter=@algolia/sitesearch-js",
+    "dev:demo": "cd apps/demo && pnpm dev"
   },
   "keywords": [],
   "author": "",

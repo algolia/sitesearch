@@ -1,0 +1,35 @@
+{
+  "name": "@algolia/sitesearch-js",
+  "version": "1.0.0",
+  "description": "Vanilla JavaScript search widget powered by Algolia",
+  "main": "dist/sitesearch.js",
+  "module": "dist/sitesearch.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rolldown -c",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "algolia",
+    "search",
+    "ai",
+    "javascript",
+    "vanilla"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "rolldown": "^1.0.0-beta.38",
+    "rollup-plugin-postcss": "^4.0.2",
+    "postcss": "^8.4.49",
+    "autoprefixer": "^10.4.20",
+    "preact": "^10.24.3",
+    "@algolia/sitesearch-react": "workspace:*",
+    "cssnano": "^7.0.6",
+    "@types/node": "^22.12.9",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,82 +1,261 @@
-# CLAUDE.md
+# Algolia Instant Site Search
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+A powerful, customizable search widget for websites that combines Algolia's instant search capabilities with AI-powered chat functionality. This monorepo provides both vanilla JavaScript and React implementations.
 
-## Development Commands
+## 🚀 Features
 
-**Start development server:**
+- **Instant Search**: Powered by Algolia's lightning-fast search API
+- **AI Chat Integration**: Ask AI feature for complex queries and conversational search
+- **Keyboard Navigation**: Full keyboard support with customizable shortcuts (default: Cmd+K)
+- **Modal Interface**: Clean, accessible search modal with modern UI
+- **Multiple Experiences**: Flexible architecture supporting different search experiences
+- **TypeScript Support**: Full type safety and excellent developer experience
+- **Customizable**: Extensive configuration options for styling and behavior
 
-```bash
-pnpm dev
+## 📦 Packages
+
+### `@algolia/sitesearch` (Vanilla JavaScript)
+
+- **Purpose**: Drop-in vanilla JavaScript search widget
+- **Technology**: Uses Preact under the hood for performance
+- **Bundle Size**: Optimized for minimal footprint
+- **Usage**: Simple API with global `SiteSearch` constructor
+
+### `@algolia/sitesearch-react` (React)
+
+- **Purpose**: React components and hooks for search functionality
+- **Technology**: Built with React and React InstantSearch
+- **Features**: Full component library including SearchModal, SearchButton, ChatWidget
+- **Usage**: Use individual components or the complete SearchExperience
+
+## 🏗️ Architecture
+
+```
+quick-search/
+├── packages/
+│   ├── search-js/           # Vanilla JS implementation
+│   │   └── src/index.ts     # Main SiteSearch class
+│   └── search-react/        # React implementation
+│       └── src/experiences/sitesearch/
+│           ├── index.tsx    # Main SearchExperience component
+│           ├── search-modal.tsx
+│           ├── search-input.tsx
+│           ├── hits-list.tsx
+│           ├── chat.tsx      # AI chat functionality
+│           └── useSearchState.ts
+└── apps/demo/               # Demo application
 ```
 
-**Build for production:**
+## 🛠️ Installation
+
+### Using React Components
 
 ```bash
-pnpm build
+npm install @algolia/sitesearch-react react react-dom
 ```
 
-**Lint code:**
+### Using Vanilla JavaScript
 
 ```bash
-pnpm lint
+npm install @algolia/sitesearch
 ```
 
-**Preview production build:**
+## 🚀 Quick Start
+
+### React Implementation
+
+```tsx
+import { SearchExperience } from '@algolia/sitesearch-react';
+
+function App() {
+  return (
+    <SearchExperience
+      applicationId="YOUR_APP_ID"
+      apiKey="YOUR_API_KEY"
+      indexName="YOUR_INDEX_NAME"
+      assistantId="YOUR_ASSISTANT_ID"
+      placeholder="Search your site..."
+    />
+  );
+}
+```
+
+### Vanilla JavaScript Implementation
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Site</title>
+</head>
+<body>
+  <div id="search-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@algolia/sitesearch/dist/sitesearch.min.js"></script>
+  <script>
+    SiteSearch.init({
+      container: '#search-container',
+      applicationId: 'YOUR_APP_ID',
+      apiKey: 'YOUR_API_KEY',
+      indexName: 'YOUR_INDEX_NAME',
+      assistantId: 'YOUR_ASSISTANT_ID'
+    });
+  </script>
+</body>
+</html>
+```
+
+## ⚙️ Configuration
+
+### Required Parameters
+
+- `applicationId`: Your Algolia Application ID
+- `apiKey`: Your Algolia API Key (search-only key recommended)
+- `indexName`: The Algolia index to search
+- `assistantId`: AI Assistant ID for chat functionality
+
+### Optional Parameters
+
+- `placeholder`: Search input placeholder text (default: "What are you looking for?")
+- `hitsPerPage`: Number of results per page (default: 8)
+- `keyboardShortcut`: Keyboard shortcut to open search (default: "cmd+k")
+- `buttonText`: Custom search button text
+- `buttonProps`: Additional props for the search button
+- `baseAskaiUrl`: Custom AI chat API endpoint
+
+## 🎯 Key Components
+
+### SearchExperience
+
+Main component that orchestrates the entire search experience including the button, modal, and all interactions.
+
+### SearchModal
+
+The modal container that houses the search interface with backdrop and accessibility features.
+
+### SearchInput
+
+Enhanced search input with AI chat toggle, keyboard navigation, and query management.
+
+### HitsList
+
+Displays search results with highlighting, selection states, and keyboard navigation.
+
+### ChatWidget
+
+AI-powered chat interface for conversational search when direct results aren't sufficient.
+
+### SearchButton
+
+Trigger button that opens the search modal with customizable styling and behavior.
+
+## ⌨️ Keyboard Navigation
+
+- **Cmd+K** (or custom shortcut): Open search modal
+- **Arrow Up/Down**: Navigate through search results
+- **Enter**: Select highlighted result or trigger AI chat
+- **Escape**: Close modal or clear search
+
+## 🎨 Styling
+
+The component comes with a complete CSS implementation that's:
+
+- **Responsive**: Works on all screen sizes
+- **Accessible**: WCAG compliant with proper focus management
+- **Customizable**: CSS custom properties for easy theming
+- **Dark Mode Ready**: Supports dark/light theme switching
+
+## 🏗️ Build System
+
+### Development
 
 ```bash
-pnpm preview
+pnpm dev          # Start all packages in development mode
+pnpm dev:demo     # Start demo application
 ```
 
-## Project Architecture
+### Building
 
-This is a React + TypeScript + Vite application that implements a hybrid search interface combining Algolia InstantSearch with AI-powered chat functionality.
+```bash
+pnpm build        # Build all packages
+pnpm build:demo   # Build demo application
+```
 
-### Core Architecture
+### Tech Stack
 
-**Search Integration:**
+- **Monorepo**: Turborepo for efficient builds and caching
+- **Bundler**: Rolldown for fast, optimized bundles
+- **Language**: TypeScript for type safety
+- **React**: React 18+ with hooks and modern patterns
+- **CSS**: PostCSS with autoprefixer and CSS modules
+- **Testing**: ESLint for code quality
 
-- Uses `algoliasearch/lite` client connected to Algolia's "instant_search" index
-- Built on `react-instantsearch` with custom search box implementation
-- Configured with `latency` app ID for demo purposes
+## 🔧 Development
 
-**Dual-Mode Interface:**
+### Project Structure
 
-- Toggle between traditional search results and AI chat mode
-- `HitsOrChat` component manages mode switching
-- Search query state shared between both modes
+- `/packages/search-js`: Vanilla JavaScript implementation
+- `/packages/search-react`: React components and experiences
+- `/apps/demo`: Demo application showcasing usage
+- `/turbo.json`: Turborepo configuration
+- `/pnpm-workspace.yaml`: Package workspace configuration
 
-**AI Chat Integration:**
+### Adding New Features
 
-- `ChatWidget` uses `@ai-sdk/react` for chat functionality
-- Connected to `https://askai.algolia.com/chat` endpoint via `DefaultChatTransport`
-- Enter key in search box sends queries to chat when in chat mode
-- Chat messages rendered with role-based styling
+1. Components go in `/packages/search-react/src/experiences/sitesearch/`
+2. Export new components in `/packages/search-react/src/index.ts`
+3. Add types to appropriate `.d.ts` files
+4. Update build configs if needed
 
-### Key Components
+### Testing
 
-**App.tsx (main entry point):**
+```bash
+pnpm test         # Run tests across all packages
+pnpm lint         # Lint code for style and errors
+```
 
-- `SearchBox`: Custom search input with stall detection
-- `QuickSearch`: Main search interface container
-- `ModeToggle`: Switch between search/chat modes
-- `HitComponent`: Basic hit display (currently shows JSON)
+## 📝 API Reference
 
-**ChatWidget.tsx:**
+### SiteSearch Static Methods (Vanilla JS)
 
-- Listens for Enter key events globally
-- Manages chat state with `useChat` hook
-- Renders conversation with role-based bubbles
+- `SiteSearch.init(options)`: Initialize search widget
+- `SiteSearch.destroy(container)`: Remove search widget instance
+- `SiteSearch.destroyAll()`: Remove all search widget instances
 
-### State Management
+### SearchExperience Props (React)
 
-- Search state managed by InstantSearch context
-- Chat mode toggle via React state in `QuickSearch`
-- Query synchronization between search box and chat widget
-- Prevents duplicate chat messages with `lastSentQuery` tracking
+- `applicationId: string` - Required Algolia app ID
+- `apiKey: string` - Required Algolia API key
+- `indexName: string` - Required index name
+- `assistantId: string` - Required for AI chat
+- `baseAskaiUrl?: string` - Optional AI API endpoint
+- `placeholder?: string` - Search input placeholder
+- `hitsPerPage?: number` - Results per page
+- `keyboardShortcut?: string` - Keyboard shortcut
+- `buttonText?: string` - Button label
+- `buttonProps?: object` - Additional button props
 
-### Styling
+## 🤝 Contributing
 
-- CSS files: `src/App.css`
-- Chat bubbles styled by role (`chat-user`, `chat-assistant`)
-- Toggle button indicates active mode with dynamic classes
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Update documentation
+6. Submit a pull request
+
+## 📄 License
+
+MIT License - see LICENSE file for details.
+
+## 🆘 Support
+
+For issues and questions:
+
+- Check the GitHub issues
+- Review the Algolia documentation
+- Visit the demo application for examples
+
+---
+
+*Built with ❤️ using Algolia's powerful search platform and modern web technologies.*

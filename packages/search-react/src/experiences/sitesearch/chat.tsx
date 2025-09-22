@@ -11,12 +11,11 @@ import { useChat, type UIMessage } from "@ai-sdk/react";
 import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithToolCalls,
-  tool,
   UIDataTypes,
   UIMessagePart,
 } from "ai";
 import { getValidToken } from "./askai";
-import { Streamdown } from "streamdown";
+import { MemoizedMarkdown } from "./markdown";
 import { CopyIcon, LikeIcon, DislikeIcon, SearchIcon, BrainIcon, CheckIcon } from "./icons";
 
 function useClipboard() {
@@ -110,7 +109,7 @@ export const ChatWidget = memo(function ChatWidget({
     },
   });
 
-  const { messages, sendMessage, status, error, addToolResult } = useChat({
+  const { messages, sendMessage, status, error } = useChat({
     transport,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     async onToolCall({ toolCall }) {
@@ -242,9 +241,9 @@ export const ChatWidget = memo(function ChatWidget({
                           }
                           if (part.type === "text") {
                             return (
-                              <Streamdown key={`${index}`}>
+                              <MemoizedMarkdown key={`${index}`}>
                                 {part.text}
-                              </Streamdown>
+                              </MemoizedMarkdown>
                             );
                           } else if (
                             part.type === "reasoning" &&
@@ -280,7 +279,7 @@ export const ChatWidget = memo(function ChatWidget({
                                   <SearchIcon size={18} />{" "}
                                   <span>
                                     Searched for <mark>&quot;{part.output?.query}&quot;</mark> {" "}
-                                    found {part.output?.hits.length || "some"}{" "}
+                                    found {part.output?.hits.length || "no"}{" "}
                                     results
                                   </span>
                                 </p>
@@ -300,7 +299,7 @@ export const ChatWidget = memo(function ChatWidget({
                         })}
                       </div>
                     ) : (
-                      <div className="qs-qa-generating qs-shimmer-text">
+                      <div className="qs-qa-markdown qs-qa-generating qs-shimmer-text">
                         {isGenerating && isLastExchange ? "Thinking..." : ""}
                       </div>
                     )}
