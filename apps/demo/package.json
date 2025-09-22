@@ -1,5 +1,5 @@
 {
-  "name": "demo",
+  "name": "@algolia/sitesearch-demo",
   "private": true,
   "version": "0.0.0",
   "type": "module",

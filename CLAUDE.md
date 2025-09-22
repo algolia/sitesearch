@@ -183,7 +183,7 @@ pnpm build:demo   # Build demo application
 
 ### Tech Stack
 
-- **Monorepo**: Turborepo for efficient builds and caching
+- **Monorepo**: Bun for efficient builds and caching
 - **Bundler**: Rolldown for fast, optimized bundles
 - **Language**: TypeScript for type safety
 - **React**: React 18+ with hooks and modern patterns
@@ -197,8 +197,6 @@ pnpm build:demo   # Build demo application
 - `/packages/search-js`: Vanilla JavaScript implementation
 - `/packages/search-react`: React components and experiences
 - `/apps/demo`: Demo application showcasing usage
-- `/turbo.json`: Turborepo configuration
-- `/pnpm-workspace.yaml`: Package workspace configuration
 
 ### Adding New Features
 

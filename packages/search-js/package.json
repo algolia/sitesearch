@@ -1,5 +1,6 @@
 {
   "name": "@algolia/sitesearch-js",
+  "type": "module",
   "version": "1.0.0",
   "description": "Vanilla JavaScript search widget powered by Algolia",
   "main": "dist/sitesearch.js",
