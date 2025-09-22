@@ -76,8 +76,8 @@ function App() {
               <div className="code-block">
                 <div className="code-header">
                   <span>App.tsx</span>
-                  <button className="copy-btn" onClick={() => navigator.clipboard.writeText(`import { SiteSearchExperience } from '@algolia/sitesearch-react';
-import '@algolia/sitesearch-react/dist/sitesearch.css';
+                  <button className="copy-btn" onClick={() => navigator.clipboard.writeText(`import { SiteSearchExperience } from './components/sitesearch';
+import './sitesearch.css';
 
 function App() {
   return (
@@ -95,8 +95,8 @@ function App() {
                     Copy
                   </button>
                 </div>
-                <pre><code>{`import { SiteSearchExperience } from '@algolia/sitesearch-react';
-import '@algolia/sitesearch-react/dist/sitesearch.css';
+                <pre><code>{`import { SiteSearchExperience } from './components/sitesearch';
+import './sitesearch.css';
 
 function App() {
   return (
