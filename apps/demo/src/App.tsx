@@ -1,4 +1,6 @@
 import { SiteSearchExperience } from '@algolia/sitesearch-react';
+import { Sidepanel } from '@algolia/sidepanel-react';
+import '@algolia/sidepanel-react/dist/sidepanel.css';
 import '@algolia/sitesearch-react/dist/sitesearch.css';
 import './App.css';
 
@@ -23,7 +25,7 @@ function App() {
             <div className="demo-section">
               <h2>Live Demo</h2>
               <p>Experience the search widget in action:</p>
-              <div className="demo-widget">
+              <div className="demo-widget" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                 <SiteSearchExperience
                   applicationId="betaHAXPMHIMMC"
                   apiKey="8b00405cba281a7d800ccec393e9af24"
@@ -34,6 +36,12 @@ function App() {
                   keyboardShortcut="cmd+k"
                   buttonText="🎧 Search Podcasts"
                 />
+                <Sidepanel buttonLabel="SP">
+                  <div style={{ padding: 16 }}>
+                    <h3 style={{ marginTop: 0 }}>Sidepanel</h3>
+                    <p>Empty panel ready for content. Click backdrop to close.</p>
+                  </div>
+                </Sidepanel>
               </div>
               <div className="demo-features">
                 <h3>Features</h3>

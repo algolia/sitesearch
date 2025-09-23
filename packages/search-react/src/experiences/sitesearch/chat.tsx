@@ -206,8 +206,7 @@ export const ChatWidget = memo(function ChatWidget({
     <div className="ss-chat-root">
       <div className="ss-qa-list">
         <p className="ss-hint">
-          Answers are generated with AI which can make mistakes. Verify
-          responses.
+          Answers are generated using AI and may make mistakes.
         </p>
         {/* errors */}
         {error && <div className="ss-error-banner">{error.message}</div>}
