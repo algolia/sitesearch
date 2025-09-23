@@ -1,5 +1,6 @@
 import { defineConfig } from 'rolldown'
 import postcss from 'rollup-plugin-postcss'
+import { dts } from 'rolldown-plugin-dts'
 
 export default defineConfig([
   // ES Module build with CSS extraction
@@ -15,6 +16,37 @@ export default defineConfig([
         extract: 'sitesearch.css',
         minimize: false,
         sourceMap: true,
+      }),
+    ],
+    define: {
+      'process.env.NODE_ENV': JSON.stringify('production'),
+    },
+    external: [
+      'react',
+      'react-dom',
+      'algoliasearch',
+      'algoliasearch/lite',
+      'react-instantsearch',
+      '@ai-sdk/react',
+      'ai',
+      'marked'
+    ],
+    resolve: {
+      extensions: ['.tsx', '.ts', '.js', '.jsx']
+    },
+  },
+  // DTS build (requires output.dir)
+  {
+    input: 'src/index.ts',
+    output: {
+      dir: 'dist',
+      format: 'esm',
+      sourcemap: true,
+    },
+    plugins: [
+      dts({
+        tsconfig: 'tsconfig.json',
+        sourcemap: true,
       }),
     ],
     define: {
