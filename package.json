@@ -7,8 +7,7 @@
     "dev": "bun --filter @algolia/sidepanel-react --filter @algolia/sitesearch-react --filter @algolia/sitesearch-demo dev",
     "build:react": "bun --filter @algolia/sitesearch-react build && bun --filter @algolia/sidepanel-react build",
     "build:js-bundle": "bun --filter @algolia/sitesearch-react build && bun --filter @algolia/sitesearch-js build",
-    "build:demo": "bun run build:react && bun run --filter @algolia/sitesearch-demo build",
-    "build": "bun run build",
+    "build": "bun run build:react && bun run --filter @algolia/sitesearch-demo build",
     "dev:demo": "bun --filter @algolia/sitesearch-demo dev",
     "dev:sidepanel": "bun --filter @algolia/sidepanel-react dev",
     "deploy": "bunx gh-pages -d apps/demo/dist"
