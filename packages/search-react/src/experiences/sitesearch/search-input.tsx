@@ -26,7 +26,7 @@ const SearchLeftButton = memo(function SearchLeftButton({
     return (
       <button
         onClick={() => setShowChat(false)}
-        className="qs-search-left-button"
+        className="ss-search-left-button"
         aria-label="Back to search"
         title="Back to search"
       >
@@ -38,7 +38,7 @@ const SearchLeftButton = memo(function SearchLeftButton({
   return (
     <div
       tabIndex={-1}
-      className="qs-search-left-button"
+      className="ss-search-left-button"
       aria-label="Search"
       title="Search"
     >
@@ -122,15 +122,15 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
         }}
         autoFocus
       />
-      <div className="qs-search-action-buttons-container">
+      <div className="ss-search-action-buttons-container">
         <button
           type="reset"
-          className="qs-search-clear-button"
+          className="ss-search-clear-button"
           hidden={!inputValue || inputValue.length === 0 || isSearchStalled}
         >
           Clear
         </button>
-        <button className="qs-search-close-button" onClick={props.onClose}>
+        <button className="ss-search-close-button" onClick={props.onClose}>
           <CloseIcon />
         </button>
       </div>

@@ -148,21 +148,21 @@ function App() {
                 <div className="code-header">
                   <span>styles.css</span>
                   <button className="copy-btn" onClick={() => navigator.clipboard.writeText(`:root {
-  --qs-primary-color: #003dff;
-  --qs-background: #ffffff;
-  --qs-border-radius: 12px;
-  --qs-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  --qs-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
+  --ss-primary-color: #003dff;
+  --ss-background: #ffffff;
+  --ss-border-radius: 12px;
+  --ss-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  --ss-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
 }`)}>
                     Copy
                   </button>
                 </div>
                 <pre><code>{`:root {
-  --qs-primary-color: #003dff;
-  --qs-background: #ffffff;
-  --qs-border-radius: 12px;
-  --qs-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  --qs-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
+  --ss-primary-color: #003dff;
+  --ss-background: #ffffff;
+  --ss-border-radius: 12px;
+  --ss-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  --ss-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
 }`}</code></pre>
               </div>
             </div>

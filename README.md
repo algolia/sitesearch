@@ -92,7 +92,7 @@ import './sitesearch.css';
 All components use CSS custom properties for easy theming:
 
 ```css
-.qs-exp-pop {
+.ss-exp {
   --search-primary-color: #your-brand-color;
   --search-background-color: #your-bg-color;
   --search-text-color: #your-text-color;

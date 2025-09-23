@@ -203,14 +203,14 @@ export const ChatWidget = memo(function ChatWidget({
   }, []);
 
   return (
-    <div className="qs-chat-root">
-      <div className="qs-qa-list">
-        <p className="qs-hint">
+    <div className="ss-chat-root">
+      <div className="ss-qa-list">
+        <p className="ss-hint">
           Answers are generated with AI which can make mistakes. Verify
           responses.
         </p>
         {/* errors */}
-        {error && <div className="qs-error-banner">{error.message}</div>}
+        {error && <div className="ss-error-banner">{error.message}</div>}
 
         {/* exchanges */}
         {exchanges
@@ -220,9 +220,9 @@ export const ChatWidget = memo(function ChatWidget({
             const isLastExchange = index === 0;
 
             return (
-              <article key={exchange.id} className="qs-qa-card">
-                <header className="qs-qa-header">
-                  <div className="qs-qa-question">
+              <article key={exchange.id} className="ss-qa-card">
+                <header className="ss-qa-header">
+                  <div className="ss-qa-question">
                     {exchange.userMessage.parts.map((part, index) =>
                       part.type === "text" ? (
                         <span key={index}>{part.text}</span>
@@ -231,10 +231,10 @@ export const ChatWidget = memo(function ChatWidget({
                   </div>
                 </header>
 
-                <section className="qs-qa-answer">
-                  <div className="qs-qa-answer-content">
+                <section className="ss-qa-answer">
+                  <div className="ss-qa-answer-content">
                     {exchange.assistantMessage ? (
-                      <div className="qs-qa-markdown">
+                      <div className="ss-qa-markdown">
                         {exchange.assistantMessage.parts.map((part, index) => {
                           if (typeof part === "string") {
                             return <p key={`${index}`}>{part}</p>;
@@ -250,22 +250,22 @@ export const ChatWidget = memo(function ChatWidget({
                             part.state === "streaming"
                           ) {
                             return (
-                              <p className="qs-tool-info" key={`${index}`}>
-                                <BrainIcon /> <span className="qs-shimmer-text">Reasoning...</span>
+                              <p className="ss-tool-info" key={`${index}`}>
+                                <BrainIcon /> <span className="ss-shimmer-text">Reasoning...</span>
                               </p>
                             );
                           } else if (part.type === "tool-searchIndex") {
                             if (part.state === "input-streaming") {
                               return (
-                                <p className="qs-tool-info" key={`${index}`}>
-                                  <SearchIcon size={18} /> <span className="qs-shimmer-text">Searching...</span>
+                                <p className="ss-tool-info" key={`${index}`}>
+                                  <SearchIcon size={18} /> <span className="ss-shimmer-text">Searching...</span>
                                 </p>
                               );
                             } else if (part.state === "input-available") {
                               return (
-                                <p className="qs-tool-info" key={`${index}`}>
+                                <p className="ss-tool-info" key={`${index}`}>
                                   <SearchIcon size={18} />{" "}
-                                  <span className="qs-shimmer-text">
+                                  <span className="ss-shimmer-text">
                                     Looking for{" "}
                                     <mark>
                                       &quot;{part.input?.query || ""}&quot;
@@ -275,7 +275,7 @@ export const ChatWidget = memo(function ChatWidget({
                               );
                             } else if (part.state === "output-available") {
                               return (
-                                <p className="qs-tool-info" key={`${index}`}>
+                                <p className="ss-tool-info" key={`${index}`}>
                                   <SearchIcon size={18} />{" "}
                                   <span>
                                     Searched for <mark>&quot;{part.output?.query}&quot;</mark> {" "}
@@ -286,7 +286,7 @@ export const ChatWidget = memo(function ChatWidget({
                               );
                             } else if (part.state === "output-error") {
                               return (
-                                <p className="qs-tool-info" key={`${index}`}>
+                                <p className="ss-tool-info" key={`${index}`}>
                                   {part.errorText}
                                 </p>
                               );
@@ -299,22 +299,22 @@ export const ChatWidget = memo(function ChatWidget({
                         })}
                       </div>
                     ) : (
-                      <div className="qs-qa-markdown qs-qa-generating qs-shimmer-text">
+                      <div className="ss-qa-markdown ss-qa-generating ss-shimmer-text">
                         {isGenerating && isLastExchange ? "Thinking..." : ""}
                       </div>
                     )}
                   </div>
                 </section>
 
-                <footer className="qs-qa-actions">
-                  <button className="qs-qa-action-btn">
+                <footer className="ss-qa-actions">
+                  <button className="ss-qa-action-btn">
                     <LikeIcon size={18} />
                   </button>
-                  <button className="qs-qa-action-btn">
+                  <button className="ss-qa-action-btn">
                     <DislikeIcon size={18} />
                   </button>
                   <button
-                    className={`qs-qa-action-btn ${copiedExchangeId === exchange.id ? "is-copied" : ""
+                    className={`ss-qa-action-btn ${copiedExchangeId === exchange.id ? "is-copied" : ""
                       }`}
                     aria-label={
                       copiedExchangeId === exchange.id ? "Copied" : "Copy answer"

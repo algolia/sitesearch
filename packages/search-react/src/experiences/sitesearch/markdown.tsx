@@ -26,23 +26,23 @@ renderer.code = ({ text, lang = '', escaped }: Tokens.Code): string => {
   const encodedCode = encodeURIComponent(text);
 
   const copyIconSvg = `
-    <svg class="qs-markdown-copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg class="ss-markdown-copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
       <path d="m5 15-4-4 4-4"></path>
     </svg>
   `;
 
   const checkIconSvg = `
-    <svg class="qs-markdown-check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg class="ss-markdown-check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="20,6 9,17 4,12"></polyline>
     </svg>
   `;
 
   return `
-    <div class="qs-markdown-code-snippet">
-      <button class="qs-markdown-copy-button" data-code="${encodedCode}" aria-label="Copy code to clipboard" title="Copy code">
+    <div class="ss-markdown-code-snippet">
+      <button class="ss-markdown-copy-button" data-code="${encodedCode}" aria-label="Copy code to clipboard" title="Copy code">
         ${copyIconSvg}${checkIconSvg}
-        <span class="qs-markdown-copy-label">Copy</span>
+        <span class="ss-markdown-copy-label">Copy</span>
       </button>
       <pre><code class="${languageClass}">${safeCode}</code></pre>
     </div>
@@ -84,7 +84,7 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
 
     const handleCopyClick = async (event: Event) => {
       const target = event.target as HTMLElement;
-      const button = target.closest('.qs-markdown-copy-button') as HTMLButtonElement;
+      const button = target.closest('.ss-markdown-copy-button') as HTMLButtonElement;
 
       if (!button) return;
 
@@ -99,11 +99,11 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
         await navigator.clipboard.writeText(code);
 
         // Show success state
-        button.classList.add('qs-markdown-copied');
+        button.classList.add('ss-markdown-copied');
 
         // Reset after 2 seconds
         setTimeout(() => {
-          button.classList.remove('qs-markdown-copied');
+          button.classList.remove('ss-markdown-copied');
         }, 2000);
       } catch (error) {
         console.error('Failed to copy code:', error);
@@ -120,7 +120,7 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
   return (
     <div
       ref={containerRef}
-      className={`qs-markdown-content ${className}`.trim()}
+      className={`ss-markdown-content ${className}`.trim()}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

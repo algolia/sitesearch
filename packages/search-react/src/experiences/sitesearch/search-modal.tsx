@@ -34,7 +34,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
       onClick={onClose}
     >
       <div
-        className="modal-content qs-exp-pop"
+        className="modal-content ss-exp"
         onClick={(e) => e.stopPropagation()}
       >
         {children}

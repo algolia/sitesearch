@@ -8,7 +8,7 @@ interface SearchButtonProps {
 export const SearchButton: React.FC<SearchButtonProps> = ({ onClick }) => {
   return (
     <button
-      className="pop-search-button"
+      className="sitesearch-button"
       onClick={onClick}
       aria-label="Open search"
     >
