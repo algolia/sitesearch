@@ -1,22 +1,23 @@
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-  useMemo,
-  useRef,
-  memo,
-} from "react";
-import { useSearchBox } from "react-instantsearch";
-import { useChat, type UIMessage } from "@ai-sdk/react";
+import { type UIMessage, useChat } from "@ai-sdk/react";
 import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithToolCalls,
-  UIDataTypes,
-  UIMessagePart,
+  type UIDataTypes,
+  type UIMessagePart,
 } from "ai";
+import type React from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useSearchBox } from "react-instantsearch";
 import { getValidToken } from "./askai";
+import { BrainIcon, CheckIcon, CopyIcon, DislikeIcon, LikeIcon, SearchIcon } from "./icons";
 import { MemoizedMarkdown } from "./markdown";
-import { CopyIcon, LikeIcon, DislikeIcon, SearchIcon, BrainIcon, CheckIcon } from "./icons";
 
 function useClipboard() {
   const copyText = useCallback(async (text: string) => {
@@ -37,6 +38,7 @@ function useKeyboardListener(
   useEffect(() => {
     document.addEventListener("keydown", callback);
     return () => document.removeEventListener("keydown", callback);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: passed by param
   }, dependencies);
 }
 
@@ -158,7 +160,7 @@ export const ChatWidget = memo(function ChatWidget({
         setLastSentQuery(trimmed);
       }
     },
-    [lastSentQuery, sendMessage, refine]
+    [lastSentQuery, sendMessage]
   );
 
   // Auto-send initial question
@@ -224,6 +226,7 @@ export const ChatWidget = memo(function ChatWidget({
                   <div className="ss-qa-question">
                     {exchange.userMessage.parts.map((part, index) =>
                       part.type === "text" ? (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: better
                         <span key={index}>{part.text}</span>
                       ) : null
                     )}
@@ -236,10 +239,12 @@ export const ChatWidget = memo(function ChatWidget({
                       <div className="ss-qa-markdown">
                         {exchange.assistantMessage.parts.map((part, index) => {
                           if (typeof part === "string") {
+                            // biome-ignore lint/suspicious/noArrayIndexKey: better
                             return <p key={`${index}`}>{part}</p>;
                           }
                           if (part.type === "text") {
                             return (
+                              // biome-ignore lint/suspicious/noArrayIndexKey: better
                               <MemoizedMarkdown key={`${index}`}>
                                 {part.text}
                               </MemoizedMarkdown>
@@ -249,6 +254,7 @@ export const ChatWidget = memo(function ChatWidget({
                             part.state === "streaming"
                           ) {
                             return (
+                              // biome-ignore lint/suspicious/noArrayIndexKey: better
                               <p className="ss-tool-info" key={`${index}`}>
                                 <BrainIcon /> <span className="ss-shimmer-text">Reasoning...</span>
                               </p>
@@ -256,12 +262,14 @@ export const ChatWidget = memo(function ChatWidget({
                           } else if (part.type === "tool-searchIndex") {
                             if (part.state === "input-streaming") {
                               return (
+                                // biome-ignore lint/suspicious/noArrayIndexKey: better
                                 <p className="ss-tool-info" key={`${index}`}>
                                   <SearchIcon size={18} /> <span className="ss-shimmer-text">Searching...</span>
                                 </p>
                               );
                             } else if (part.state === "input-available") {
                               return (
+                                // biome-ignore lint/suspicious/noArrayIndexKey: better
                                 <p className="ss-tool-info" key={`${index}`}>
                                   <SearchIcon size={18} />{" "}
                                   <span className="ss-shimmer-text">
@@ -274,6 +282,7 @@ export const ChatWidget = memo(function ChatWidget({
                               );
                             } else if (part.state === "output-available") {
                               return (
+                                // biome-ignore lint/suspicious/noArrayIndexKey: better
                                 <p className="ss-tool-info" key={`${index}`}>
                                   <SearchIcon size={18} />{" "}
                                   <span>
@@ -285,6 +294,7 @@ export const ChatWidget = memo(function ChatWidget({
                               );
                             } else if (part.state === "output-error") {
                               return (
+                                // biome-ignore lint/suspicious/noArrayIndexKey: better
                                 <p className="ss-tool-info" key={`${index}`}>
                                   {part.errorText}
                                 </p>

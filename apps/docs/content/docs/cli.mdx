@@ -1,0 +1,45 @@
+---
+title: CLI
+description: "The CLI for Sitesearch."
+---
+
+The Sitesearch CLI scaffolds experiences, syncs Algolia config, and keeps your components up to date. Think of it as the glue between your repo and our templates.
+
+## Installation
+
+- Run once with `pnpm dlx` (recommended for quick experiments)
+- Or install locally if you prefer a pinned version
+
+```bash
+pnpm add -D @sitesearch/cli
+```
+
+> We tag releases frequently. Consider using `@latest` when invoking `pnpm dlx`.
+
+## Common commands
+
+- `sitesearch init` — scaffold an experience in your Next.js app
+- `sitesearch upgrade` — pull the latest component changes into your local copies
+- `sitesearch sync analytics` — ensure Insights events align with your Algolia app configuration
+- `sitesearch doctor` — run diagnostics for missing env vars, outdated packages, or schema mismatches
+
+```bash
+pnpm dlx @sitesearch/cli@latest init \
+  --preset search-askai \
+  --path apps/web/app/(search)/page.tsx \
+  --use-demo-data
+```
+
+## Workflow tips
+
+- Re-run `init` with a new preset in a scratch folder to compare layouts before committing.
+- Use `upgrade --dry-run` to preview diffs and cherry-pick only the pieces you need.
+- Add `doctor` to your CI so missing tokens or credentials fail fast.
+
+## Next steps
+
+<Cards>
+  <Card title="Quickstart" href="/docs/quickstart" />
+  <Card title="Search experience" href="/docs/experiences/search" />
+  <Card title="AskAI Sidepanel" href="/docs/experiences/sidepanel" />
+</Cards>

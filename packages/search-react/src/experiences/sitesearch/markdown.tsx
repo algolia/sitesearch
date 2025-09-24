@@ -1,5 +1,5 @@
 import { marked, type Tokens } from 'marked';
-import React, { memo, useMemo, useEffect, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 
 interface MemoizedMarkdownProps {
   children: string;
@@ -78,6 +78,7 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
   }, [children]);
 
   // Handle copy button clicks
+  // biome-ignore lint/correctness/useExhaustiveDependencies: expected
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -121,6 +122,7 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
     <div
       ref={containerRef}
       className={`ss-markdown-content ${className}`.trim()}
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: its alright :)
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

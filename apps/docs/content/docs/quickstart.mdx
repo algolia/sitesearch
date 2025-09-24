@@ -1,0 +1,74 @@
+---
+title: Quickstart
+description: "Our philosophy is simple: copy Algolia search experiences as components, customize freely. No complex configuration, just grab what you need and make it yours."
+---
+
+Sitesearch helps you ship Algolia-powered search interfaces without rebuilding the basics. Start from an opinionated experience, then tailor the styling, layout, and data hooks to your product.
+
+This quickstart mirrors the shadcn/ui flow: install the CLI, scaffold a page, and iterate locally before publishing.
+
+## Prerequisites
+
+- Node.js 18 or newer
+- A package manager (`pnpm`, `yarn`, or `npm`)
+- An Algolia application with an index you can read from (Analytics optional but recommended)
+- Basic familiarity with Next.js and React Server Components
+
+> Tip: If you are evaluating, you can point the starter at the demo Algolia dataset shipped with the CLI and switch to your own credentials later.
+
+## 1. Install the Sitesearch CLI
+
+We recommend running the CLI with `pnpm dlx`, but you can also add it to your devDependencies.
+
+```bash
+pnpm dlx @sitesearch/cli@latest init
+```
+
+You will be asked to choose an experience preset (`Search`, `Search + AskAI`, `AskAI Sidepanel`) and whether to wire in demo data.
+
+## 2. Configure Algolia credentials
+
+After the CLI finishes scaffolding, update `sitesearch.config.ts` at the root of your app.
+
+```ts
+export default defineConfig({
+  appId: process.env.ALGOLIA_APP_ID!,
+  apiKey: process.env.ALGOLIA_SEARCH_API_KEY!,
+  indexName: "products",
+});
+```
+
+Store your credentials in `.env.local` and restart the dev server so the config is picked up.
+
+## 3. Run the dev server
+
+```bash
+pnpm dev
+```
+
+Navigate to `/search` (or the route the CLI created) to explore. The starter ships with sensible defaults: keyboard navigation, empty state messaging, and analytics events wired through Algolia Insights.
+
+## 4. Customize the experience
+
+- **Styling:** tweak tokens in `sitesearch/theme.ts` or swap to your design system tokens. Components expose `className` overrides for fine-grained control.
+- **Data:** adjust the InstantSearch widgets inside the generated `page.tsx`. You can add federated sources, derived attributes, or switch ranking formulas without leaving the template.
+- **UX additions:** drop in call-to-actions, onboarding modals, or telemetry hooks. Each experience exposes headless primitives so you can recompose the layout when needed.
+
+## 5. Ship it
+
+When you are ready, run:
+
+```bash
+pnpm build
+pnpm start
+```
+
+Deploy to Vercel, Netlify, or your preferred platform. Because everything is just React + Algolia, you can progressively enhance existing pages instead of migrating your whole app.
+
+## What is next?
+
+<Cards>
+  <Card title="Install the CLI" href="/docs/cli" />
+  <Card title="Explore the Search experience" href="/docs/experiences/search" />
+  <Card title="Learn how we build components" href="/docs/components" />
+</Cards>

@@ -1,6 +1,6 @@
 import { defineConfig } from 'rolldown'
-import postcss from 'rollup-plugin-postcss'
 import { dts } from 'rolldown-plugin-dts'
+import postcss from 'rollup-plugin-postcss'
 
 export default defineConfig([
   // ESM build with CSS extraction

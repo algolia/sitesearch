@@ -1,6 +1,7 @@
-import React, { memo, useState } from 'react';
-import { useSearchBox, useInstantSearch } from 'react-instantsearch';
-import { SearchIcon, ArrowLeftIcon, CloseIcon } from './icons';
+import type React from 'react';
+import { memo, useState } from 'react';
+import { useInstantSearch, useSearchBox } from 'react-instantsearch';
+import { ArrowLeftIcon, CloseIcon, SearchIcon } from './icons';
 
 interface SearchInputProps {
   placeholder?: string;

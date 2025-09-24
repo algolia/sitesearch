@@ -1,25 +1,24 @@
-import React, { useRef, useCallback, memo, useEffect, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
+import type React from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   Configure,
   InstantSearch,
-  useSearchBox,
-  useInstantSearch,
   useHits,
-  PoweredBy,
-  RefinementList,
+  useInstantSearch,
+  useSearchBox,
 } from "react-instantsearch";
 
 import { ChatWidget } from "./chat";
-import { useSearchState } from "./useSearchState";
-import { useKeyboardNavigation } from "./useKeyboardNavigation";
-import { SearchInput } from "./search-input";
 import { HitsList } from "./hits-list";
-import { SparklesIcon, SearchIcon, AlgoliaLogo } from "./icons";
+import { AlgoliaLogo, SearchIcon } from "./icons";
+import { SearchInput } from "./search-input";
+import { useKeyboardNavigation } from "./useKeyboardNavigation";
+import { useSearchState } from "./useSearchState";
 
-import "./index.css";
-import { Modal } from "./search-modal";
+import "./styles.css";
 import { SearchButton } from "./search-button";
+import { Modal } from "./search-modal";
 
 export interface SearchExperienceConfig {
   /** Algolia Application ID (required) */
@@ -112,10 +111,11 @@ interface ResultsPanelProps {
   config: SearchExperienceConfig;
 }
 
-const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowChat, query, initialQuestion, selectedIndex, refine, config }: ResultsPanelProps) {
+const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowChat, query, initialQuestion, selectedIndex, config }: ResultsPanelProps) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: expected
   useEffect(() => {
     if (showChat) return;
     const container = containerRef.current;
@@ -250,7 +250,7 @@ const Footer = memo(function Footer({ showResultsPanel, showChat }: { showResult
         {/* 🚧 DO NOT REMOVE the logo if you are on a Free plan 
         * https://support.algolia.com/hc/en-us/articles/17226079853073-Is-displaying-the-Algolia-logo-required
         */}
-        <a className="ss-footer-powered-by" href="https://www.algolia.com" target="_blank" rel="quicksearch">
+        <a className="ss-footer-powered-by" href="https://www.algolia.com" target="_blank" rel="noopener quicksearch">
           <span>Powered by </span>
           <AlgoliaLogo />
         </a>
@@ -272,6 +272,7 @@ export default function SearchExperience(config: SearchExperienceConfig) {
   const shortcut = config.keyboardShortcut || "cmd+k";
   const [modifierKey, key] = shortcut.toLowerCase().split("+");
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: we don't to rerun
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const isModifierPressed = modifierKey === "cmd"

@@ -283,7 +283,6 @@
 
 .ss-exp .ss-infinite-hits-item .ais-Highlight-highlighted {
 	color: var(--search-primary-color);
-	offset-inline-start: 2px;
 	background-color: transparent;
 	text-decoration-thickness: 1px;
 	text-underline-offset: 4px;
@@ -661,6 +660,7 @@
 .sitesearch-button:hover {
   border-color: var(--search-primary-color);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	transform: translateY(-1px);
 }
 
 .sitesearch-button .search-icon {

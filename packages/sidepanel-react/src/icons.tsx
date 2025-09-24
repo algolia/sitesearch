@@ -4,39 +4,167 @@ interface IconProps {
   className?: string;
 }
 
-
-export const ExpandIcon = ({ size = 24, color = "currentColor" }: IconProps) => {
+export const ExpandIcon = ({
+  size = 24,
+  color = "currentColor",
+}: IconProps) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6" /><path d="m21 3-7 7" /><path d="m3 21 7-7" /><path d="M9 21H3v-6" /></svg>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M15 3h6v6" />
+      <path d="m21 3-7 7" />
+      <path d="m3 21 7-7" />
+      <path d="M9 21H3v-6" />
+    </svg>
   );
 };
 
 export const CloseIcon = ({ size = 24, color = "currentColor" }: IconProps) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18" /><path d="m6 6 12 12" /></svg>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 6L6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
   );
 };
 
 export const UpIcon = ({ size = 24, color = "currentColor" }: IconProps) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></svg>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m5 12 7-7 7 7" />
+      <path d="M12 19V5" />
+    </svg>
   );
 };
 
-export const SparklesIcon = ({
-  size = 24,
-  color = "currentColor",
-}: IconProps) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill={color}
-    width={size}
-    height={size}
-  >
-    <path d="M10.6144 17.7956C10.277 18.5682 9.20776 18.5682 8.8704 17.7956L7.99275 15.7854C7.21171 13.9966 5.80589 12.5726 4.0523 11.7942L1.63658 10.7219C.868536 10.381.868537 9.26368 1.63658 8.92276L3.97685 7.88394C5.77553 7.08552 7.20657 5.60881 7.97427 3.75892L8.8633 1.61673C9.19319.821767 10.2916.821765 10.6215 1.61673L11.5105 3.75894C12.2782 5.60881 13.7092 7.08552 15.5079 7.88394L17.8482 8.92276C18.6162 9.26368 18.6162 10.381 17.8482 10.7219L15.4325 11.7942C13.6789 12.5726 12.2731 13.9966 11.492 15.7854L10.6144 17.7956ZM4.53956 9.82234C6.8254 10.837 8.68402 12.5048 9.74238 14.7996 10.8008 12.5048 12.6594 10.837 14.9452 9.82234 12.6321 8.79557 10.7676 7.04647 9.74239 4.71088 8.71719 7.04648 6.85267 8.79557 4.53956 9.82234ZM19.4014 22.6899 19.6482 22.1242C20.0882 21.1156 20.8807 20.3125 21.8695 19.8732L22.6299 19.5353C23.0412 19.3526 23.0412 18.7549 22.6299 18.5722L21.9121 18.2532C20.8978 17.8026 20.0911 16.9698 19.6586 15.9269L19.4052 15.3156C19.2285 14.8896 18.6395 14.8896 18.4628 15.3156L18.2094 15.9269C17.777 16.9698 16.9703 17.8026 15.956 18.2532L15.2381 18.5722C14.8269 18.7549 14.8269 19.3526 15.2381 19.5353L15.9985 19.8732C16.9874 20.3125 17.7798 21.1156 18.2198 22.1242L18.4667 22.6899C18.6473 23.104 19.2207 23.104 19.4014 22.6899ZM18.3745 19.0469 18.937 18.4883 19.4878 19.0469 18.937 19.5898 18.3745 19.0469Z" />
-  </svg>
-);
+export const SparklesIcon = ({ size = 24 }: IconProps) => {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8 1.5a.5.5 0 0 1 .475.344L9.75 5.719a.833.833 0 0 0 .53.531l3.876 1.275a.5.5 0 0 1 0 .95L10.281 9.75a.833.833 0 0 0-.531.53l-1.275 3.876a.5.5 0 0 1-.95 0L6.25 10.281a.833.833 0 0 0-.53-.531L1.843 8.475a.5.5 0 0 1 0-.95L5.719 6.25a.833.833 0 0 0 .531-.53l1.275-3.876A.5.5 0 0 1 8 1.5Zm-.8 4.532A1.833 1.833 0 0 1 6.032 7.2L3.6 8l2.432.8A1.833 1.833 0 0 1 7.2 9.968L8 12.4l.8-2.432A1.833 1.833 0 0 1 9.968 8.8L12.4 8l-2.432-.8A1.833 1.833 0 0 1 8.8 6.032L8 3.6l-.8 2.432Z"
+        fill="url(#8aa5f4b5___a)"
+      ></path>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M3.333 1.5a.5.5 0 0 1 .5.5v2.667a.5.5 0 1 1-1 0V2a.5.5 0 0 1 .5-.5Z"
+        fill="url(#8aa5f4b5___b)"
+      ></path>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12.667 10.833a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-1 0v-2.667a.5.5 0 0 1 .5-.5Z"
+        fill="url(#8aa5f4b5___c)"
+      ></path>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M1.5 3.333a.5.5 0 0 1 .5-.5h2.667a.5.5 0 0 1 0 1H2a.5.5 0 0 1-.5-.5Z"
+        fill="url(#8aa5f4b5___d)"
+      ></path>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M10.833 12.667a.5.5 0 0 1 .5-.5H14a.5.5 0 1 1 0 1h-2.667a.5.5 0 0 1-.5-.5Z"
+        fill="url(#8aa5f4b5___e)"
+      ></path>
+      <defs>
+        <linearGradient
+          id="8aa5f4b5___a"
+          x1="15.03"
+          y1="8"
+          x2="2.03"
+          y2="8"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.15" stopColor="#8E00FC"></stop>
+          <stop offset="1" stopColor="#003DFF"></stop>
+        </linearGradient>
+        <linearGradient
+          id="8aa5f4b5___b"
+          x1="15.03"
+          y1="8"
+          x2="2.03"
+          y2="8"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.15" stopColor="#8E00FC"></stop>
+          <stop offset="1" stopColor="#003DFF"></stop>
+        </linearGradient>
+        <linearGradient
+          id="8aa5f4b5___c"
+          x1="15.03"
+          y1="8"
+          x2="2.03"
+          y2="8"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.15" stopColor="#8E00FC"></stop>
+          <stop offset="1" stopColor="#003DFF"></stop>
+        </linearGradient>
+        <linearGradient
+          id="8aa5f4b5___d"
+          x1="15.03"
+          y1="8"
+          x2="2.03"
+          y2="8"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.15" stopColor="#8E00FC"></stop>
+          <stop offset="1" stopColor="#003DFF"></stop>
+        </linearGradient>
+        <linearGradient
+          id="8aa5f4b5___e"
+          x1="15.03"
+          y1="8"
+          x2="2.03"
+          y2="8"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.15" stopColor="#8E00FC"></stop>
+          <stop offset="1" stopColor="#003DFF"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
 
 export const AlgoliaLogo = ({
   size = 150,
@@ -53,7 +181,7 @@ export const AlgoliaLogo = ({
   >
     <defs>
       {/* eslint-disable-nextLine @docusaurus/no-untranslated-text */}
-      <style>{`.cls-1,.cls-2{fill:#003dff}.cls-2{fill-rule:evenodd}`}</style>
+      <style>{`.cls-1,.cls-2{fill:#003dff}.cls-2{fillRule:evenodd}`}</style>
     </defs>
     <path
       className="cls-2"
@@ -100,5 +228,115 @@ export const AlgoliaLogo = ({
 );
 
 export const BrainIcon = ({ size = 20, color = "currentColor" }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 20 20" ><path fill={color} d="m14.878.282l.348 1.071a2.2 2.2 0 0 0 1.399 1.397l1.071.348l.021.006a.423.423 0 0 1 0 .798l-1.071.348a2.2 2.2 0 0 0-1.399 1.397l-.348 1.07a.423.423 0 0 1-.798 0l-.349-1.07a2.2 2.2 0 0 0-.532-.867a2.2 2.2 0 0 0-.866-.536l-1.071-.348a.423.423 0 0 1 0-.798l1.071-.348a2.2 2.2 0 0 0 1.377-1.397l.348-1.07a.423.423 0 0 1 .799 0m4.905 7.931l-.766-.248a1.58 1.58 0 0 1-.998-.999l-.25-.764a.302.302 0 0 0-.57 0l-.248.764a1.58 1.58 0 0 1-.984.999l-.765.248a.303.303 0 0 0 0 .57l.765.249a1.58 1.58 0 0 1 1 1.002l.248.764a.302.302 0 0 0 .57 0l.249-.764a1.58 1.58 0 0 1 .999-.999l.765-.248a.303.303 0 0 0 0-.57zM16.97 11.89a1.46 1.46 0 0 0 1.013.038q.016.158.016.32a3.25 3.25 0 0 1-2.575 3.178l-.037.185A2.973 2.973 0 0 1 10 16.678a2.973 2.973 0 0 1-5.388-1.068l-.037-.185a3.248 3.248 0 0 1-.77-6.088A2.5 2.5 0 0 1 3 7.5v-.198a2.7 2.7 0 0 1 2.169-2.646l.406-.08l.125-.628a2.423 2.423 0 0 1 4.3-1a2.4 2.4 0 0 1 .293-.318l-.033.045c-.17.24-.26.52-.26.821s.09.581.26.821q.104.147.24.265v10.445a1.973 1.973 0 0 0 3.907.387l.103-.512a.5.5 0 0 1 .392-.392l.291-.059a2.25 2.25 0 0 0 1.778-2.562M9.5 15.027V4.423a1.423 1.423 0 0 0-2.819-.279l-.19.954a.5.5 0 0 1-.393.392l-.733.147A1.7 1.7 0 0 0 4 7.302V7.5A1.5 1.5 0 0 0 5.5 9a.5.5 0 0 1 0 1h-.252a2.248 2.248 0 0 0-.441 4.451l.291.059a.5.5 0 0 1 .392.392l.103.512a1.973 1.973 0 0 0 3.907-.387" /></svg>
-)
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 20 20"
+  >
+    <path
+      fill={color}
+      d="m14.878.282l.348 1.071a2.2 2.2 0 0 0 1.399 1.397l1.071.348l.021.006a.423.423 0 0 1 0 .798l-1.071.348a2.2 2.2 0 0 0-1.399 1.397l-.348 1.07a.423.423 0 0 1-.798 0l-.349-1.07a2.2 2.2 0 0 0-.532-.867a2.2 2.2 0 0 0-.866-.536l-1.071-.348a.423.423 0 0 1 0-.798l1.071-.348a2.2 2.2 0 0 0 1.377-1.397l.348-1.07a.423.423 0 0 1 .799 0m4.905 7.931l-.766-.248a1.58 1.58 0 0 1-.998-.999l-.25-.764a.302.302 0 0 0-.57 0l-.248.764a1.58 1.58 0 0 1-.984.999l-.765.248a.303.303 0 0 0 0 .57l.765.249a1.58 1.58 0 0 1 1 1.002l.248.764a.302.302 0 0 0 .57 0l.249-.764a1.58 1.58 0 0 1 .999-.999l.765-.248a.303.303 0 0 0 0-.57zM16.97 11.89a1.46 1.46 0 0 0 1.013.038q.016.158.016.32a3.25 3.25 0 0 1-2.575 3.178l-.037.185A2.973 2.973 0 0 1 10 16.678a2.973 2.973 0 0 1-5.388-1.068l-.037-.185a3.248 3.248 0 0 1-.77-6.088A2.5 2.5 0 0 1 3 7.5v-.198a2.7 2.7 0 0 1 2.169-2.646l.406-.08l.125-.628a2.423 2.423 0 0 1 4.3-1a2.4 2.4 0 0 1 .293-.318l-.033.045c-.17.24-.26.52-.26.821s.09.581.26.821q.104.147.24.265v10.445a1.973 1.973 0 0 0 3.907.387l.103-.512a.5.5 0 0 1 .392-.392l.291-.059a2.25 2.25 0 0 0 1.778-2.562M9.5 15.027V4.423a1.423 1.423 0 0 0-2.819-.279l-.19.954a.5.5 0 0 1-.393.392l-.733.147A1.7 1.7 0 0 0 4 7.302V7.5A1.5 1.5 0 0 0 5.5 9a.5.5 0 0 1 0 1h-.252a2.248 2.248 0 0 0-.441 4.451l.291.059a.5.5 0 0 1 .392.392l.103.512a1.973 1.973 0 0 0 3.907-.387"
+    />
+  </svg>
+);
+
+export const LikeIcon = ({ size = 24, color = "currentColor" }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M7 10v12" />
+    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+  </svg>
+);
+
+export const DislikeIcon = ({
+  size = 24,
+  color = "currentColor",
+}: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M17 14V2" />
+    <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z" />
+  </svg>
+);
+
+export const CopyIcon = ({ size = 24, color = "currentColor" }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+  </svg>
+);
+
+export const CheckIcon = ({ size = 24, color = "currentColor" }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+);
+
+export const SearchIcon = ({
+  size = 24,
+  color = "currentColor",
+  className,
+}: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill={color}
+    width={size}
+    height={size}
+  >
+    <circle
+      cx="11"
+      cy="11"
+      r="8"
+      stroke={color}
+      fill="none"
+      strokeWidth="1.4"
+    />
+    <path
+      d="m21 21-4.3-4.3"
+      stroke={color}
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

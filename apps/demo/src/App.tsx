@@ -1,218 +1,69 @@
-import { SiteSearchExperience } from '@algolia/sitesearch-react';
-import { Sidepanel } from '@algolia/sidepanel-react';
-import '@algolia/sidepanel-react/dist/sidepanel.css';
-import '@algolia/sitesearch-react/dist/sitesearch.css';
-import './App.css';
+import { Sidepanel } from "@algolia/sidepanel-react";
+import { SiteSearchExperience } from "@algolia/sitesearch-react";
+import "@algolia/sidepanel-react/dist/sidepanel.css";
+import "@algolia/sitesearch-react/dist/sitesearch.css";
+import "./App.css";
 
 function App() {
   return (
     <div className="app">
-      <header className="hero">
-        <div className="hero-content">
-          <AlgoliaLogo size={124} />
-          <p className="hero-subtitle">
-            Drop-in search widget with AI-powered chat for modern websites
-          </p>
-          <p className="hero-description">
-            Try it out: <kbd>Cmd/Ctrl + K</kbd> or click the search button below
-          </p>
-        </div>
+      <header>
+        <AlgoliaLogo size={124} />
       </header>
 
       <div className="main-container">
-        <aside className="demo-sidebar">
-          <div className="demo-sticky">
-            <div className="demo-section">
-              <h2>Live Demo</h2>
-              <p>Experience the search widget in action:</p>
-              <div className="demo-widget" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <SiteSearchExperience
-                  applicationId="betaHAXPMHIMMC"
-                  apiKey="8b00405cba281a7d800ccec393e9af24"
-                  indexName="algolia_podcast_sample_dataset"
-                  assistantId="Z03Eno3oLaXI"
-                  placeholder="Search for podcasts..."
-                  hitsPerPage={6}
-                  keyboardShortcut="cmd+k"
-                  buttonText="🎧 Search Podcasts"
-                />
-                <Sidepanel buttonLabel="SP">
-                  <div style={{ padding: 16 }}>
-                    <h3 style={{ marginTop: 0 }}>Sidepanel</h3>
-                    <p>Empty panel ready for content. Click backdrop to close.</p>
-                  </div>
-                </Sidepanel>
-              </div>
-              <div className="demo-features">
-                <h3>Features</h3>
-                <ul>
-                  <li>⚡ Instant search results</li>
-                  <li>🤖 AI-powered chat assistance</li>
-                  <li>⌨️ Full keyboard navigation</li>
-                  <li>🎨 Beautiful, accessible UI</li>
-                  <li>📱 Mobile-responsive design</li>
-                </ul>
-              </div>
+        <main className="content">
+          <div className="hero-content">
+            <p className="hero-subtitle">Search with AskAI and SidePanel</p>
+            <p className="hero-description">
+              Try it out: <kbd>Cmd/Ctrl + K</kbd> or click the search button
+              below. <br />
+              Click the sidepanel button to open the sidepanel.
+            </p>
+            <div
+              className="demo-widget"
+              style={{ display: "flex", gap: 12, alignItems: "center" }}
+            >
+              <SiteSearchExperience
+                applicationId="betaHAXPMHIMMC"
+                apiKey="8b00405cba281a7d800ccec393e9af24"
+                indexName="algolia_podcast_sample_dataset"
+                assistantId="Z03Eno3oLaXI"
+                placeholder="Search for podcasts..."
+                hitsPerPage={6}
+                keyboardShortcut="cmd+k"
+                buttonText="🎧 Search Podcasts"
+              />
+              <Sidepanel
+                config={{
+                  applicationId: "betaHAXPMHIMMC",
+                  apiKey: "8b00405cba281a7d800ccec393e9af24",
+                  indexName: "algolia_podcast_sample_dataset",
+                  assistantId: "Z03Eno3oLaXI",
+                }}
+              />
             </div>
           </div>
-        </aside>
-
-        <main className="content">
-          <section className="usage-section">
-            <h2>Quick Start</h2>
-            <p className="section-intro">
-              Our philosophy is simple: copy components, customize freely.
-              No complex configuration, just grab what you need and make it yours.
-            </p>
-
-            <div className="usage-step">
-              <h3>1. Install Dependencies</h3>
-              <div className="code-block">
-                <div className="code-header">
-                  <span>Terminal</span>
-                  <button className="copy-btn" onClick={() => navigator.clipboard.writeText('npm install @ai-sdk/react ai algoliasearch react-instantsearch marked')}>
-                    Copy
-                  </button>
-                </div>
-                <pre><code>{`npm install @ai-sdk/react ai algoliasearch react-instantsearch marked`}</code></pre>
-              </div>
-            </div>
-
-            <div className="usage-step">
-              <h3>2. Use the Complete Experience</h3>
-              <p>Perfect for most use cases - a complete search experience with button, modal, and AI chat:</p>
-              <div className="code-block">
-                <div className="code-header">
-                  <span>App.tsx</span>
-                  <button className="copy-btn" onClick={() => navigator.clipboard.writeText(`import { SiteSearchExperience } from './components/sitesearch';
-import './sitesearch.css';
-
-function App() {
-  return (
-    <SiteSearchExperience
-      applicationId="your-app-id"
-      apiKey="your-search-api-key"
-      indexName="your-index"
-      assistantId="your-assistant-id"
-      placeholder="What are you looking for?"
-      hitsPerPage={8}
-      keyboardShortcut="cmd+k"
-    />
-  );
-}`)}>
-                    Copy
-                  </button>
-                </div>
-                <pre><code>{`import { SiteSearchExperience } from './components/sitesearch';
-import './sitesearch.css';
-
-function App() {
-  return (
-    <SiteSearchExperience
-      applicationId="your-app-id"
-      apiKey="your-search-api-key"
-      indexName="your-index"
-      assistantId="your-assistant-id"
-      placeholder="What are you looking for?"
-      hitsPerPage={8}
-      keyboardShortcut="cmd+k"
-    />
-  );
-}`}</code></pre>
-              </div>
-            </div>
-
-            <div className="usage-step">
-              <h3>3. Or Copy Individual Components</h3>
-              <p>Want more control? Copy and customize individual components from our source:</p>
-              <div className="component-grid">
-                <div className="component-card">
-                  <h4>SearchModal</h4>
-                  <p>The main modal container with backdrop and accessibility</p>
-                  <code className="file-path">packages/search-react/src/experiences/sitesearch/search-modal.tsx</code>
-                </div>
-                <div className="component-card">
-                  <h4>SearchInput</h4>
-                  <p>Enhanced input with AI chat toggle and keyboard navigation</p>
-                  <code className="file-path">packages/search-react/src/experiences/sitesearch/search-input.tsx</code>
-                </div>
-                <div className="component-card">
-                  <h4>HitsList</h4>
-                  <p>Results display with highlighting and selection states</p>
-                  <code className="file-path">packages/search-react/src/experiences/sitesearch/hits-list.tsx</code>
-                </div>
-                <div className="component-card">
-                  <h4>ChatWidget</h4>
-                  <p>AI-powered conversational search interface</p>
-                  <code className="file-path">packages/search-react/src/experiences/sitesearch/chat.tsx</code>
-                </div>
-              </div>
-            </div>
-
-            <div className="usage-step">
-              <h3>4. Customize with CSS</h3>
-              <p>All components use CSS custom properties for easy theming:</p>
-              <div className="code-block">
-                <div className="code-header">
-                  <span>styles.css</span>
-                  <button className="copy-btn" onClick={() => navigator.clipboard.writeText(`:root {
-  --ss-primary-color: #003dff;
-  --ss-background: #ffffff;
-  --ss-border-radius: 12px;
-  --ss-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  --ss-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
-}`)}>
-                    Copy
-                  </button>
-                </div>
-                <pre><code>{`:root {
-  --ss-primary-color: #003dff;
-  --ss-background: #ffffff;
-  --ss-border-radius: 12px;
-  --ss-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  --ss-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
-}`}</code></pre>
-              </div>
-            </div>
-
-            <div className="usage-step">
-              <h3>Usage with other frameworks</h3>
-              <p>Want more control? Copy and customize individual components from our source: Vanilla JavaScript, Vue, Angular, Svelte, etc.</p>
-              <div className="code-block">
-                <div className="code-header">
-                  <span>Terminal</span>
-                  <button className="copy-btn" onClick={() => navigator.clipboard.writeText(`npm run build:js-bundle`)}>
-                    Copy
-                  </button>
-                </div>
-                <pre><code>{`npm run build:js-bundle`}</code></pre>
-              </div>
-              <div>
-                <p>Then use the bundle in your project. </p>
-              </div>
-            </div>
-          </section>
-
-        </main >
-      </div >
+        </main>
+      </div>
 
       <footer className="footer">
         <p>
-          Built with ❤️ by the Algolia team.
-          <a href="https://github.com/algolia/sitesearch" target="_blank" rel="noopener noreferrer">
+          Built with ❤️ by Algolia.
+          <a
+            href="https://github.com/algolia/sitesearch"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             View on GitHub
           </a>
         </p>
       </footer>
-    </div >
+    </div>
   );
 }
 
-const AlgoliaLogo = ({
-  size = 150,
-}: {
-  size?: number;
-}) => (
+const AlgoliaLogo = ({ size = 150 }: { size?: number }) => (
   <svg
     width={size}
     aria-label="Algolia"

@@ -1,5 +1,5 @@
-import { render } from "preact";
 import { SiteSearchExperience } from "@algolia/sitesearch-react";
+import { render } from "preact";
 import "@algolia/sitesearch-react/dist/sitesearch.css";
 import type { SiteSearchInitOptions } from "./types";
 
@@ -21,15 +21,15 @@ class SiteSearch {
 		}
 
 		// Clean up existing instance if any
-		if (this.instances.has(containerElement)) {
-			this.destroy(containerElement);
+		if (SiteSearch.instances.has(containerElement)) {
+			SiteSearch.destroy(containerElement);
 		}
 
 		// Render the React component with Preact
 		render(SiteSearchExperience(config), containerElement);
 
 		// Store instance reference
-		this.instances.set(containerElement, config);
+		SiteSearch.instances.set(containerElement, config);
 	}
 
 	static destroy(container: string | HTMLElement): void {
@@ -44,12 +44,12 @@ class SiteSearch {
 		render(null, containerElement);
 
 		// Remove from instances
-		this.instances.delete(containerElement);
+		SiteSearch.instances.delete(containerElement);
 	}
 
 	static destroyAll(): void {
-		this.instances.forEach((_, container) => {
-			this.destroy(container);
+		SiteSearch.instances.forEach((_, container) => {
+			SiteSearch.destroy(container);
 		});
 	}
 }

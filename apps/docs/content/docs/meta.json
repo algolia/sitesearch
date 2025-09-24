@@ -1,0 +1,12 @@
+{
+  "root": true,
+  "pages": [
+    "(root)",
+    "---Getting started---",
+    "index",
+    "---Experiences---",
+    "experiences/search", 
+    "experiences/search-askai", 
+    "experiences/sidepanel"
+  ]
+}

@@ -44,7 +44,7 @@ export const getValidToken = async ({
 				sessionStorage.setItem(TOKEN_KEY, token);
 				return token;
 			})
-			.finally(() => (inflight = null));
+			.finally(() => { inflight = null; });
 	}
 
 	return inflight;
