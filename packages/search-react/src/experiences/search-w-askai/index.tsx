@@ -8,8 +8,8 @@ import {
   useInstantSearch,
   useSearchBox,
 } from "react-instantsearch";
-
-import { ChatWidget } from "./chat";
+import { useAskai } from "./askai";
+import { ChatWidget, type Message } from "./chat";
 import { HitsList } from "./hits-list";
 import { AlgoliaLogo, SearchIcon } from "./icons";
 import { SearchInput } from "./search-input";
@@ -20,7 +20,7 @@ import "./styles.css";
 import { SearchButton } from "./search-button";
 import { Modal } from "./search-modal";
 
-export interface SearchExperienceConfig {
+export interface SearchWithAskAIConfig {
   /** Algolia Application ID (required) */
   applicationId: string;
   /** Algolia API Key (required) */
@@ -51,11 +51,10 @@ interface SearchBoxProps {
   inputRef: React.RefObject<HTMLInputElement | null>;
   refine: (query: string) => void;
   setShowChat: (show: boolean) => void;
-  setInitialQuestion: (question: string) => void;
   onClose?: () => void;
   onArrowDown?: () => void;
   onArrowUp?: () => void;
-  onEnter?: () => boolean;
+  onEnter?: (value: string) => boolean;
 }
 
 const SearchBox = memo(function SearchBox(props: SearchBoxProps) {
@@ -66,7 +65,6 @@ const SearchBox = memo(function SearchBox(props: SearchBoxProps) {
       showChat={props.showChat}
       inputRef={props.inputRef}
       setShowChat={props.setShowChat}
-      setInitialQuestion={props.setInitialQuestion}
       onClose={props.onClose || (() => {})}
       onArrowDown={props.onArrowDown}
       onArrowUp={props.onArrowUp}
@@ -124,10 +122,9 @@ interface ResultsPanelProps {
   inputRef: React.RefObject<HTMLInputElement | null>;
   setShowChat: (showChat: boolean) => void;
   query: string;
-  initialQuestion?: string;
   selectedIndex: number;
   refine: (query: string) => void;
-  config: SearchExperienceConfig;
+  config: SearchWithAskAIConfig;
 }
 
 const ResultsPanel = memo(function ResultsPanel({
@@ -135,8 +132,8 @@ const ResultsPanel = memo(function ResultsPanel({
   inputRef,
   setShowChat,
   query,
-  initialQuestion,
   selectedIndex,
+  refine,
   config,
 }: ResultsPanelProps) {
   const { items } = useHits();
@@ -163,12 +160,38 @@ const ResultsPanel = memo(function ResultsPanel({
     }
   }, [selectedIndex, showChat, items.length]);
 
+  // Use lifted chat state once, not conditionally
+  const { messages, error, isGenerating, sendMessage } = useAskai({
+    applicationId: config.applicationId,
+    apiKey: config.apiKey,
+    indexName: config.indexName,
+    assistantId: config.assistantId,
+    baseAskaiUrl: config.baseAskaiUrl,
+  });
+
+  const lastSentRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!showChat) return;
+    const trimmed = (query ?? "").trim();
+    if (!trimmed) return;
+    if (lastSentRef.current === trimmed) return;
+    refine("");
+    if (inputRef.current) {
+      inputRef.current.value = "";
+      inputRef.current.focus();
+    }
+    sendMessage({ text: trimmed });
+    lastSentRef.current = trimmed;
+  }, [showChat, query, inputRef, sendMessage, refine]);
+
   if (showChat) {
     return (
       <ChatWidget
-        initialQuestion={initialQuestion}
-        inputRef={inputRef}
-        config={config}
+        messages={messages as unknown as Message[]}
+        error={error as Error | null}
+        isGenerating={isGenerating}
+        applicationId={config.applicationId}
+        assistantId={config.assistantId}
       />
     );
   }
@@ -178,8 +201,7 @@ const ResultsPanel = memo(function ResultsPanel({
       {/** biome-ignore lint/a11y/useSemanticElements: . */}
       <div ref={containerRef} className="ss-hits-container" role="listbox">
         <HitsList
-          // biome-ignore lint/suspicious/noExplicitAny: too ambiguous
-          hits={items as any[]}
+          hits={items as unknown[]}
           query={query}
           selectedIndex={selectedIndex}
           onAskAI={() => setShowChat(true)}
@@ -191,7 +213,7 @@ const ResultsPanel = memo(function ResultsPanel({
 
 interface SearchModalProps {
   onClose?: () => void;
-  config: SearchExperienceConfig;
+  config: SearchWithAskAIConfig;
 }
 
 export function SearchModal({ onClose, config }: SearchModalProps) {
@@ -200,13 +222,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
 
   const results = useInstantSearch();
   const { items } = useHits();
-  const {
-    showChat,
-    initialQuestion,
-    setShowChat,
-    setInitialQuestion,
-    handleShowChat,
-  } = useSearchState();
+  const { showChat, setShowChat, handleShowChat } = useSearchState();
 
   const noResults = results.results?.nbHits === 0;
   const { selectedIndex, moveDown, moveUp, activateSelection } =
@@ -215,12 +231,12 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
   const handleActivateSelection = useCallback((): boolean => {
     if (activateSelection()) {
       if (selectedIndex === 0) {
-        handleShowChat(true, query);
+        handleShowChat(true);
       }
       return true;
     }
     return false;
-  }, [activateSelection, selectedIndex, query, handleShowChat]);
+  }, [activateSelection, selectedIndex, handleShowChat]);
 
   const showResultsPanel = (!noResults && !!query) || showChat;
 
@@ -235,11 +251,18 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
           refine={refine}
           showChat={showChat}
           setShowChat={setShowChat}
-          setInitialQuestion={setInitialQuestion}
           onClose={onClose}
           onArrowDown={moveDown}
           onArrowUp={moveUp}
-          onEnter={handleActivateSelection}
+          onEnter={(value) => {
+            const trimmed = (value ?? "").trim();
+            if (showChat && trimmed) {
+              // Trigger send via ResultsPanel effect
+              refine(trimmed);
+              return true;
+            }
+            return handleActivateSelection();
+          }}
           inputRef={inputRef}
         />
         {showResultsPanel && (
@@ -248,10 +271,8 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             inputRef={inputRef}
             setShowChat={(v) => {
               setShowChat(v);
-              if (v) setInitialQuestion(query);
             }}
             query={query}
-            initialQuestion={initialQuestion}
             selectedIndex={selectedIndex}
             refine={refine}
             config={config}
@@ -262,7 +283,6 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             query={query}
             onAskAI={() => {
               setShowChat(true);
-              setInitialQuestion(query);
             }}
             onClear={() => refine("")}
           />
@@ -342,7 +362,7 @@ const Footer = memo(function Footer({ showChat }: { showChat: boolean }) {
   );
 });
 
-export default function SearchExperience(config: SearchExperienceConfig) {
+export default function SearchExperience(config: SearchWithAskAIConfig) {
   const searchClient = algoliasearch(config.applicationId, config.apiKey);
   const [isModalOpen, setIsModalOpen] = useState(false);
 

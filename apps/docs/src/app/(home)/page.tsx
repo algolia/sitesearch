@@ -1,3 +1,5 @@
+import Link from "fumadocs-core/link";
+
 export default function HomePage() {
   return (
     <main className="flex flex-1 flex-col justify-center items-center text-center">
@@ -9,13 +11,13 @@ export default function HomePage() {
         Opinionated site search experiences built with Algolia by Algolia.
       </p>
       <div className="flex justify-center items-center gap-8 mt-8">
-        <button type="button">Get started</button>
-        <button
-          type="button"
+        <Link href="/docs/quickstart">Get started</Link>
+        <Link
+          href="/docs/experiences"
           className="bg-fd-primary text-white px-4 py-2 rounded-md"
         >
           View Experiences
-        </button>
+        </Link>
       </div>
     </main>
   );

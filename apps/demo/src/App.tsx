@@ -1,5 +1,5 @@
 import { Sidepanel } from "@algolia/sidepanel-react";
-import { SiteSearchExperience } from "@algolia/sitesearch-react";
+import { SearchWithAskAI } from "@algolia/sitesearch-react";
 import "@algolia/sidepanel-react/dist/sidepanel.css";
 import "@algolia/sitesearch-react/dist/sitesearch.css";
 import "./App.css";
@@ -24,7 +24,7 @@ function App() {
               className="demo-widget"
               style={{ display: "flex", gap: 12, alignItems: "center" }}
             >
-              <SiteSearchExperience
+              <SearchWithAskAI
                 applicationId="betaHAXPMHIMMC"
                 apiKey="8b00405cba281a7d800ccec393e9af24"
                 indexName="algolia_podcast_sample_dataset"
@@ -55,7 +55,7 @@ function App() {
 
       <footer className="footer">
         <p>
-          Built with ❤️ by Algolia.
+          Built with 💙 by Algolia.
           <a
             href="https://github.com/algolia/sitesearch"
             target="_blank"

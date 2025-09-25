@@ -29,6 +29,8 @@
       "name": "docs",
       "version": "0.0.0",
       "dependencies": {
+        "@algolia/sidepanel-react": "workspace:*",
+        "@algolia/sitesearch-react": "workspace:*",
         "fumadocs-core": "15.7.13",
         "fumadocs-mdx": "11.10.1",
         "fumadocs-ui": "15.7.13",

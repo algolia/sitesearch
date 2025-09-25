@@ -33,11 +33,11 @@ npm install @ai-sdk/react ai algoliasearch react-instantsearch marked
 ### 3. Use in Your Project
 
 ```tsx
-import { SiteSearchExperience } from './components/sitesearch';
+import { SearchWithAskAI } from './components/sitesearch';
 
 function App() {
   return (
-    <SiteSearchExperience
+    <SearchWithAskAI
       applicationId="YOUR_APP_ID"
       apiKey="YOUR_API_KEY"
       indexName="YOUR_INDEX_NAME"
@@ -52,14 +52,14 @@ That's it! No complex setup, no configuration files, no build processes.
 
 ## Available Components
 
-### SiteSearchExperience
+### SearchWithAskAI
 
 The main search experience component with modal, keyboard shortcuts, and AI chat.
 
 ```tsx
-import { SiteSearchExperience } from './sitesearch-experience';
+import { SearchWithAskAI } from './sitesearch-experience';
 
-<SiteSearchExperience
+<SearchWithAskAI
   applicationId="latency"
   apiKey="6be0576ff61c053d5f9a3225e2a90f76"
   indexName="instant_search"
@@ -111,7 +111,7 @@ All components use CSS custom properties for easy theming:
 ### Copy Component Code
 
 1. Go to [StackBlitz](https://stackblitz.com/~/github.com/algolia/sitesearch)
-2. Navigate to `src/experiences/sitesearch/`
+2. Navigate to `src/experiences/`
 3. Copy the component files you need
 4. Paste into your project
 
@@ -152,9 +152,9 @@ Each component can be used independently:
 ### Basic Search
 
 ```tsx
-import { SiteSearchExperience } from './sitesearch-experience';
+import { SearchWithAskAI } from './sitesearch-experience';
 
-<SiteSearchExperience
+<SearchWithAskAI
   applicationId="YOUR_APP_ID"
   apiKey="YOUR_SEARCH_KEY"
   indexName="your_index"
@@ -167,7 +167,7 @@ import { SiteSearchExperience } from './sitesearch-experience';
 ```tsx
 import './custom-sitesearch.css';
 
-<SiteSearchExperience
+<SearchWithAskAI
   applicationId="YOUR_APP_ID"
   apiKey="YOUR_SEARCH_KEY"
   indexName="your_index"

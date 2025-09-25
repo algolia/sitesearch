@@ -59,10 +59,7 @@ export function PanelHeader({
             aria-label="More actions"
             title="More actions"
           >
-            <MoreActionsIcon
-              size={16}
-              color={expanded ? "var(--sp-primary)" : "currentColor"}
-            />
+            <MoreActionsIcon size={16} />
           </button>
           {menuOpen && (
             <div role="menu" className="sp-header-menu">
@@ -75,10 +72,10 @@ export function PanelHeader({
                 }}
                 role="menuitem"
               >
-                <NewConversationIcon size={16} color="currentColor" />
+                <NewConversationIcon size={16} />
                 Start a new conversation
               </button>
-              <button
+              {/* <button
                 className="sp-header-menu-item"
                 type="button"
                 onClick={() => {
@@ -87,9 +84,9 @@ export function PanelHeader({
                 }}
                 role="menuitem"
               >
-                <HistoryIcon size={16} color="currentColor" />
+                <HistoryIcon size={16} />
                 Conversation history
-              </button>
+              </button> */}
             </div>
           )}
         </div>

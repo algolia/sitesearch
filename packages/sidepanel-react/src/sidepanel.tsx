@@ -178,7 +178,7 @@ export function Sidepanel({ ...props }: SidepanelProps) {
         aria-controls="sp-panel"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {props.icon ?? <SparklesPlainIcon color="var(--sp-secondary)" />}
+        {props.icon ?? <SparklesPlainIcon />}
       </button>
 
       <aside

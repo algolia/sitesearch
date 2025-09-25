@@ -1,14 +1,7 @@
-import { type UIMessage, useChat } from "@ai-sdk/react";
-import {
-  DefaultChatTransport,
-  lastAssistantMessageIsCompleteWithToolCalls,
-  type UIDataTypes,
-  type UIMessagePart,
-} from "ai";
-import type React from "react";
+import type { UIMessage } from "@ai-sdk/react";
+import type { UIDataTypes, UIMessagePart } from "ai";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchBox } from "react-instantsearch";
-import { getValidToken } from "./askai";
+import { postFeedback } from "./askai";
 import {
   BrainIcon,
   CheckIcon,
@@ -31,27 +24,17 @@ function useClipboard() {
   return { copyText };
 }
 
-function useKeyboardListener(
-  callback: (e: KeyboardEvent) => void,
-  dependencies: React.DependencyList,
-) {
-  useEffect(() => {
-    document.addEventListener("keydown", callback);
-    return () => document.removeEventListener("keydown", callback);
-    // biome-ignore lint/correctness/useExhaustiveDependencies: passed by param
-  }, dependencies);
-}
+// keyboard listener not needed: input handled in parent
 
 interface ChatWidgetProps {
-  initialQuestion?: string;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  config: {
-    applicationId: string;
-    apiKey: string;
-    indexName: string;
-    assistantId: string;
-    baseAskaiUrl?: string;
-  };
+  messages: Message[];
+  error: Error | null;
+  isGenerating: boolean;
+  onCopy?: (text: string) => Promise<void> | void;
+  onThumbsUp?: (userMessageId: string) => Promise<void> | void;
+  onThumbsDown?: (userMessageId: string) => Promise<void> | void;
+  applicationId: string;
+  assistantId: string;
 }
 
 export interface SearchIndexTool {
@@ -87,43 +70,24 @@ interface Exchange {
 }
 
 export const ChatWidget = memo(function ChatWidget({
-  initialQuestion,
-  inputRef,
-  config,
+  messages,
+  error,
+  isGenerating,
+  onCopy,
+  onThumbsUp,
+  onThumbsDown,
+  applicationId,
+  assistantId,
 }: ChatWidgetProps) {
   const { copyText } = useClipboard();
-  const { refine } = useSearchBox();
   const [copiedExchangeId, setCopiedExchangeId] = useState<string | null>(null);
   const copyResetTimeoutRef = useRef<number | null>(null);
-
-  const baseUrl = config.baseAskaiUrl || "https://beta-askai.algolia.com";
-  const transport = new DefaultChatTransport({
-    api: `${baseUrl}/chat`,
-    headers: async () => {
-      const token = await getValidToken({ assistantId: config.assistantId });
-      return {
-        "x-algolia-api-key": config.apiKey,
-        "x-algolia-application-id": config.applicationId,
-        "x-algolia-index-name": config.indexName,
-        "x-algolia-assistant-id": config.assistantId,
-        "x-ai-sdk-version": "v5",
-        authorization: `TOKEN ${token}`,
-      };
-    },
-  });
-
-  const { messages, sendMessage, status, error } = useChat({
-    transport,
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    async onToolCall({ toolCall }) {
-      if (toolCall.dynamic) {
-        return;
-      }
-    },
-  });
-
-  const [lastSentQuery, setLastSentQuery] = useState("");
-  const hasAutoSent = useRef(false);
+  const [acknowledgedExchangeIds, setAcknowledgedExchangeIds] = useState<
+    Set<string>
+  >(new Set());
+  const [submittingExchangeId, setSubmittingExchangeId] = useState<
+    string | null
+  >(null);
 
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
@@ -153,49 +117,6 @@ export const ChatWidget = memo(function ChatWidget({
     return grouped;
   }, [messages]);
 
-  const handleSendMessage = useCallback(
-    (text: string) => {
-      const trimmed = text.trim();
-      if (trimmed && trimmed !== lastSentQuery) {
-        sendMessage({ text: trimmed });
-        setLastSentQuery(trimmed);
-      }
-    },
-    [lastSentQuery, sendMessage],
-  );
-
-  // Auto-send initial question
-  useEffect(() => {
-    const trimmed = (initialQuestion ?? "").trim();
-    if (trimmed && !hasAutoSent.current && trimmed !== lastSentQuery) {
-      handleSendMessage(trimmed);
-      hasAutoSent.current = true;
-      refine("");
-      inputRef.current?.focus();
-      inputRef.current!.value = "";
-    }
-  }, [initialQuestion, handleSendMessage, refine, inputRef, lastSentQuery]);
-
-  // Listen for Enter key presses
-  useKeyboardListener(
-    useCallback(
-      (e: KeyboardEvent) => {
-        if (
-          e.key === "Enter" &&
-          inputRef.current?.value &&
-          inputRef.current.value.trim() !== lastSentQuery
-        ) {
-          handleSendMessage(inputRef.current.value);
-          inputRef.current!.value = "";
-        }
-      },
-      [inputRef, lastSentQuery, handleSendMessage],
-    ),
-    [inputRef, lastSentQuery, handleSendMessage],
-  );
-
-  const isGenerating = status === "submitted" || status === "streaming";
-
   // Cleanup any pending reset timers on unmount
   useEffect(() => {
     return () => {
@@ -223,7 +144,7 @@ export const ChatWidget = memo(function ChatWidget({
 
             return (
               <article key={exchange.id} className="ss-qa-card">
-                <header className="ss-qa-header">
+                <div className="ss-qa-header">
                   <div className="ss-qa-question">
                     {exchange.userMessage.parts.map((part, index) =>
                       part.type === "text" ? (
@@ -232,9 +153,9 @@ export const ChatWidget = memo(function ChatWidget({
                       ) : null,
                     )}
                   </div>
-                </header>
+                </div>
 
-                <section className="ss-qa-answer">
+                <div className="ss-qa-answer">
                   <div className="ss-qa-answer-content">
                     {exchange.assistantMessage ? (
                       <div className="ss-qa-markdown">
@@ -323,25 +244,97 @@ export const ChatWidget = memo(function ChatWidget({
                       </div>
                     )}
                   </div>
-                </section>
+                </div>
 
-                <footer className="ss-qa-actions">
-                  <button
-                    type="button"
-                    title="Like"
-                    aria-label="Like"
-                    className="ss-qa-action-btn"
-                  >
-                    <LikeIcon size={18} />
-                  </button>
-                  <button
-                    type="button"
-                    title="Dislike"
-                    aria-label="Dislike"
-                    className="ss-qa-action-btn"
-                  >
-                    <DislikeIcon size={18} />
-                  </button>
+                <div className="ss-qa-actions">
+                  {exchange.assistantMessage && !isGenerating ? (
+                    acknowledgedExchangeIds.has(exchange.id) ? (
+                      <span className="ss-qa-feedback-ack ss-fade">
+                        Thanks for your feedback!
+                      </span>
+                    ) : submittingExchangeId === exchange.id ? (
+                      <span className="ss-qa-feedback-ack ss-shimmer-text">
+                        Submitting...
+                      </span>
+                    ) : (
+                      <div className="ss-qa-actions-group">
+                        <button
+                          type="button"
+                          title="Like"
+                          aria-label="Like"
+                          className="ss-qa-action-btn"
+                          disabled={
+                            !exchange.assistantMessage ||
+                            submittingExchangeId === exchange.id
+                          }
+                          onClick={async () => {
+                            if (!exchange.assistantMessage) return;
+                            try {
+                              setSubmittingExchangeId(exchange.id);
+                              if (onThumbsUp) {
+                                await onThumbsUp(exchange.userMessage.id);
+                              } else {
+                                await postFeedback({
+                                  assistantId,
+                                  appId: applicationId,
+                                  messageId: exchange.userMessage.id,
+                                  thumbs: 1,
+                                });
+                              }
+                              setAcknowledgedExchangeIds((prev) => {
+                                const next = new Set(prev);
+                                next.add(exchange.id);
+                                return next;
+                              });
+                            } catch {
+                              // ignore errors
+                            } finally {
+                              setSubmittingExchangeId(null);
+                            }
+                          }}
+                        >
+                          <LikeIcon size={18} />
+                        </button>
+                        <button
+                          type="button"
+                          title="Dislike"
+                          aria-label="Dislike"
+                          className="ss-qa-action-btn"
+                          disabled={
+                            !exchange.assistantMessage ||
+                            submittingExchangeId === exchange.id
+                          }
+                          onClick={async () => {
+                            if (!exchange.assistantMessage) return;
+                            try {
+                              setSubmittingExchangeId(exchange.id);
+                              if (onThumbsDown) {
+                                await onThumbsDown(exchange.userMessage.id);
+                              } else {
+                                await postFeedback({
+                                  assistantId,
+                                  appId: applicationId,
+                                  messageId: exchange.userMessage.id,
+                                  thumbs: 0,
+                                });
+                              }
+                              setAcknowledgedExchangeIds((prev) => {
+                                const next = new Set(prev);
+                                next.add(exchange.id);
+                                return next;
+                              });
+                            } catch {
+                              // ignore errors
+                            } finally {
+                              setSubmittingExchangeId(null);
+                            }
+                          }}
+                        >
+                          <DislikeIcon size={18} />
+                        </button>
+                      </div>
+                    )
+                  ) : null}
                   <button
                     type="button"
                     className={`ss-qa-action-btn ${
@@ -357,16 +350,24 @@ export const ChatWidget = memo(function ChatWidget({
                         ? "Copied"
                         : "Copy answer"
                     }
-                    disabled={copiedExchangeId === exchange.id}
+                    disabled={
+                      !exchange.assistantMessage ||
+                      copiedExchangeId === exchange.id
+                    }
                     onClick={async () => {
-                      const textContent = exchange
-                        .assistantMessage!.parts.filter(
-                          (part) => part.type === "text",
-                        )
+                      const parts = exchange.assistantMessage?.parts ?? [];
+                      const textContent = parts
+                        .filter((part) => part.type === "text")
                         .map((part) => part.text)
-                        .join("");
+                        .join("")
+                        .trim();
+                      if (!textContent) return;
                       try {
-                        await copyText(textContent);
+                        if (onCopy) {
+                          await onCopy(textContent);
+                        } else {
+                          await copyText(textContent);
+                        }
                         setCopiedExchangeId(exchange.id);
                         if (copyResetTimeoutRef.current) {
                           window.clearTimeout(copyResetTimeoutRef.current);
@@ -385,7 +386,7 @@ export const ChatWidget = memo(function ChatWidget({
                       <CopyIcon size={18} />
                     )}
                   </button>
-                </footer>
+                </div>
               </article>
             );
           })}

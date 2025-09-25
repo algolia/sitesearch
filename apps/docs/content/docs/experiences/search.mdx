@@ -12,14 +12,23 @@ The `Search` experience focuses on fast retrieval, instant feedback, and sensibl
 
 ## Preview
 
-```tsx
-  Yup
-```
+<PreviewSiteSearch />
 
 ## Usage
 
 ```tsx
-  Yup
+import { SearchWithAskAI } from '@algolia/sitesearch-react';
+import '@algolia/sitesearch-react/dist/sitesearch.css';
+
+<SearchWithAskAI
+  applicationId="YOUR_APP_ID"
+  apiKey="YOUR_SEARCH_API_KEY"
+  indexName="YOUR_INDEX_NAME"
+  placeholder="Search..."
+  hitsPerPage={6}
+  keyboardShortcut="cmd+k"
+  buttonText="Search"
+/>
 ```
 
 

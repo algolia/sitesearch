@@ -1,3 +1,65 @@
+import { useChat } from "@ai-sdk/react";
+import {
+  DefaultChatTransport,
+  lastAssistantMessageIsCompleteWithToolCalls,
+} from "ai";
+import { useMemo } from "react";
+
+export interface AskAIConfig {
+  applicationId: string;
+  apiKey: string;
+  indexName: string;
+  assistantId: string;
+  baseAskaiUrl?: string;
+}
+
+export function useAskai(config: AskAIConfig) {
+  if (!config) {
+    throw new Error("config is required for useAskai");
+  }
+
+  const baseUrl = config.baseAskaiUrl || "https://beta-askai.algolia.com";
+
+  const transport = useMemo(() => {
+    return new DefaultChatTransport({
+      api: `${baseUrl}/chat`,
+      headers: async () => {
+        const token = await getValidToken({ assistantId: config.assistantId });
+        return {
+          "x-algolia-api-key": config.apiKey,
+          "x-algolia-application-id": config.applicationId,
+          "x-algolia-index-name": config.indexName,
+          "x-algolia-assistant-id": config.assistantId,
+          "x-ai-sdk-version": "v5",
+          authorization: `TOKEN ${token}`,
+        } as Record<string, string>;
+      },
+    });
+  }, [
+    baseUrl,
+    config.apiKey,
+    config.applicationId,
+    config.indexName,
+    config.assistantId,
+  ]);
+
+  const chat = useChat({
+    transport,
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    async onToolCall({ toolCall }) {
+      if (toolCall.dynamic) return;
+    },
+  });
+
+  const isGenerating =
+    chat.status === "submitted" || chat.status === "streaming";
+
+  return {
+    ...chat,
+    isGenerating,
+  };
+}
+
 const BASE_ASKAI_URL = "https://beta-askai.algolia.com";
 const TOKEN_KEY = "askai_token";
 
@@ -70,7 +132,7 @@ export const postFeedback = async ({
   const token = await getValidToken({ assistantId });
   headers.set("authorization", `TOKEN ${token}`);
 
-  return fetch(`${BASE_ASKAI_URL}/feedback`, {
+  return fetch(`${BASE_ASKAI_URL}/chat/feedback`, {
     method: "POST",
     body: JSON.stringify({
       appId,

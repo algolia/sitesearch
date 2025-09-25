@@ -1,12 +1,14 @@
-import '@/app/global.css';
-import { RootProvider } from 'fumadocs-ui/provider';
-import { Inter } from 'next/font/google';
+import "@/app/global.css";
+import "@algolia/sidepanel-react/dist/sidepanel.css";
+import "@algolia/sitesearch-react/dist/sitesearch.css";
+import { RootProvider } from "fumadocs-ui/provider";
+import { Inter } from "next/font/google";
 
 const inter = Inter({
-  subsets: ['latin'],
+  subsets: ["latin"],
 });
 
-export default function Layout({ children }: LayoutProps<'/'>) {
+export default function Layout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">

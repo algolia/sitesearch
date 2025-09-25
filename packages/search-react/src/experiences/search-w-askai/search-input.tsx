@@ -1,19 +1,18 @@
 import type React from "react";
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useInstantSearch, useSearchBox } from "react-instantsearch";
 import { ArrowLeftIcon, CloseIcon, SearchIcon } from "./icons";
 
-interface SearchInputProps {
+export interface SearchInputProps {
   placeholder?: string;
   className?: string;
   showChat: boolean;
   inputRef: React.RefObject<HTMLInputElement | null>;
   onClose: () => void;
   setShowChat: (show: boolean) => void;
-  setInitialQuestion: (question: string) => void;
   onArrowDown?: () => void;
   onArrowUp?: () => void;
-  onEnter?: () => boolean;
+  onEnter?: (value: string) => boolean;
 }
 
 const SearchLeftButton = memo(function SearchLeftButton({
@@ -64,6 +63,13 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
       refine(newQuery);
     }
   }
+
+  // Clear the input when entering chat mode
+  useEffect(() => {
+    if (props.showChat) {
+      setInputValue("");
+    }
+  }, [props.showChat]);
 
   // if showChat is true, change placeholder to "Ask AI"
   const placeholder = props.showChat
@@ -117,13 +123,15 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
           }
           if (e.key === "Enter") {
             e.preventDefault();
-            if (props.onEnter?.()) {
+            if (props.onEnter?.(inputValue)) {
+              // If handled by parent (e.g., send in chat), clear the input
+              setQuery("");
               return;
             }
             const trimmed = inputValue.trim();
             if (trimmed) {
+              // Open chat; parent will send the query
               props.setShowChat(true);
-              props.setInitialQuestion(trimmed);
             }
           }
         }}
@@ -135,6 +143,9 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
           type="reset"
           className="ss-search-clear-button"
           hidden={!inputValue || inputValue.length === 0 || isSearchStalled}
+          onClick={() => {
+            setQuery("");
+          }}
         >
           Clear
         </button>

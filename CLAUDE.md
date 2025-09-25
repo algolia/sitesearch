@@ -36,13 +36,7 @@ quick-search/
 │   ├── search-js/           # Vanilla JS implementation
 │   │   └── src/index.ts     # Main SiteSearch class
 │   └── search-react/        # React implementation
-│       └── src/experiences/sitesearch/
-│           ├── index.tsx    # Main SearchExperience component
-│           ├── search-modal.tsx
-│           ├── search-input.tsx
-│           ├── hits-list.tsx
-│           ├── chat.tsx      # AI chat functionality
-│           └── useSearchState.ts
+│       └── src/experiences/ # Search experiences
 └── apps/demo/               # Demo application
 ```
 

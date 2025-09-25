@@ -1,62 +1,62 @@
-import { SiteSearchExperience } from "@algolia/sitesearch-react";
+import { SearchWithAskAI } from "@algolia/sitesearch-react/search-w-askai/icons";
 import { render } from "preact";
 import "@algolia/sitesearch-react/dist/sitesearch.css";
 import type { SiteSearchInitOptions } from "./types";
 
 // Global API for vanilla JS usage
 class SiteSearch {
-	private static instances: Map<HTMLElement, any> = new Map();
+  private static instances: Map<HTMLElement, any> = new Map();
 
-	static init(options: SiteSearchInitOptions): void {
-		const { container, ...config } = options;
+  static init(options: SiteSearchInitOptions): void {
+    const { container, ...config } = options;
 
-		// Get container element
-		const containerElement =
-			typeof container === "string"
-				? (document.querySelector(container) as HTMLElement)
-				: container;
+    // Get container element
+    const containerElement =
+      typeof container === "string"
+        ? (document.querySelector(container) as HTMLElement)
+        : container;
 
-		if (!containerElement) {
-			throw new Error(`Container not found: ${container}`);
-		}
+    if (!containerElement) {
+      throw new Error(`Container not found: ${container}`);
+    }
 
-		// Clean up existing instance if any
-		if (SiteSearch.instances.has(containerElement)) {
-			SiteSearch.destroy(containerElement);
-		}
+    // Clean up existing instance if any
+    if (SiteSearch.instances.has(containerElement)) {
+      SiteSearch.destroy(containerElement);
+    }
 
-		// Render the React component with Preact
-		render(SiteSearchExperience(config), containerElement);
+    // Render the React component with Preact
+    render(SearchWithAskAI(config), containerElement);
 
-		// Store instance reference
-		SiteSearch.instances.set(containerElement, config);
-	}
+    // Store instance reference
+    SiteSearch.instances.set(containerElement, config);
+  }
 
-	static destroy(container: string | HTMLElement): void {
-		const containerElement =
-			typeof container === "string"
-				? (document.querySelector(container) as HTMLElement)
-				: container;
+  static destroy(container: string | HTMLElement): void {
+    const containerElement =
+      typeof container === "string"
+        ? (document.querySelector(container) as HTMLElement)
+        : container;
 
-		if (!containerElement) return;
+    if (!containerElement) return;
 
-		// Unmount component
-		render(null, containerElement);
+    // Unmount component
+    render(null, containerElement);
 
-		// Remove from instances
-		SiteSearch.instances.delete(containerElement);
-	}
+    // Remove from instances
+    SiteSearch.instances.delete(containerElement);
+  }
 
-	static destroyAll(): void {
-		SiteSearch.instances.forEach((_, container) => {
-			SiteSearch.destroy(container);
-		});
-	}
+  static destroyAll(): void {
+    SiteSearch.instances.forEach((_, container) => {
+      SiteSearch.destroy(container);
+    });
+  }
 }
 
 // Make it available globally for CDN usage
 if (typeof window !== "undefined") {
-	(window as any).SiteSearch = SiteSearch;
+  (window as any).SiteSearch = SiteSearch;
 }
 
 export default SiteSearch;

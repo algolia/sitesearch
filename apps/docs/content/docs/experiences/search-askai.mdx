@@ -14,13 +14,23 @@ Combine precise retrieval with AI summarization. `Search + AskAI` keeps traditio
 
 ## Preview
 
-```tsx
-  Yup
-```
+<PreviewSiteSearch />
 
 ## Usage
 
 ```tsx
-  Yup
+import { SearchWithAskAI } from '@algolia/sitesearch-react';
+import '@algolia/sitesearch-react/dist/sitesearch.css';
+
+<SearchWithAskAI
+  applicationId="YOUR_APP_ID"
+  apiKey="YOUR_SEARCH_API_KEY"
+  indexName="YOUR_INDEX_NAME"
+  assistantId="YOUR_ASSISTANT_ID"
+  placeholder="Search..."
+  hitsPerPage={6}
+  keyboardShortcut="cmd+k"
+  buttonText="Search"
+/>
 ```
 

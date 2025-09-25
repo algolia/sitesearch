@@ -13,12 +13,25 @@ AskAI Sidepanel lets you add conversational answers to any page without redesign
 
 ## Preview
 
-```tsx
-  Yup
-```
+<PreviewSidepanel />
 
 ## Usage
 
 ```tsx
-  Yup
+import { Sidepanel } from '@algolia/sidepanel-react';
+import '@algolia/sidepanel-react/dist/sidepanel.css';
+
+<Sidepanel
+  config={{
+    applicationId: 'YOUR_APP_ID',
+    apiKey: 'YOUR_SEARCH_API_KEY',
+    indexName: 'YOUR_INDEX_NAME',
+    assistantId: 'YOUR_ASSISTANT_ID',
+  }}
+  suggestions={[
+    'Show me trending items',
+    'Explain how billing works',
+    'Find docs about webhooks',
+  ]}
+/>
 ```
