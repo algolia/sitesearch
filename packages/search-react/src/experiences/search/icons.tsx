@@ -1,99 +1,80 @@
-import { Sidepanel } from "@algolia/sidepanel-react";
-import { Search, SearchWithAskAI } from "@algolia/sitesearch-react";
-import "@algolia/sidepanel-react/dist/sidepanel.css";
-import "@algolia/sitesearch-react/dist/sitesearch.css";
-import "./App.css";
-
-function App() {
-  return (
-    <div className="app">
-      <header>
-        <AlgoliaLogo size={124} />
-      </header>
-
-      <div className="main-container">
-        <main className="content">
-          <div>
-            <p className="hero-subtitle">Search with AskAI and SidePanel</p>
-            <p className="hero-description">
-              Try it out: <kbd>Cmd/Ctrl + K</kbd> or click the search button
-              below. <br />
-              Click the sidepanel button to open the sidepanel.
-            </p>
-            <div
-              className="demo-widget"
-              style={{ display: "flex", gap: 12, alignItems: "center" }}
-            >
-              <SearchWithAskAI
-                applicationId="betaHAXPMHIMMC"
-                apiKey="8b00405cba281a7d800ccec393e9af24"
-                indexName="algolia_podcast_sample_dataset"
-                assistantId="Z03Eno3oLaXI"
-                placeholder="Search for podcasts..."
-                hitsPerPage={6}
-                keyboardShortcut="cmd+k"
-                buttonText="🎧 Search Podcasts"
-              />
-              <Sidepanel
-                config={{
-                  applicationId: "betaHAXPMHIMMC",
-                  apiKey: "8b00405cba281a7d800ccec393e9af24",
-                  indexName: "algolia_podcast_sample_dataset",
-                  assistantId: "Z03Eno3oLaXI",
-                }}
-                suggestions={[
-                  "What are the trending podcast episodes this week?",
-                  "Show me episodes about product management",
-                  "What is the latest episode about AI?",
-                  "What is the latest episode about StartUps?",
-                ]}
-              />
-            </div>
-          </div>
-
-          <div>
-            <p className="hero-subtitle">Simple Search (No AskAI)</p>
-            <p className="hero-description">
-              Try it out: <kbd>Cmd/Ctrl + K</kbd> or click the search button
-              below. <br />
-            </p>
-            <div
-              className="demo-widget"
-              style={{ display: "flex", gap: 12, alignItems: "center" }}
-            >
-              <Search
-                applicationId="betaHAXPMHIMMC"
-                apiKey="8b00405cba281a7d800ccec393e9af24"
-                indexName="algolia_podcast_sample_dataset"
-                placeholder="Search for podcasts..."
-                hitsPerPage={6}
-                keyboardShortcut="cmd+k"
-                buttonText="🎧 Search Podcasts"
-              />
-            </div>
-          </div>
-        </main>
-      </div>
-
-      <footer className="footer">
-        <p>
-          Built with 💙 by Algolia.
-          <a
-            href="https://github.com/algolia/sitesearch"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View on GitHub
-          </a>
-        </p>
-      </footer>
-    </div>
-  );
+interface IconProps {
+  size?: number | string;
+  color?: string;
+  className?: string;
 }
 
-const AlgoliaLogo = ({ size = 150 }: { size?: number }) => (
+export const SearchIcon = ({
+  size = 24,
+  color = "currentColor",
+}: IconProps) => (
   <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill={color}
     width={size}
+    height={size}
+  >
+    <circle
+      cx="11"
+      cy="11"
+      r="8"
+      stroke={color}
+      fill="none"
+      strokeWidth="1.4"
+    />
+    <path
+      d="m21 21-4.3-4.3"
+      stroke={color}
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const ArrowLeftIcon = ({
+  size = 24,
+  color = "currentColor",
+  className,
+}: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill={color}
+    width={size}
+    height={size}
+    className={className}
+  >
+    <path
+      fill={color}
+      d="M20 11v2H8l5.5 5.5l-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5L8 11z"
+    />
+  </svg>
+);
+
+export const CloseIcon = ({ size = 24, color = "currentColor" }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    {" "}
+    <path d="M18 6 6 18" />
+    <path d="m6 6 12 12" />
+  </svg>
+);
+
+export const AlgoliaLogo = ({ size = 150 }: IconProps) => (
+  <svg
+    width="80"
+    height="24"
     aria-label="Algolia"
     role="img"
     xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +82,8 @@ const AlgoliaLogo = ({ size = 150 }: { size?: number }) => (
     style={{ maxWidth: size }}
   >
     <defs>
-      <style>{`.cls-1,.cls-2{fill:#fff}.cls-2{fill-rule:evenodd}`}</style>
+      {/* eslint-disable-nextLine @docusaurus/no-untranslated-text */}
+      <style>{`.cls-1,.cls-2{fill:#003dff}.cls-2{fillRule:evenodd}`}</style>
     </defs>
     <path
       className="cls-2"
@@ -147,4 +129,16 @@ const AlgoliaLogo = ({ size = 150 }: { size?: number }) => (
   </svg>
 );
 
-export default App;
+export const BrainIcon = ({ size = 20, color = "currentColor" }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 20 20"
+  >
+    <path
+      fill={color}
+      d="m14.878.282l.348 1.071a2.2 2.2 0 0 0 1.399 1.397l1.071.348l.021.006a.423.423 0 0 1 0 .798l-1.071.348a2.2 2.2 0 0 0-1.399 1.397l-.348 1.07a.423.423 0 0 1-.798 0l-.349-1.07a2.2 2.2 0 0 0-.532-.867a2.2 2.2 0 0 0-.866-.536l-1.071-.348a.423.423 0 0 1 0-.798l1.071-.348a2.2 2.2 0 0 0 1.377-1.397l.348-1.07a.423.423 0 0 1 .799 0m4.905 7.931l-.766-.248a1.58 1.58 0 0 1-.998-.999l-.25-.764a.302.302 0 0 0-.57 0l-.248.764a1.58 1.58 0 0 1-.984.999l-.765.248a.303.303 0 0 0 0 .57l.765.249a1.58 1.58 0 0 1 1 1.002l.248.764a.302.302 0 0 0 .57 0l.249-.764a1.58 1.58 0 0 1 .999-.999l.765-.248a.303.303 0 0 0 0-.57zM16.97 11.89a1.46 1.46 0 0 0 1.013.038q.016.158.016.32a3.25 3.25 0 0 1-2.575 3.178l-.037.185A2.973 2.973 0 0 1 10 16.678a2.973 2.973 0 0 1-5.388-1.068l-.037-.185a3.248 3.248 0 0 1-.77-6.088A2.5 2.5 0 0 1 3 7.5v-.198a2.7 2.7 0 0 1 2.169-2.646l.406-.08l.125-.628a2.423 2.423 0 0 1 4.3-1a2.4 2.4 0 0 1 .293-.318l-.033.045c-.17.24-.26.52-.26.821s.09.581.26.821q.104.147.24.265v10.445a1.973 1.973 0 0 0 3.907.387l.103-.512a.5.5 0 0 1 .392-.392l.291-.059a2.25 2.25 0 0 0 1.778-2.562M9.5 15.027V4.423a1.423 1.423 0 0 0-2.819-.279l-.19.954a.5.5 0 0 1-.393.392l-.733.147A1.7 1.7 0 0 0 4 7.302V7.5A1.5 1.5 0 0 0 5.5 9a.5.5 0 0 1 0 1h-.252a2.248 2.248 0 0 0-.441 4.451l.291.059a.5.5 0 0 1 .392.392l.103.512a1.973 1.973 0 0 0 3.907-.387"
+    />
+  </svg>
+);

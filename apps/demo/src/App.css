@@ -5,8 +5,8 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -33,7 +33,7 @@ body {
 }
 
 .hero::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -41,16 +41,13 @@ body {
   bottom: 0;
   filter: brightness(0.5);
   background-color: #e5e5f7;
-    opacity: 0.8;
-    background-image: repeating-radial-gradient(circle at 0 0, transparent 0, #e5e5f7 10px), repeating-linear-gradient(#e1e2f555, #b8b9d5);
+  opacity: 0.8;
+  background-image: repeating-radial-gradient(
+      circle at 0 0,
+      transparent 0,
+      #e5e5f7 10px
+    ), repeating-linear-gradient(#e1e2f555, #b8b9d5);
   z-index: 1;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: 800px;
-  margin: 0 auto;
 }
 
 .hero h1 {
@@ -78,7 +75,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 4px;
   padding: 0.3em 0.6em;
-  font-family: 'Monaco', 'Menlo', monospace;
+  font-family: "Monaco", "Menlo", monospace;
   font-size: 0.9em;
   backdrop-filter: blur(10px);
 }
@@ -157,6 +154,10 @@ body {
 .content {
   flex: 1;
   min-width: 0;
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* Usage section */
@@ -238,7 +239,7 @@ body {
 }
 
 .code-block code {
-  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-family: "Monaco", "Menlo", "Consolas", monospace;
   font-size: 0.9rem;
   line-height: 1.6;
 }
@@ -256,7 +257,9 @@ body {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 1.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .component-card:hover {
@@ -282,7 +285,7 @@ body {
   color: #475569;
   padding: 0.3rem 0.6rem;
   border-radius: 6px;
-  font-family: 'Monaco', 'Menlo', monospace;
+  font-family: "Monaco", "Menlo", monospace;
   font-size: 0.8rem;
   display: block;
   word-break: break-all;
@@ -312,7 +315,9 @@ body {
   border-radius: 12px;
   padding: 2rem;
   text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .philosophy-card:hover {

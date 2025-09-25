@@ -22,6 +22,9 @@
       "a11y": {
         "noSvgWithoutTitle": "off",
         "useKeyWithClickEvents": "off"
+      },
+      "performance": {
+        "noImgElement": "off"
       }
     },
     "domains": {
