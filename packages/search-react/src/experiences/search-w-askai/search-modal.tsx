@@ -34,7 +34,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
   return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div
-        className="modal-content ss-exp"
+        className="modal-content ssask-exp"
         onClick={(e) => e.stopPropagation()}
       >
         {children}

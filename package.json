@@ -7,7 +7,7 @@
     "dev": "bun --filter @algolia/sidepanel-react --filter @algolia/sitesearch-react --filter demo dev",
     "build:react": "bun --filter @algolia/sitesearch-react build && bun --filter @algolia/sidepanel-react build",
     "build:js-bundle": "bun --filter @algolia/sitesearch-react build && bun --filter @algolia/sitesearch-js build",
-    "build": "bun run build:react && bun run --filter demo build",
+    "build": "bun run build:react && bun run --filter demo build && bun run --filter docs build",
     "dev:demo": "bun --filter demo dev",
     "dev:docs": "bun --filter docs dev",
     "dev:sidepanel": "bun --filter @algolia/sidepanel-react dev",

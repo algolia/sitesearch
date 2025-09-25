@@ -5,16 +5,21 @@ export default function HomePage() {
     <main className="flex flex-1 flex-col justify-center items-center text-center">
       <IconoirInputSearch className="w-40 h-40 mb-4 text-fd-primary" />
       <h1 className="mb-4 text-5xl font-bold">
-        [Pre-built] search experiences for your site
+        Pre-built search experiences for your site
       </h1>
       <p className="text-fd-muted-foreground text-2xl">
         Opinionated site search experiences built with Algolia by Algolia.
       </p>
       <div className="flex justify-center items-center gap-8 mt-8">
-        <Link href="/docs/quickstart">Get started</Link>
         <Link
-          href="/docs/experiences"
-          className="bg-fd-primary text-white px-4 py-2 rounded-md"
+          href="/docs/quickstart"
+          className="px-4 py-2 rounded-md border border-black bg-white text-black text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
+        >
+          Get started
+        </Link>
+        <Link
+          href="/docs/experiences/search"
+          className="px-4 py-2 rounded-md border border-black bg-fd-primary text-white text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
         >
           View Experiences
         </Link>

@@ -1,7 +1,10 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
-import { PreviewSidepanel } from "@/components/PreviewSidepanel";
-import { PreviewSiteSearch } from "@/components/PreviewSiteSearch";
+import {
+  PreviewSearchNoAskAI,
+  PreviewSidepanel,
+  PreviewSiteSearch,
+} from "@/components/previews";
 
 // use this function to get MDX components, you will need it for rendering MDX
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
@@ -9,6 +12,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...defaultMdxComponents,
     PreviewSiteSearch,
     PreviewSidepanel,
+    PreviewSearchNoAskAI,
     ...components,
   };
 }
