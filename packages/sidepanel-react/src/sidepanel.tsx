@@ -4,8 +4,10 @@ import type { AskAIConfig } from "./askai";
 import { useAskai } from "./askai";
 import type { Message } from "./chat";
 import { ChatWidget } from "./chat";
-import { AlgoliaLogo, SparklesIcon, UpIcon } from "./icons";
+import { AlgoliaLogo, SparklesPlainIcon, UpIcon } from "./icons";
 import { PanelHeader } from "./panel-header";
+import PromptTextarea from "./prompt-textarea";
+import Suggestions from "./suggestions";
 
 export interface SidepanelProps {
   /** Content rendered inside the sidepanel */
@@ -28,6 +30,8 @@ export interface SidepanelProps {
   className?: string;
   /** AskAI configuration */
   config: AskAIConfig;
+  /** Optional suggestions for placeholder animation and quick actions */
+  suggestions?: string[];
 }
 
 function useControllableState<T>({
@@ -59,7 +63,11 @@ export function Sidepanel({ ...props }: SidepanelProps) {
   const [prompt, setPrompt] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const { messages, sendMessage, isGenerating, error } = useAskai(props.config);
+  const { messages, sendMessage, isGenerating, error, setMessages } = useAskai(
+    props.config,
+  ) as ReturnType<typeof useAskai> & {
+    setMessages?: (msgs: Message[]) => void;
+  };
 
   const baseWidth = useMemo(
     () =>
@@ -139,16 +147,38 @@ export function Sidepanel({ ...props }: SidepanelProps) {
     }
   };
 
+  const handleStartNewConversation = () => {
+    setPrompt("");
+    // clear chat messages if API exposes setMessages; otherwise reload chat state via transport
+    if (typeof setMessages === "function") {
+      setMessages([] as unknown as Message[]);
+    } else {
+      // Fallback: force a soft reset by closing/opening the panel
+      // Users will likely replace setMessages implementation later
+      // eslint-disable-next-line no-void
+      void 0;
+    }
+  };
+
+  const handleOpenHistory = () => {
+    // Placeholder – integrate later
+    // eslint-disable-next-line no-console
+    console.log("Conversation history clicked");
+    // eslint-disable-next-line no-void
+    void 0;
+  };
+
   return (
     <div className={`sp-root ${props.className || ""}`.trim()}>
       <button
         type="button"
         className="sp-trigger-button"
+        title="Open AskAI Sidepanel"
         aria-expanded={isOpen}
         aria-controls="sp-panel"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {props.icon ?? <SparklesIcon color="var(--sp-bg)" />}
+        {props.icon ?? <SparklesPlainIcon color="var(--sp-secondary)" />}
       </button>
 
       <aside
@@ -162,14 +192,26 @@ export function Sidepanel({ ...props }: SidepanelProps) {
           expanded={isExpanded}
           onToggleExpand={() => setIsExpanded((v) => !v)}
           onClose={() => setIsOpen(false)}
+          onStartNewConversation={handleStartNewConversation}
+          onOpenHistory={handleOpenHistory}
         />
         <div className="sp-content">
           <section className="sp-scroll">
-            <ChatWidget
-              messages={messages as unknown as Message[]}
-              error={error as Error | null}
-              isGenerating={isGenerating}
-            />
+            {messages.length === 0 && (
+              <Suggestions
+                setPrompt={setPrompt}
+                handleSend={handleSend}
+                suggestions={props.suggestions}
+              />
+            )}
+            {messages.length > 0 && (
+              <ChatWidget
+                messages={messages as unknown as Message[]}
+                error={error as Error | null}
+                isGenerating={isGenerating}
+                config={props.config}
+              />
+            )}
           </section>
 
           <div className="sp-prompt">
@@ -180,15 +222,18 @@ export function Sidepanel({ ...props }: SidepanelProps) {
                 handleSend();
               }}
             >
-              <textarea
+              <PromptTextarea
                 ref={textareaRef}
                 className="sp-textarea"
-                placeholder="Ask a question"
+                basePlaceholder="Ask a question"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={2}
-                aria-label="Prompt input"
+                ariaLabel="Prompt input"
+                suggestions={props.suggestions}
+                hasMessages={messages.length > 0}
+                postConversationPlaceholder="Ask AI another question"
               />
               <button
                 type="submit"

@@ -15,7 +15,7 @@ export const ExpandIcon = ({
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
+      stroke={color}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -28,6 +28,29 @@ export const ExpandIcon = ({
   );
 };
 
+export const MoreActionsIcon = ({
+  size = 24,
+  color = "currentColor",
+}: IconProps) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="12" cy="5" r="1" />
+      <circle cx="12" cy="19" r="1" />
+    </svg>
+  );
+};
+
 export const CloseIcon = ({ size = 24, color = "currentColor" }: IconProps) => {
   return (
     <svg
@@ -36,7 +59,7 @@ export const CloseIcon = ({ size = 24, color = "currentColor" }: IconProps) => {
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
+      stroke={color}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -166,10 +189,51 @@ export const SparklesIcon = ({ size = 24 }: IconProps) => {
   );
 };
 
-export const AlgoliaLogo = ({
-  size = 150,
+export const SparklesPlainIcon = ({
+  size = 24,
   color = "currentColor",
 }: IconProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 40 40"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M20 3.75C20.5399 3.75 21.0187 4.0966 21.1874 4.60944L24.3741 14.2978C24.476 14.6077 24.6493 14.8893 24.88 15.12C25.1107 15.3507 25.3923 15.524 25.7022 15.6259L35.3906 18.8126C35.9034 18.9813 36.25 19.4601 36.25 20C36.25 20.5399 35.9034 21.0187 35.3906 21.1874L25.7022 24.3741C25.3923 24.476 25.1107 24.6493 24.88 24.88C24.6493 25.1107 24.476 25.3923 24.3741 25.7022L21.1874 35.3906C21.0187 35.9034 20.5399 36.25 20 36.25C19.4601 36.25 18.9813 35.9034 18.8126 35.3906L15.6259 25.7022C15.524 25.3923 15.3507 25.1107 15.12 24.88C14.8893 24.6493 14.6077 24.476 14.2978 24.3741L4.60944 21.1874C4.0966 21.0187 3.75 20.5399 3.75 20C3.75 19.4601 4.0966 18.9813 4.60944 18.8126L14.2978 15.6259C14.6077 15.524 14.8893 15.3507 15.12 15.12C15.3507 14.8893 15.524 14.6077 15.6259 14.2978L18.8126 4.60944C18.9813 4.0966 19.4601 3.75 20 3.75ZM18.0008 15.0789C17.7765 15.7607 17.3953 16.3803 16.8878 16.8878C16.3803 17.3953 15.7607 17.7765 15.0789 18.0008L9.00064 20L15.0789 21.9992C15.7607 22.2235 16.3803 22.6047 16.8878 23.1122C17.3953 23.6197 17.7765 24.2393 18.0008 24.9211L20 30.9994L21.9992 24.9211C22.2235 24.2393 22.6047 23.6197 23.1122 23.1122C23.6197 22.6047 24.2393 22.2235 24.9211 21.9992L30.9994 20L24.9211 18.0008C24.2393 17.7765 23.6197 17.3953 23.1122 16.8878C22.6047 16.3803 22.2235 15.7607 21.9992 15.0789L20 9.00064L18.0008 15.0789Z"
+      fill={color}
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M8.33333 3.75C9.02369 3.75 9.58333 4.30964 9.58333 5V11.6667C9.58333 12.357 9.02369 12.9167 8.33333 12.9167C7.64298 12.9167 7.08333 12.357 7.08333 11.6667V5C7.08333 4.30964 7.64298 3.75 8.33333 3.75Z"
+      fill={color}
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M31.6667 27.0833C32.357 27.0833 32.9167 27.643 32.9167 28.3333V35C32.9167 35.6904 32.357 36.25 31.6667 36.25C30.9763 36.25 30.4167 35.6904 30.4167 35V28.3333C30.4167 27.643 30.9763 27.0833 31.6667 27.0833Z"
+      fill={color}
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M3.75 8.33333C3.75 7.64298 4.30964 7.08333 5 7.08333H11.6667C12.357 7.08333 12.9167 7.64298 12.9167 8.33333C12.9167 9.02369 12.357 9.58333 11.6667 9.58333H5C4.30964 9.58333 3.75 9.02369 3.75 8.33333Z"
+      fill={color}
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M27.0833 31.6667C27.0833 30.9763 27.643 30.4167 28.3333 30.4167H35C35.6904 30.4167 36.25 30.9763 36.25 31.6667C36.25 32.357 35.6904 32.9167 35 32.9167H28.3333C27.643 32.9167 27.0833 32.357 27.0833 31.6667Z"
+      fill={color}
+    />
+  </svg>
+);
+
+export const AlgoliaLogo = ({ size = 150 }: IconProps) => (
   <svg
     width="80"
     height="24"
@@ -248,7 +312,7 @@ export const LikeIcon = ({ size = 24, color = "currentColor" }: IconProps) => (
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
+    stroke={color}
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -268,7 +332,7 @@ export const DislikeIcon = ({
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
+    stroke={color}
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -314,7 +378,6 @@ export const CheckIcon = ({ size = 24, color = "currentColor" }: IconProps) => (
 export const SearchIcon = ({
   size = 24,
   color = "currentColor",
-  className,
 }: IconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -338,5 +401,48 @@ export const SearchIcon = ({
       strokeLinecap="round"
       strokeLinejoin="round"
     />
+  </svg>
+);
+
+export const NewConversationIcon = ({
+  size = 24,
+  color = "currentColor",
+}: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="lucide lucide-square-pen-icon lucide-square-pen"
+  >
+    <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" />
+  </svg>
+);
+
+export const HistoryIcon = ({
+  size = 24,
+  color = "currentColor",
+}: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="lucide lucide-history-icon lucide-history"
+  >
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+    <path d="M12 7v5l4 2" />
   </svg>
 );

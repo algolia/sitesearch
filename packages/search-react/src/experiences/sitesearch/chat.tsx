@@ -6,17 +6,17 @@ import {
   type UIMessagePart,
 } from "ai";
 import type React from "react";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchBox } from "react-instantsearch";
 import { getValidToken } from "./askai";
-import { BrainIcon, CheckIcon, CopyIcon, DislikeIcon, LikeIcon, SearchIcon } from "./icons";
+import {
+  BrainIcon,
+  CheckIcon,
+  CopyIcon,
+  DislikeIcon,
+  LikeIcon,
+  SearchIcon,
+} from "./icons";
 import { MemoizedMarkdown } from "./markdown";
 
 function useClipboard() {
@@ -33,7 +33,7 @@ function useClipboard() {
 
 function useKeyboardListener(
   callback: (e: KeyboardEvent) => void,
-  dependencies: React.DependencyList
+  dependencies: React.DependencyList,
 ) {
   useEffect(() => {
     document.addEventListener("keydown", callback);
@@ -60,6 +60,7 @@ export interface SearchIndexTool {
   };
   output: {
     query: string;
+    // biome-ignore lint/suspicious/noExplicitAny: too ambiguous
     hits: any[];
   };
 }
@@ -160,7 +161,7 @@ export const ChatWidget = memo(function ChatWidget({
         setLastSentQuery(trimmed);
       }
     },
-    [lastSentQuery, sendMessage]
+    [lastSentQuery, sendMessage],
   );
 
   // Auto-send initial question
@@ -188,9 +189,9 @@ export const ChatWidget = memo(function ChatWidget({
           inputRef.current!.value = "";
         }
       },
-      [inputRef, lastSentQuery, handleSendMessage]
+      [inputRef, lastSentQuery, handleSendMessage],
     ),
-    [inputRef, lastSentQuery, handleSendMessage]
+    [inputRef, lastSentQuery, handleSendMessage],
   );
 
   const isGenerating = status === "submitted" || status === "streaming";
@@ -228,7 +229,7 @@ export const ChatWidget = memo(function ChatWidget({
                       part.type === "text" ? (
                         // biome-ignore lint/suspicious/noArrayIndexKey: better
                         <span key={index}>{part.text}</span>
-                      ) : null
+                      ) : null,
                     )}
                   </div>
                 </header>
@@ -256,7 +257,10 @@ export const ChatWidget = memo(function ChatWidget({
                             return (
                               // biome-ignore lint/suspicious/noArrayIndexKey: better
                               <p className="ss-tool-info" key={`${index}`}>
-                                <BrainIcon /> <span className="ss-shimmer-text">Reasoning...</span>
+                                <BrainIcon />{" "}
+                                <span className="ss-shimmer-text">
+                                  Reasoning...
+                                </span>
                               </p>
                             );
                           } else if (part.type === "tool-searchIndex") {
@@ -264,7 +268,10 @@ export const ChatWidget = memo(function ChatWidget({
                               return (
                                 // biome-ignore lint/suspicious/noArrayIndexKey: better
                                 <p className="ss-tool-info" key={`${index}`}>
-                                  <SearchIcon size={18} /> <span className="ss-shimmer-text">Searching...</span>
+                                  <SearchIcon size={18} />{" "}
+                                  <span className="ss-shimmer-text">
+                                    Searching...
+                                  </span>
                                 </p>
                               );
                             } else if (part.state === "input-available") {
@@ -286,7 +293,10 @@ export const ChatWidget = memo(function ChatWidget({
                                 <p className="ss-tool-info" key={`${index}`}>
                                   <SearchIcon size={18} />{" "}
                                   <span>
-                                    Searched for <mark>&quot;{part.output?.query}&quot;</mark> {" "}
+                                    Searched for{" "}
+                                    <mark>
+                                      &quot;{part.output?.query}&quot;
+                                    </mark>{" "}
                                     found {part.output?.hits.length || "no"}{" "}
                                     results
                                   </span>
@@ -316,26 +326,42 @@ export const ChatWidget = memo(function ChatWidget({
                 </section>
 
                 <footer className="ss-qa-actions">
-                  <button className="ss-qa-action-btn">
+                  <button
+                    type="button"
+                    title="Like"
+                    aria-label="Like"
+                    className="ss-qa-action-btn"
+                  >
                     <LikeIcon size={18} />
                   </button>
-                  <button className="ss-qa-action-btn">
+                  <button
+                    type="button"
+                    title="Dislike"
+                    aria-label="Dislike"
+                    className="ss-qa-action-btn"
+                  >
                     <DislikeIcon size={18} />
                   </button>
                   <button
-                    className={`ss-qa-action-btn ${copiedExchangeId === exchange.id ? "is-copied" : ""
-                      }`}
+                    type="button"
+                    className={`ss-qa-action-btn ${
+                      copiedExchangeId === exchange.id ? "is-copied" : ""
+                    }`}
                     aria-label={
-                      copiedExchangeId === exchange.id ? "Copied" : "Copy answer"
+                      copiedExchangeId === exchange.id
+                        ? "Copied"
+                        : "Copy answer"
                     }
                     title={
-                      copiedExchangeId === exchange.id ? "Copied" : "Copy answer"
+                      copiedExchangeId === exchange.id
+                        ? "Copied"
+                        : "Copy answer"
                     }
                     disabled={copiedExchangeId === exchange.id}
                     onClick={async () => {
                       const textContent = exchange
                         .assistantMessage!.parts.filter(
-                          (part) => part.type === "text"
+                          (part) => part.type === "text",
                         )
                         .map((part) => part.text)
                         .join("");

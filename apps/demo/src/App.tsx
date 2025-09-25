@@ -41,6 +41,12 @@ function App() {
                   indexName: "algolia_podcast_sample_dataset",
                   assistantId: "Z03Eno3oLaXI",
                 }}
+                suggestions={[
+                  "What are the trending podcast episodes this week?",
+                  "Show me episodes about product management",
+                  "What is the latest episode about AI?",
+                  "What is the latest episode about StartUps?",
+                ]}
               />
             </div>
           </div>

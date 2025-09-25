@@ -1,7 +1,7 @@
-import type React from 'react';
-import { memo, useState } from 'react';
-import { useInstantSearch, useSearchBox } from 'react-instantsearch';
-import { ArrowLeftIcon, CloseIcon, SearchIcon } from './icons';
+import type React from "react";
+import { memo, useState } from "react";
+import { useInstantSearch, useSearchBox } from "react-instantsearch";
+import { ArrowLeftIcon, CloseIcon, SearchIcon } from "./icons";
 
 interface SearchInputProps {
   placeholder?: string;
@@ -18,7 +18,7 @@ interface SearchInputProps {
 
 const SearchLeftButton = memo(function SearchLeftButton({
   showChat,
-  setShowChat
+  setShowChat,
 }: {
   showChat: boolean;
   setShowChat: (show: boolean) => void;
@@ -26,6 +26,7 @@ const SearchLeftButton = memo(function SearchLeftButton({
   if (showChat) {
     return (
       <button
+        type="button"
         onClick={() => setShowChat(false)}
         className="ss-search-left-button"
         aria-label="Back to search"
@@ -38,6 +39,8 @@ const SearchLeftButton = memo(function SearchLeftButton({
 
   return (
     <div
+      // biome-ignore lint/a11y/useSemanticElements: hand crafted
+      role="button"
       tabIndex={-1}
       className="ss-search-left-button"
       aria-label="Search"
@@ -51,9 +54,9 @@ const SearchLeftButton = memo(function SearchLeftButton({
 export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
   const { status } = useInstantSearch();
   const { query, refine } = useSearchBox();
-  const [inputValue, setInputValue] = useState(query || '');
+  const [inputValue, setInputValue] = useState(query || "");
 
-  const isSearchStalled = status === 'stalled';
+  const isSearchStalled = status === "stalled";
 
   function setQuery(newQuery: string) {
     setInputValue(newQuery);
@@ -63,13 +66,13 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
   }
 
   // if showChat is true, change placeholder to "Ask AI"
-  const placeholder = props.showChat ? "Ask AI anything about Algolia" : props.placeholder;
+  const placeholder = props.showChat
+    ? "Ask AI anything about Algolia"
+    : props.placeholder;
 
   return (
-    <form
-      role="search"
+    <search
       className={props.className}
-      noValidate
       onSubmit={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -78,13 +81,16 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
         event.preventDefault();
         event.stopPropagation();
 
-        setQuery('');
+        setQuery("");
         if (props.inputRef.current) {
           props.inputRef.current.focus();
         }
       }}
     >
-      <SearchLeftButton showChat={props.showChat} setShowChat={props.setShowChat} />
+      <SearchLeftButton
+        showChat={props.showChat}
+        setShowChat={props.setShowChat}
+      />
       <input
         ref={props.inputRef}
         autoComplete="off"
@@ -99,17 +105,17 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
           setQuery(event.currentTarget.value);
         }}
         onKeyDown={(e) => {
-          if (e.key === 'ArrowDown') {
+          if (e.key === "ArrowDown") {
             e.preventDefault();
             props.onArrowDown?.();
             return;
           }
-          if (e.key === 'ArrowUp') {
+          if (e.key === "ArrowUp") {
             e.preventDefault();
             props.onArrowUp?.();
             return;
           }
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             e.preventDefault();
             if (props.onEnter?.()) {
               return;
@@ -121,6 +127,7 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
             }
           }
         }}
+        // biome-ignore lint/a11y/noAutofocus: expected
         autoFocus
       />
       <div className="ss-search-action-buttons-container">
@@ -131,10 +138,14 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
         >
           Clear
         </button>
-        <button className="ss-search-close-button" onClick={props.onClose}>
+        <button
+          type="button"
+          className="ss-search-close-button"
+          onClick={props.onClose}
+        >
           <CloseIcon />
         </button>
       </div>
-    </form>
+    </search>
   );
 });

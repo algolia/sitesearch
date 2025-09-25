@@ -1,20 +1,26 @@
 import { useMemo } from "react";
 
+export interface SuggestionsProps {
+  setPrompt: (text: string) => void;
+  handleSend: () => void;
+  suggestions?: string[];
+}
+
+const DEFAULT_SUGGESTIONS = [
+  "Show me the latest SDK release notes",
+  "List all error codes and what they mean",
+  "How do I authenticate with the API?",
+  "Walk me through adding a custom integration.",
+];
+
 const Suggestions = ({
   setPrompt,
   handleSend,
-}: {
-  setPrompt: (text: string) => void;
-  handleSend: () => void;
-}) => {
+  suggestions: external,
+}: SuggestionsProps) => {
   const suggestions = useMemo(
-    () => [
-      "Show me the latest SDK release notes",
-      "List all error codes and what they mean",
-      "How do I authenticate with the API?",
-      "Walk me through adding a custom integration.",
-    ],
-    [],
+    () => (external && external.length > 0 ? external : DEFAULT_SUGGESTIONS),
+    [external],
   );
   const handleSuggestion = (text: string) => {
     setPrompt(text);

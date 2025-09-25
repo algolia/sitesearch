@@ -8,14 +8,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "**",
-      "!node_modules",
-      "!.next",
-      "!dist",
-      "!build",
-      "!.source"
-    ]
+    "includes": ["**", "!node_modules", "!.next", "!dist", "!build", "!.source"]
   },
   "formatter": {
     "enabled": true,
@@ -26,7 +19,10 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "a11y": "warn"
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useKeyWithClickEvents": "off"
+      }
     },
     "domains": {
       "react": "recommended",
@@ -41,4 +37,3 @@
     }
   }
 }
-

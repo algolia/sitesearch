@@ -1,5 +1,3 @@
-import React, { ReactNode } from "react";
-
 interface IconProps {
   size?: number | string;
   color?: string;
@@ -13,7 +11,7 @@ export const LikeIcon = ({ size = 24, color = "currentColor" }: IconProps) => (
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
+    stroke={color}
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -33,7 +31,7 @@ export const DislikeIcon = ({
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
+    stroke={color}
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -161,7 +159,6 @@ export const SparklesIcon = ({ size = 24 }: IconProps) => (
 export const SearchIcon = ({
   size = 24,
   color = "currentColor",
-  className,
 }: IconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -202,7 +199,7 @@ export const ArrowLeftIcon = ({
     className={className}
   >
     <path
-      fill="currentColor"
+      fill={color}
       d="M20 11v2H8l5.5 5.5l-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5L8 11z"
     />
   </svg>
@@ -226,10 +223,7 @@ export const CloseIcon = ({ size = 24, color = "currentColor" }: IconProps) => (
   </svg>
 );
 
-export const AlgoliaLogo = ({
-  size = 150,
-  color = "currentColor",
-}: IconProps) => (
+export const AlgoliaLogo = ({ size = 150 }: IconProps) => (
   <svg
     width="80"
     height="24"

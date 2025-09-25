@@ -67,7 +67,7 @@ const SearchBox = memo(function SearchBox(props: SearchBoxProps) {
       inputRef={props.inputRef}
       setShowChat={props.setShowChat}
       setInitialQuestion={props.setInitialQuestion}
-      onClose={props.onClose || (() => { })}
+      onClose={props.onClose || (() => {})}
       onArrowDown={props.onArrowDown}
       onArrowUp={props.onArrowUp}
       onEnter={props.onEnter}
@@ -75,26 +75,45 @@ const SearchBox = memo(function SearchBox(props: SearchBoxProps) {
   );
 });
 
-
-
 interface NoResultsProps {
   query: string;
   onAskAI: () => void;
   onClear: () => void;
 }
 
-const NoResults = memo(function NoResults({ query, onAskAI, onClear }: NoResultsProps) {
+const NoResults = memo(function NoResults({
+  query,
+  onAskAI,
+  onClear,
+}: NoResultsProps) {
   return (
     <div className="ss-no-results">
-      <div className="ss-no-results-icon"><SearchIcon /></div>
+      <div className="ss-no-results-icon">
+        <SearchIcon />
+      </div>
       <p className="ss-no-results-title">No results for "{query}"</p>
-      <p className="ss-no-results-subtitle">Try a different query or ask AI to help.</p>
+      <p className="ss-no-results-subtitle">
+        Try a different query or ask AI to help.
+      </p>
       <div className="ss-no-results-actions">
-        <button className="ss-no-results-btn" onClick={onAskAI}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="m6.8 13l2.9 2.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275l-4.6-4.6q-.15-.15-.213-.325T3.426 12t.063-.375t.212-.325l4.6-4.6q.275-.275.7-.275t.7.275t.275.7t-.275.7L6.8 11H19V8q0-.425.288-.712T20 7t.713.288T21 8v3q0 .825-.587 1.413T19 13z" /></svg>
+        <button type="button" className="ss-no-results-btn" onClick={onAskAI}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+          >
+            <title>Ask AI</title>
+            <path
+              fill="currentColor"
+              d="m6.8 13l2.9 2.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275l-4.6-4.6q-.15-.15-.213-.325T3.426 12t.063-.375t.212-.325l4.6-4.6q.275-.275.7-.275t.7.275t.275.7t-.275.7L6.8 11H19V8q0-.425.288-.712T20 7t.713.288T21 8v3q0 .825-.587 1.413T19 13z"
+            />
+          </svg>
           Ask AI
         </button>
-        <button className="ss-no-results-btn" onClick={onClear}>Clear</button>
+        <button type="button" className="ss-no-results-btn" onClick={onClear}>
+          Clear
+        </button>
       </div>
     </div>
   );
@@ -111,7 +130,15 @@ interface ResultsPanelProps {
   config: SearchExperienceConfig;
 }
 
-const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowChat, query, initialQuestion, selectedIndex, config }: ResultsPanelProps) {
+const ResultsPanel = memo(function ResultsPanel({
+  showChat,
+  inputRef,
+  setShowChat,
+  query,
+  initialQuestion,
+  selectedIndex,
+  config,
+}: ResultsPanelProps) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -120,7 +147,9 @@ const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowCha
     if (showChat) return;
     const container = containerRef.current;
     if (!container) return;
-    const selectedEl = container.querySelector('[aria-selected="true"]') as HTMLElement | null;
+    const selectedEl = container.querySelector(
+      '[aria-selected="true"]',
+    ) as HTMLElement | null;
     if (!selectedEl) return;
 
     const padding = 8;
@@ -128,20 +157,28 @@ const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowCha
     const iRect = selectedEl.getBoundingClientRect();
 
     if (iRect.top < cRect.top + padding) {
-      container.scrollTop -= (cRect.top + padding - iRect.top);
+      container.scrollTop -= cRect.top + padding - iRect.top;
     } else if (iRect.bottom > cRect.bottom - padding) {
-      container.scrollTop += (iRect.bottom - (cRect.bottom - padding));
+      container.scrollTop += iRect.bottom - (cRect.bottom - padding);
     }
   }, [selectedIndex, showChat, items.length]);
 
   if (showChat) {
-    return <ChatWidget initialQuestion={initialQuestion} inputRef={inputRef} config={config} />;
+    return (
+      <ChatWidget
+        initialQuestion={initialQuestion}
+        inputRef={inputRef}
+        config={config}
+      />
+    );
   }
 
   return (
     <>
+      {/** biome-ignore lint/a11y/useSemanticElements: . */}
       <div ref={containerRef} className="ss-hits-container" role="listbox">
         <HitsList
+          // biome-ignore lint/suspicious/noExplicitAny: too ambiguous
           hits={items as any[]}
           query={query}
           selectedIndex={selectedIndex}
@@ -151,8 +188,6 @@ const ResultsPanel = memo(function ResultsPanel({ showChat, inputRef, setShowCha
     </>
   );
 });
-
-
 
 interface SearchModalProps {
   onClose?: () => void;
@@ -165,10 +200,17 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
 
   const results = useInstantSearch();
   const { items } = useHits();
-  const { showChat, initialQuestion, setShowChat, setInitialQuestion, handleShowChat } = useSearchState();
+  const {
+    showChat,
+    initialQuestion,
+    setShowChat,
+    setInitialQuestion,
+    handleShowChat,
+  } = useSearchState();
 
   const noResults = results.results?.nbHits === 0;
-  const { selectedIndex, moveDown, moveUp, activateSelection } = useKeyboardNavigation(showChat, items, query);
+  const { selectedIndex, moveDown, moveUp, activateSelection } =
+    useKeyboardNavigation(showChat, items, query);
 
   const handleActivateSelection = useCallback((): boolean => {
     if (activateSelection()) {
@@ -226,40 +268,79 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
           />
         )}
       </div>
-      <Footer showResultsPanel={showResultsPanel} showChat={showChat} />
+      <Footer showChat={showChat} />
     </>
   );
 }
 
-const Footer = memo(function Footer({ showResultsPanel, showChat }: { showResultsPanel: boolean, showChat: boolean }) {
+const Footer = memo(function Footer({ showChat }: { showChat: boolean }) {
   return (
     <div className="ss-footer">
       <div className="ss-footer-left">
         <div className="ss-footer-kbd-group">
-          <kbd className="ss-kbd"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="m6.8 13l2.9 2.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275l-4.6-4.6q-.15-.15-.213-.325T3.426 12t.063-.375t.212-.325l4.6-4.6q.275-.275.7-.275t.7.275t.275.7t-.275.7L6.8 11H19V8q0-.425.288-.712T20 7t.713.288T21 8v3q0 .825-.587 1.413T19 13z" /></svg></kbd>
+          <kbd className="ss-kbd">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="m6.8 13l2.9 2.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275l-4.6-4.6q-.15-.15-.213-.325T3.426 12t.063-.375t.212-.325l4.6-4.6q.275-.275.7-.275t.7.275t.275.7t-.275.7L6.8 11H19V8q0-.425.288-.712T20 7t.713.288T21 8v3q0 .825-.587 1.413T19 13z"
+              />
+            </svg>
+          </kbd>
           <span>{showChat ? "Ask question" : "Open"}</span>
         </div>
 
         <div className="ss-footer-kbd-group">
-          <kbd className="ss-kbd"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="m11 7.825l-4.9 4.9q-.3.3-.7.288t-.7-.313q-.275-.3-.288-.7t.288-.7l6.6-6.6q.15-.15.325-.212T12 4.425t.375.063t.325.212l6.6 6.6q.275.275.275.688t-.275.712q-.3.3-.712.3t-.713-.3L13 7.825V19q0 .425-.288.713T12 20t-.712-.288T11 19z" /></svg></kbd>
-          <kbd className="ss-kbd"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M11 16.175V5q0-.425.288-.712T12 4t.713.288T13 5v11.175l4.9-4.9q.3-.3.7-.288t.7.313q.275.3.287.7t-.287.7l-6.6 6.6q-.15.15-.325.213t-.375.062t-.375-.062t-.325-.213l-6.6-6.6q-.275-.275-.275-.687T4.7 11.3q.3-.3.713-.3t.712.3z" /></svg></kbd>
+          <kbd className="ss-kbd">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="m11 7.825l-4.9 4.9q-.3.3-.7.288t-.7-.313q-.275-.3-.288-.7t.288-.7l6.6-6.6q.15-.15.325-.212T12 4.425t.375.063t.325.212l6.6 6.6q.275.275.275.688t-.275.712q-.3.3-.712.3t-.713-.3L13 7.825V19q0 .425-.288.713T12 20t-.712-.288T11 19z"
+              />
+            </svg>
+          </kbd>
+          <kbd className="ss-kbd">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M11 16.175V5q0-.425.288-.712T12 4t.713.288T13 5v11.175l4.9-4.9q.3-.3.7-.288t.7.313q.275.3.287.7t-.287.7l-6.6 6.6q-.15.15-.325.213t-.375.062t-.375-.062t-.325-.213l-6.6-6.6q-.275-.275-.275-.687T4.7 11.3q.3-.3.713-.3t.712.3z"
+              />
+            </svg>
+          </kbd>
           <span>Navigate</span>
         </div>
       </div>
       <div className="ss-footer-right">
-        {/* 🚧 DO NOT REMOVE the logo if you are on a Free plan 
-        * https://support.algolia.com/hc/en-us/articles/17226079853073-Is-displaying-the-Algolia-logo-required
-        */}
-        <a className="ss-footer-powered-by" href="https://www.algolia.com" target="_blank" rel="noopener quicksearch">
+        {/* 🚧 DO NOT REMOVE the logo if you are on a Free plan
+         * https://support.algolia.com/hc/en-us/articles/17226079853073-Is-displaying-the-Algolia-logo-required
+         */}
+        <a
+          className="ss-footer-powered-by"
+          href="https://www.algolia.com"
+          target="_blank"
+          rel="noopener quicksearch"
+        >
           <span>Powered by </span>
           <AlgoliaLogo />
         </a>
       </div>
     </div>
-
   );
 });
-
 
 export default function SearchExperience(config: SearchExperienceConfig) {
   const searchClient = algoliasearch(config.applicationId, config.apiKey);
@@ -275,9 +356,12 @@ export default function SearchExperience(config: SearchExperienceConfig) {
   // biome-ignore lint/correctness/useExhaustiveDependencies: we don't to rerun
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const isModifierPressed = modifierKey === "cmd"
-        ? (event.metaKey || event.ctrlKey)
-        : event.getModifierState(modifierKey.charAt(0).toUpperCase() + modifierKey.slice(1));
+      const isModifierPressed =
+        modifierKey === "cmd"
+          ? event.metaKey || event.ctrlKey
+          : event.getModifierState(
+              modifierKey.charAt(0).toUpperCase() + modifierKey.slice(1),
+            );
 
       if (isModifierPressed && event.key.toLowerCase() === key) {
         event.preventDefault();
@@ -285,8 +369,8 @@ export default function SearchExperience(config: SearchExperienceConfig) {
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [modifierKey, key]);
 
   const buttonProps = {
@@ -296,9 +380,7 @@ export default function SearchExperience(config: SearchExperienceConfig) {
 
   return (
     <>
-      <SearchButton {...buttonProps}>
-        {config.buttonText}
-      </SearchButton>
+      <SearchButton {...buttonProps}>{config.buttonText}</SearchButton>
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <InstantSearch
           searchClient={searchClient}

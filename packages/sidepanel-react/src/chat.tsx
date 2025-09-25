@@ -1,6 +1,8 @@
 import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { AskAIConfig } from "./askai";
+import { postFeedback } from "./askai";
 import {
   BrainIcon,
   CheckIcon,
@@ -58,16 +60,24 @@ export interface ChatWidgetProps {
   messages: Message[];
   error: Error | null;
   isGenerating: boolean;
+  config: AskAIConfig;
 }
 
 export const ChatWidget = memo(function ChatWidget({
   messages,
   error,
   isGenerating,
+  config,
 }: ChatWidgetProps) {
   const { copyText } = useClipboard();
   const [copiedExchangeId, setCopiedExchangeId] = useState<string | null>(null);
   const copyResetTimeoutRef = useRef<number | null>(null);
+  const [acknowledgedExchangeIds, setAcknowledgedExchangeIds] = useState<
+    Set<string>
+  >(new Set());
+  const [submittingExchangeId, setSubmittingExchangeId] = useState<
+    string | null
+  >(null);
 
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
@@ -97,9 +107,7 @@ export const ChatWidget = memo(function ChatWidget({
     return grouped;
   }, [messages]);
 
-  // isGenerating is provided by parent
-
-  // Cleanup any pending reset timers on unmount
+  // cleanup any pending reset timers on unmount
   useEffect(() => {
     return () => {
       if (copyResetTimeoutRef.current) {
@@ -123,6 +131,7 @@ export const ChatWidget = memo(function ChatWidget({
 
             return (
               <article key={exchange.id} className="sp-qa-card">
+                {/* message header with question */}
                 <div className="sp-qa-header">
                   <div className="sp-qa-question">
                     {exchange.userMessage.parts.map((part, index) =>
@@ -134,6 +143,7 @@ export const ChatWidget = memo(function ChatWidget({
                   </div>
                 </div>
 
+                {/* message body with answer */}
                 <section className="sp-qa-answer">
                   <div className="sp-qa-answer-content">
                     {exchange.assistantMessage ? (
@@ -225,60 +235,134 @@ export const ChatWidget = memo(function ChatWidget({
                   </div>
                 </section>
 
-                <footer className="sp-qa-actions">
-                  <button type="button" className="sp-qa-action-btn">
-                    <LikeIcon size={18} />
-                  </button>
-                  <button type="button" className="sp-qa-action-btn">
-                    <DislikeIcon size={18} />
-                  </button>
-                  <button
-                    type="button"
-                    className={`sp-qa-action-btn ${
-                      copiedExchangeId === exchange.id ? "is-copied" : ""
-                    }`}
-                    aria-label={
-                      copiedExchangeId === exchange.id
-                        ? "Copied"
-                        : "Copy answer"
-                    }
-                    title={
-                      copiedExchangeId === exchange.id
-                        ? "Copied"
-                        : "Copy answer"
-                    }
-                    disabled={
-                      !exchange.assistantMessage ||
-                      copiedExchangeId === exchange.id
-                    }
-                    onClick={async () => {
-                      const parts = exchange.assistantMessage?.parts ?? [];
-                      const textContent = parts
-                        .filter((part) => part.type === "text")
-                        .map((part) => part.text)
-                        .join("");
-                      if (!textContent) return;
-                      try {
-                        await copyText(textContent);
-                        setCopiedExchangeId(exchange.id);
-                        if (copyResetTimeoutRef.current) {
-                          window.clearTimeout(copyResetTimeoutRef.current);
-                        }
-                        copyResetTimeoutRef.current = window.setTimeout(() => {
-                          setCopiedExchangeId(null);
-                        }, 1500);
-                      } catch {
-                        // noop – copy may fail silently
-                      }
-                    }}
-                  >
-                    {copiedExchangeId === exchange.id ? (
-                      <CheckIcon size={18} />
+                {/* message footer with actions */}
+                {exchange.assistantMessage && !isGenerating && (
+                  <footer className="sp-qa-actions">
+                    {acknowledgedExchangeIds.has(exchange.id) ? (
+                      <span className="sp-qa-feedback-ack sp-fade">
+                        Thanks for your feedback!
+                      </span>
+                    ) : submittingExchangeId === exchange.id ? (
+                      <span className="sp-qa-feedback-ack sp-shimmer-text">
+                        Submitting...
+                      </span>
                     ) : (
-                      <CopyIcon size={18} />
+                      <>
+                        <button
+                          type="button"
+                          className="sp-qa-action-btn"
+                          disabled={
+                            !exchange.assistantMessage ||
+                            submittingExchangeId === exchange.id
+                          }
+                          onClick={async () => {
+                            if (!exchange.assistantMessage) return;
+                            try {
+                              setSubmittingExchangeId(exchange.id);
+                              await postFeedback({
+                                assistantId: config.assistantId,
+                                appId: config.applicationId,
+                                messageId: exchange.userMessage.id,
+                                thumbs: 1,
+                              });
+                              setAcknowledgedExchangeIds((prev) => {
+                                const next = new Set(prev);
+                                next.add(exchange.id);
+                                return next;
+                              });
+                            } catch {
+                              // ignore errors
+                            } finally {
+                              setSubmittingExchangeId(null);
+                            }
+                          }}
+                        >
+                          <LikeIcon size={18} />
+                        </button>
+                        <button
+                          type="button"
+                          className="sp-qa-action-btn"
+                          disabled={
+                            !exchange.assistantMessage ||
+                            submittingExchangeId === exchange.id
+                          }
+                          onClick={async () => {
+                            if (!exchange.assistantMessage) return;
+                            try {
+                              setSubmittingExchangeId(exchange.id);
+                              await postFeedback({
+                                assistantId: config.assistantId,
+                                appId: config.applicationId,
+                                messageId: exchange.userMessage.id,
+                                thumbs: 0,
+                              });
+                              setAcknowledgedExchangeIds((prev) => {
+                                const next = new Set(prev);
+                                next.add(exchange.id);
+                                return next;
+                              });
+                            } catch {
+                              // ignore errors
+                            } finally {
+                              setSubmittingExchangeId(null);
+                            }
+                          }}
+                        >
+                          <DislikeIcon size={18} />
+                        </button>
+                      </>
                     )}
-                  </button>
-                </footer>
+                    <button
+                      type="button"
+                      className={`sp-qa-action-btn ${
+                        copiedExchangeId === exchange.id ? "is-copied" : ""
+                      }`}
+                      aria-label={
+                        copiedExchangeId === exchange.id
+                          ? "Copied"
+                          : "Copy answer"
+                      }
+                      title={
+                        copiedExchangeId === exchange.id
+                          ? "Copied"
+                          : "Copy answer"
+                      }
+                      disabled={
+                        !exchange.assistantMessage ||
+                        copiedExchangeId === exchange.id
+                      }
+                      onClick={async () => {
+                        const parts = exchange.assistantMessage?.parts ?? [];
+                        const textContent = parts
+                          .filter((part) => part.type === "text")
+                          .map((part) => part.text)
+                          .join("");
+                        if (!textContent) return;
+                        try {
+                          await copyText(textContent);
+                          setCopiedExchangeId(exchange.id);
+                          if (copyResetTimeoutRef.current) {
+                            window.clearTimeout(copyResetTimeoutRef.current);
+                          }
+                          copyResetTimeoutRef.current = window.setTimeout(
+                            () => {
+                              setCopiedExchangeId(null);
+                            },
+                            1500,
+                          );
+                        } catch {
+                          // noop – copy may fail silently
+                        }
+                      }}
+                    >
+                      {copiedExchangeId === exchange.id ? (
+                        <CheckIcon size={18} />
+                      ) : (
+                        <CopyIcon size={18} />
+                      )}
+                    </button>
+                  </footer>
+                )}
               </article>
             );
           })}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface UseKeyboardNavigationReturn {
   selectedIndex: number;
@@ -10,7 +10,7 @@ interface UseKeyboardNavigationReturn {
 export function useKeyboardNavigation(
   showChat: boolean,
   hits: any[],
-  query: string
+  query: string,
 ): UseKeyboardNavigationReturn {
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
@@ -33,15 +33,15 @@ export function useKeyboardNavigation(
     }
     if (selectedIndex > 0) {
       const hit = hits[selectedIndex - 1];
-      if (hit && hit.url) {
-        window.open(hit.url, '_blank', 'noopener,noreferrer');
+      if (hit?.url) {
+        window.open(hit.url, "_blank", "noopener,noreferrer");
         return true;
       }
     }
     return false;
   }, [showChat, selectedIndex, hits]);
 
-  // Reset selection on query change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: expected
   useEffect(() => {
     setSelectedIndex(-1);
   }, [query, showChat]);

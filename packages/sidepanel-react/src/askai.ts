@@ -15,17 +15,11 @@ export interface AskAIConfig {
 
 export function useAskai(config: AskAIConfig) {
   if (!config) {
-    console.warn("config is required for useAskai");
-    return {
-      messages: [],
-      sendMessage: () => {},
-      isGenerating: false,
-      error: null,
-    };
+    throw new Error("config is required for useAskai");
   }
+
   const baseUrl = config.baseAskaiUrl || "https://beta-askai.algolia.com";
 
-  // biome-ignore lint/correctness/useHookAtTopLevel: conditional
   const transport = useMemo(() => {
     return new DefaultChatTransport({
       api: `${baseUrl}/chat`,
@@ -139,7 +133,7 @@ export const postFeedback = async ({
   const token = await getValidToken({ assistantId });
   headers.set("authorization", `TOKEN ${token}`);
 
-  return fetch(`${BASE_ASKAI_URL}/feedback`, {
+  return fetch(`${BASE_ASKAI_URL}/chat/feedback`, {
     method: "POST",
     body: JSON.stringify({
       appId,

@@ -1,6 +1,10 @@
-import { memo } from 'react';
-import { Highlight } from 'react-instantsearch';
-import { SparklesIcon } from './icons';
+/** biome-ignore-all lint/a11y/useFocusableInteractive: hand crafted interactions */
+/** biome-ignore-all lint/a11y/useSemanticElements: . */
+/** biome-ignore-all lint/a11y/useSemanticElements: hand crafted interactions */
+
+import { memo } from "react";
+import { Highlight } from "react-instantsearch";
+import { SparklesIcon } from "./icons";
 
 interface HitsActionsProps {
   query: string;
@@ -8,7 +12,11 @@ interface HitsActionsProps {
   onAskAI: () => void;
 }
 
-const HitsActions = memo(function HitsActions({ query, isSelected, onAskAI }: HitsActionsProps) {
+const HitsActions = memo(function HitsActions({
+  query,
+  isSelected,
+  onAskAI,
+}: HitsActionsProps) {
   return (
     <div className="ss-infinite-hits-list">
       <article
@@ -16,6 +24,7 @@ const HitsActions = memo(function HitsActions({ query, isSelected, onAskAI }: Hi
         className="ss-infinite-hits-item ss-ask-ai-btn"
         aria-label="Ask AI"
         title="Ask AI"
+        // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: hand crafted
         role="option"
         aria-selected={isSelected}
       >
@@ -39,7 +48,7 @@ export const HitsList = memo(function HitsList({
   hits,
   query,
   selectedIndex,
-  onAskAI
+  onAskAI,
 }: HitsListProps) {
   return (
     <>
