@@ -74,6 +74,7 @@ export function PreviewSidepanel() {
           indexName: "algolia_podcast_sample_dataset",
           assistantId: "Z03Eno3oLaXI",
         }}
+        pushSelector="main"
         suggestions={[
           "What are the trending podcast episodes this week?",
           "Show me episodes about product management",
