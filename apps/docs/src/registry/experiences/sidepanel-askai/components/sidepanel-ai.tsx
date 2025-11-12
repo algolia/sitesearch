@@ -38,7 +38,7 @@ import { Button } from "@/components/ui/button";
 import {
   postFeedback,
   useAskai,
-} from "@/registry/experiences/search-askai/hooks/use-askai";
+} from "@/registry/experiences/sidepanel-askai/hooks/use-askai";
 
 // ============================================================================
 // Types

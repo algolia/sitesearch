@@ -1,0 +1,153 @@
+---
+title: Sidepanel Ask AI
+description: "Sidepanel chat experience with Ask AI, powered by Algolia's Ask AI. Opens as a side panel that doesn't block the rest of the page."
+---
+
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+import { Tabs, TabsList, TabsTrigger, TabsContent, TabsContents } from '@/components/animate-ui/components/animate/tabs';
+import { LogosShadcn } from '@/components/icons/shadcn';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+A sidepanel chat experience that opens from the right side of the screen, allowing users to interact with [Algolia's Ask AI](https://www.algolia.com/products/ai/ask-ai) without blocking the rest of the page. Perfect for documentation sites, help centers, or any context where users need quick AI assistance while browsing.
+
+## Use cases
+
+- Documentation site AI assistant
+- Help center chat support
+- Non-blocking AI chat interface
+- Side-by-side browsing and AI interaction
+- Keyboard-accessible chat experience
+
+## Preview
+
+<PreviewSidepanelAskAI />
+
+<Tabs>
+  <div className="flex items-center justify-between gap-2 mt-20 mb-2">
+    <h2 className="!my-0 mr-4">Usage</h2>
+    <TabsList className="flex items-center gap-2">
+      <TabsTrigger value="shadcn" className="flex items-center gap-2 px-2"> <LogosShadcn /> <span>shadcn/ui</span></TabsTrigger>
+    </TabsList>
+  </div>
+  <TabsContents>
+    <TabsContent value="shadcn">
+```tsx
+npx shadcn@latest add @algolia/sidepanel-askai
+```
+
+This will add the `Sidepanel Ask AI` experience to your project under `components/sidepanel-askai`. Use it like this:
+
+```tsx
+import SidepanelExperience from "@/components/sidepanel-askai";
+
+<SidepanelExperience
+  applicationId="06YAZFOHSQ"
+  apiKey="94b6afdc316917b6e6cdf2763fa561df"
+  indexName="algolia_podcast_sample_dataset"
+  assistantId="UpR727VnXnoG"
+/>
+```
+
+### Configuration
+
+Required props for using the `SidepanelExperience` component:
+
+- `applicationId`: The Algolia application ID
+- `apiKey`: The Algolia API key
+- `indexName`: The Algolia index name
+- `assistantId`: The Ask AI assistant ID
+
+### Structure
+
+<Files>
+  <Folder name="app">
+    <File name="page.tsx" />
+  </Folder>
+  <Folder name="components" defaultOpen>
+    <File name="sidepanel-ai.tsx" />
+  </Folder>
+  <Folder name="hooks" defaultOpen>
+    <File name="use-askai.ts" />
+  </Folder>
+  <File name="package.json" />
+</Files>
+    </TabsContent>
+  </TabsContents>
+</Tabs>
+
+## Behavior
+
+- **Opens via button or keyboard**: Click the "Ask AI" button or press `Cmd+I` (Mac) / `Ctrl+I` (Windows)
+- **Non-blocking**: The rest of the page remains interactive while the sidepanel is open
+- **Resizable**: Toggle between 360px (default) and 580px (maximized) width on desktop
+- **Keyboard accessible**: Press `Escape` to close, `Enter` to send messages
+- **Auto-scroll**: Chat automatically scrolls to show new messages
+- **Mobile responsive**: Full-width on mobile, fixed width on desktop
+
+## References
+<TypeTable
+  type={{
+    applicationId: {
+      description: "Algolia Application ID (required)",
+      type: "string",
+      required: true,
+    },
+    apiKey: {
+      description: "Algolia API Key (required)",
+      type: "string",
+      required: true,
+    },
+    indexName: {
+      description: "Algolia Index Name (required)",
+      type: "string",
+      required: true,
+    },
+    assistantId: {
+      description: "AI Assistant ID (required for chat functionality)",
+      type: "string",
+      required: true,
+    },
+    baseAskaiUrl: {
+      description: "Base URL for AI chat API (optional, defaults to beta endpoint)",
+      type: "string",
+      default: "\"https://askai.algolia.com\"",
+      required: false,
+    },
+    placeholder: {
+      description: "Placeholder text for input (optional, defaults to \"Ask AI anything\")",
+      type: "string",
+      default: "\"Ask AI anything\"",
+      required: false,
+    },
+    buttonText: {
+      description: "Custom button text (optional, defaults to \"Ask AI\")",
+      type: "string",
+      default: "\"Ask AI\"",
+      required: false,
+    },
+    buttonProps: {
+      description: "Custom button props (optional)",
+      type: "ComponentProps<typeof Button>",
+      parameters: [
+        {
+          name: "onClick",
+          description: "The function to call when the button is clicked",
+        },
+        {
+          name: "children",
+          description: "The children to render in the button (optional)",
+        },
+      ],
+      required: false,
+    },
+  }}
+/>
+
+## Extending further
+
+- Change the styling to match your brand
+- Customize the sidepanel width and animations
+- Add custom message handlers
+- Integrate with your analytics system
+- Open in v0 for more customization
+

@@ -11,6 +11,7 @@
     "experiences/search-askai",
     "experiences/dropdown-search",
     "---Ask AI Experiences---",
+    "experiences/ask-ai/sidepanel-askai",
     "experiences/ask-ai/highlight-to-askai"
   ]
 }

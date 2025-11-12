@@ -4,6 +4,7 @@ import type { MDXComponents } from "mdx/types";
 import {
   PreviewDropdownSearch,
   PreviewSearchNoAskAI,
+  PreviewSidepanelAskAI,
   PreviewSiteSearch,
 } from "@/components/previews";
 
@@ -19,6 +20,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     PreviewSiteSearch,
     PreviewSearchNoAskAI,
     PreviewDropdownSearch,
+    PreviewSidepanelAskAI,
     ...components,
   };
 }
