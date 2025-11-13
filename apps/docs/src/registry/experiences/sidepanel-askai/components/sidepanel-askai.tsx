@@ -62,6 +62,8 @@ export interface SidepanelAskAIConfig {
   buttonText?: string;
   /** Custom button props (optional) */
   buttonProps?: React.ComponentProps<typeof Button>;
+  /** Display variant (optional, defaults to 'floating') */
+  variant?: "floating" | "inline";
 }
 
 export interface SearchIndexTool {
@@ -903,6 +905,7 @@ const Sidepanel = memo(function Sidepanel({
   const [shouldRender, setShouldRender] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
+  const variant = config.variant || "floating";
 
   // Handle mount/unmount and closing animation
   useEffect(() => {
@@ -942,6 +945,29 @@ const Sidepanel = memo(function Sidepanel({
       document.removeEventListener("keydown", handleEscape);
     };
   }, [isOpen, onClose]);
+
+  // Inline variant: push page content by adjusting body padding-right on desktop
+  useEffect(() => {
+    if (variant !== "inline") return;
+    if (typeof window === "undefined") return;
+
+    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+    const panelWidth = isMaximized ? 580 : 360;
+
+    if (isOpen && isDesktop) {
+      const prevPadding = document.body.style.paddingRight;
+      const prevTransition = document.body.style.transition;
+      document.body.style.transition =
+        "padding-right 0.28s cubic-bezier(0.22, 1, 0.36, 1)";
+      document.body.style.paddingRight = `${panelWidth}px`;
+      return () => {
+        document.body.style.paddingRight = prevPadding;
+        document.body.style.transition = prevTransition;
+      };
+    }
+
+    return;
+  }, [variant, isOpen, isMaximized]);
 
   const handleSubmit = useCallback(
     (e?: React.FormEvent) => {
@@ -994,13 +1020,17 @@ const Sidepanel = memo(function Sidepanel({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-50 bg-black/20 flex items-center justify-end dark:bg-black/60 md:p-4 pointer-events-none ${
+      className={`fixed inset-0 z-50 ${
+        variant === "inline"
+          ? "bg-transparent dark:bg-transparent md:p-0"
+          : "bg-black/20 dark:bg-black/60 md:p-4"
+      } flex items-center justify-end pointer-events-none ${
         isVisible ? "animate-in fade-in-0" : "animate-out fade-out-0"
       }`}
       style={{ animationDuration: "0.2s" }}
     >
       <div
-        className={`bg-background w-full md:h-full flex flex-col shadow-2xl md:rounded-lg pointer-events-auto transition-all duration-300 border border-border ease-out ${
+        className={`bg-background h-screen w-full md:h-full flex flex-col shadow-2xl pointer-events-auto transition-all duration-300 border border-border ease-out ${variant === "inline" ? "rounded-none" : "md:rounded-lg"} ${
           isVisible
             ? "animate-in slide-in-from-right"
             : "animate-out slide-out-to-right"

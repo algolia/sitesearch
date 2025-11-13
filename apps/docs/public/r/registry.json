@@ -5,6 +5,35 @@
   "homepage": "https://algolia.com",
   "items": [
     {
+      "name": "dropdown-search",
+      "type": "registry:block",
+      "title": "Algolia dropdown search experience",
+      "description": "Inline autocomplete dropdown search experience, powered by Algolia's InstantSearch",
+      "dependencies": [
+        "algoliasearch@^5",
+        "react-instantsearch@^7.16.2",
+        "lucide-react",
+        "@radix-ui/react-popover"
+      ],
+      "registryDependencies": ["input"],
+      "files": [
+        {
+          "path": "src/registry/experiences/dropdown-search/components/dropdown-search.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/registry/experiences/dropdown-search/hooks/use-keyboard-navigation.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/registry/experiences/dropdown-search/page.tsx",
+          "type": "registry:page",
+          "target": "app/dropdown-search/page.tsx"
+        }
+      ],
+      "categories": ["search"]
+    },
+    {
       "name": "search",
       "type": "registry:block",
       "title": "Algolia crafted search experience",
@@ -19,7 +48,6 @@
       "devDependencies": ["tw-animate-css"],
       "css": {
         "@import \"tw-animate-css\"": {},
-
         "input[type=\"search\"]::-webkit-search-decoration,input[type=\"search\"]::-webkit-search-cancel-button,input[type=\"search\"]::-webkit-search-results-button,input[type=\"search\"]::-webkit-search-results-decoration": "-webkit-appearance: none;"
       },
       "files": [
@@ -36,7 +64,8 @@
           "type": "registry:page",
           "target": "app/search/page.tsx"
         }
-      ]
+      ],
+      "categories": ["search"]
     },
     {
       "name": "search-ai",
@@ -90,7 +119,81 @@
           "type": "registry:page",
           "target": "app/search-ai/page.tsx"
         }
-      ]
+      ],
+      "categories": ["search", "ai"]
+    },
+    {
+      "name": "highlight-to-askai",
+      "type": "registry:block",
+      "title": "Highlight to Ask AI [Experimental]",
+      "description": "🚧 [Experimental] Highlight any text and ask Algolia Ask AI with an inline tooltip",
+      "registryDependencies": ["button", "input"],
+      "dependencies": [
+        "@floating-ui/react",
+        "@ai-sdk/react@^2.0.4",
+        "ai@^5.0.30",
+        "lucide-react",
+        "marked"
+      ],
+      "files": [
+        {
+          "path": "src/registry/experiences/highlight-to-askai/components/highlight-to-askai.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/registry/experiences/highlight-to-askai/hooks/use-askai.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/registry/experiences/highlight-to-askai/page.tsx",
+          "type": "registry:page",
+          "target": "app/highlight-to-askai/page.tsx"
+        }
+      ],
+      "categories": ["ai"]
+    },
+    {
+      "name": "sidepanel-askai",
+      "type": "registry:block",
+      "title": "Sidepanel Ask AI",
+      "description": "Sidepanel chat experience with Ask AI, powered by Algolia's Ask AI",
+      "registryDependencies": ["button"],
+      "devDependencies": ["tw-animate-css"],
+      "dependencies": [
+        "@ai-sdk/react@^2.0.4",
+        "ai@^5.0.30",
+        "lucide-react",
+        "marked",
+        "tw-animate-css"
+      ],
+      "css": {
+        "@import \"tw-animate-css\"": {},
+        "@keyframes shiny-text": {
+          "0%,90%,100%": "{\nbackground-position: calc(-100% - var(--shiny-width)) 0;\n}",
+          "30%,60%": "{\nbackground-position: calc(100% + var(--shiny-width)) 0;\n}"
+        }
+      },
+      "cssVars": {
+        "theme": {
+          "animate-shiny-text": "shiny-text 8s infinite"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/experiences/sidepanel-askai/components/sidepanel-askai.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/registry/experiences/sidepanel-askai/hooks/use-askai.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/registry/experiences/sidepanel-askai/page.tsx",
+          "type": "registry:page",
+          "target": "app/sidepanel-askai/page.tsx"
+        }
+      ],
+      "categories": ["ai", "chat"]
     }
   ]
 }

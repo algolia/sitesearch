@@ -180,7 +180,7 @@
       },
       "files": [
         {
-          "path": "src/registry/experiences/sidepanel-askai/components/sidepanel-ai.tsx",
+          "path": "src/registry/experiences/sidepanel-askai/components/sidepanel-askai.tsx",
           "type": "registry:component"
         },
         {

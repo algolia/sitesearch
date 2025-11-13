@@ -228,13 +228,24 @@ export function PreviewSidepanelAskAI() {
             "[mask-image:linear-gradient(to_bottom_right,white,transparent,transparent)]",
           )}
         />
-        <SidepanelExperience
-          applicationId="06YAZFOHSQ"
-          apiKey="94b6afdc316917b6e6cdf2763fa561df"
-          indexName="algolia_podcast_sample_dataset"
-          assistantId="UpR727VnXnoG"
-          buttonText="Ask AI"
-        />
+        <div className="flex gap-4">
+          <SidepanelExperience
+            applicationId="06YAZFOHSQ"
+            apiKey="94b6afdc316917b6e6cdf2763fa561df"
+            indexName="algolia_podcast_sample_dataset"
+            assistantId="UpR727VnXnoG"
+            buttonText="Ask AI (floating)"
+            variant="floating"
+          />
+          <SidepanelExperience
+            applicationId="06YAZFOHSQ"
+            apiKey="94b6afdc316917b6e6cdf2763fa561df"
+            indexName="algolia_podcast_sample_dataset"
+            assistantId="UpR727VnXnoG"
+            buttonText="Ask AI (inline)"
+            variant="inline"
+          />
+        </div>
       </div>
     </>
   );
