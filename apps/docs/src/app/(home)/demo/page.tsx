@@ -3,7 +3,7 @@
 import { SearchIcon, SparklesIcon } from "lucide-react";
 import Search from "@/registry/experiences/search/components/search";
 import SearchAskAI from "@/registry/experiences/search-askai/components/search-ai";
-import SidePanel from "@/registry/experiences/sidepanel-askai/components/sidepanel-ai";
+import SidePanel from "@/registry/experiences/sidepanel-askai/components/sidepanel-askai";
 
 export default function DemoPage() {
   return (

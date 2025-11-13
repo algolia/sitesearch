@@ -1,6 +1,6 @@
 "use client";
 
-import SidepanelExperience from "@/registry/experiences/sidepanel-askai/components/sidepanel-ai";
+import SidepanelExperience from "@/registry/experiences/sidepanel-askai/components/sidepanel-askai";
 
 export default function Page() {
   return (
@@ -14,4 +14,3 @@ export default function Page() {
     </div>
   );
 }
-

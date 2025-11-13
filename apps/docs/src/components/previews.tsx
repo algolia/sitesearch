@@ -5,7 +5,7 @@ import DropdownSearch from "@/registry/experiences/dropdown-search/components/dr
 import { HighlightAskAI } from "@/registry/experiences/highlight-to-askai/components/highlight-to-askai";
 import Search from "@/registry/experiences/search/components/search";
 import SearchWithAskAi from "@/registry/experiences/search-askai/components/search-ai";
-import SidepanelExperience from "@/registry/experiences/sidepanel-askai/components/sidepanel-ai";
+import SidepanelExperience from "@/registry/experiences/sidepanel-askai/components/sidepanel-askai";
 import { CopyCodeButton } from "./copy-code-button";
 import { OpenInV0Button } from "./open-in-v0";
 import { GridPattern } from "./ui/grid-pattern";

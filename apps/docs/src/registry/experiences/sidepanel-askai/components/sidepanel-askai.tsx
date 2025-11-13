@@ -12,6 +12,7 @@ import {
   BrainIcon,
   CheckIcon,
   CopyIcon,
+  Link2Icon,
   Maximize2,
   Minimize2,
   SparklesIcon,
@@ -95,6 +96,11 @@ interface Exchange {
   assistantMessage: Message | null;
 }
 
+interface ExtractedLink {
+  url: string;
+  title?: string;
+}
+
 // ============================================================================
 // Utilities & Helpers
 // ============================================================================
@@ -118,6 +124,83 @@ function escapeHtml(html: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function extractLinksFromMessage(message: Message | null): ExtractedLink[] {
+  const links: ExtractedLink[] = [];
+
+  // Used to dedupe multiple urls
+  const seen = new Set<string>();
+
+  if (!message) {
+    return [];
+  }
+
+  message.parts.forEach((part) => {
+    if (part.type !== "text") {
+      return;
+    }
+
+    if (part.text.length === 0) {
+      return;
+    }
+
+    const markdownLinkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
+    const markdownImageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    const plainLinkRegex = /(?<!\]\()https?:\/\/[^\s<>"{}|\\^`[\]]+/g;
+
+    // Strip out all code blocks e.g. ```
+    const textWithoutCodeBlocks = part.text.replace(/```[\s\S]*?```/g, "");
+
+    // Strip out all inline code blocks e.g. `
+    const cleanText = textWithoutCodeBlocks.replace(/`[^`]*`/g, "");
+
+    // Get all markdown image links to exclude them
+    const imageMatches = cleanText.matchAll(markdownImageRegex);
+    const imageUrls = new Set<string>();
+    for (const match of imageMatches) {
+      imageUrls.add(match[2]);
+    }
+
+    // Get all markdown based links e.g. []()
+    const markdownMatches = cleanText.matchAll(markdownLinkRegex);
+
+    // Parses the title and url from the found links
+    for (const match of markdownMatches) {
+      const title = match[1].trim();
+      const url = match[2];
+
+      // Skip image URLs
+      if (imageUrls.has(url)) {
+        continue;
+      }
+
+      if (!seen.has(url)) {
+        seen.add(url);
+        links.push({ url, title: title || undefined });
+      }
+    }
+
+    // Get all "plain" links e.g. https://algolia.com/doc
+    const plainUrls = cleanText.matchAll(plainLinkRegex);
+
+    for (const match of plainUrls) {
+      // Strip any extra punctuation
+      const cleanUrl = match[0].replace(/[.,;:!?]+$/, "");
+
+      // Skip image URLs
+      if (imageUrls.has(cleanUrl)) {
+        continue;
+      }
+
+      if (!seen.has(cleanUrl)) {
+        seen.add(cleanUrl);
+        links.push({ url: cleanUrl });
+      }
+    }
+  });
+
+  return links;
 }
 
 // ============================================================================
@@ -374,6 +457,48 @@ const MemoizedMarkdown = memo(function MemoizedMarkdown({
 });
 
 // ============================================================================
+// Related Sources Component
+// ============================================================================
+
+interface RelatedSourcesProps {
+  links: ExtractedLink[];
+}
+
+const RelatedSources = memo(function RelatedSources({
+  links,
+}: RelatedSourcesProps) {
+  if (links.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 pt-4 border-t border-border">
+      <h3 className="text-xs font-medium text-muted-foreground mb-3">
+        Related sources
+      </h3>
+      <div className="flex flex-wrap gap-2">
+        {links.map((link, index) => {
+          const displayText = link.title || link.url;
+
+          return (
+            <a
+              key={`${link.url}-${index}`}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-blue-50 dark:hover:bg-slate-900 hover:border-blue-600 transition-colors duration-200 no-underline"
+            >
+              <Link2Icon size={16} />
+              <span>{displayText}</span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+// ============================================================================
 // Chat Component
 // ============================================================================
 
@@ -493,91 +618,100 @@ const ChatWidget = memo(function ChatWidget({
               <div className="mt-3 flex items-start gap-3">
                 <div className="flex-1 gap-3">
                   {exchange.assistantMessage ? (
-                    <div className="text-foreground">
-                      {exchange.assistantMessage.parts.map((part, index) => {
-                        if (typeof part === "string") {
-                          return <p key={`${index}`}>{part}</p>;
-                        }
-                        if (part.type === "text") {
-                          return (
-                            <MemoizedMarkdown key={`${index}`}>
-                              {part.text}
-                            </MemoizedMarkdown>
-                          );
-                        } else if (
-                          part.type === "reasoning" &&
-                          part.state === "streaming"
-                        ) {
-                          return (
-                            <p
-                              className="text-[0.95rem] flex my-2 gap-2 items-center text-muted-foreground"
-                              key={`${index}`}
-                            >
-                              <BrainIcon />{" "}
-                              <AnimatedShinyText>
-                                Reasoning...
-                              </AnimatedShinyText>
-                            </p>
-                          );
-                        } else if (part.type === "tool-searchIndex") {
-                          if (part.state === "input-streaming") {
+                    <>
+                      <div className="text-foreground">
+                        {exchange.assistantMessage.parts.map((part, index) => {
+                          if (typeof part === "string") {
+                            return <p key={`${index}`}>{part}</p>;
+                          }
+                          if (part.type === "text") {
+                            return (
+                              <MemoizedMarkdown key={`${index}`}>
+                                {part.text}
+                              </MemoizedMarkdown>
+                            );
+                          } else if (
+                            part.type === "reasoning" &&
+                            part.state === "streaming"
+                          ) {
                             return (
                               <p
                                 className="text-[0.95rem] flex my-2 gap-2 items-center text-muted-foreground"
                                 key={`${index}`}
                               >
+                                <BrainIcon />{" "}
                                 <AnimatedShinyText>
-                                  Searching...
+                                  Reasoning...
                                 </AnimatedShinyText>
                               </p>
                             );
-                          } else if (part.state === "input-available") {
-                            return (
-                              <p
-                                className="text-[0.95rem] flex my-2 gap-2 items-center text-muted-foreground"
-                                key={`${index}`}
-                              >
-                                <AnimatedShinyText>
-                                  Looking for{" "}
-                                  <mark className="bg-transparent text-muted-foreground underline decoration-2 underline-offset-4">
-                                    &quot;{part.input?.query || ""}&quot;
-                                  </mark>
-                                </AnimatedShinyText>
-                              </p>
-                            );
-                          } else if (part.state === "output-available") {
-                            return (
-                              <p
-                                className="text-[0.95rem] flex my-2 gap-2 items-center text-muted-foreground"
-                                key={`${index}`}
-                              >
-                                <span>
-                                  Searched for{" "}
-                                  <mark className="bg-transparent text-muted-foreground underline decoration-1 underline-offset-4">
-                                    &quot;{part.output?.query}&quot;
-                                  </mark>{" "}
-                                  found {part.output?.hits.length || "no"}{" "}
-                                  results
-                                </span>
-                              </p>
-                            );
-                          } else if (part.state === "output-error") {
-                            return (
-                              <p
-                                className="text-[0.95rem] flex my-2 gap-2 items-center text-muted-foreground"
-                                key={`${index}`}
-                              >
-                                {part.errorText}
-                              </p>
-                            );
+                          } else if (part.type === "tool-searchIndex") {
+                            if (part.state === "input-streaming") {
+                              return (
+                                <p
+                                  className="text-[0.95rem] flex my-2 gap-2 items-center text-muted-foreground"
+                                  key={`${index}`}
+                                >
+                                  <AnimatedShinyText>
+                                    Searching...
+                                  </AnimatedShinyText>
+                                </p>
+                              );
+                            } else if (part.state === "input-available") {
+                              return (
+                                <p
+                                  className="text-[0.95rem] flex my-2 gap-2 items-center text-muted-foreground"
+                                  key={`${index}`}
+                                >
+                                  <AnimatedShinyText>
+                                    Looking for{" "}
+                                    <mark className="bg-transparent text-muted-foreground underline decoration-2 underline-offset-4">
+                                      &quot;{part.input?.query || ""}&quot;
+                                    </mark>
+                                  </AnimatedShinyText>
+                                </p>
+                              );
+                            } else if (part.state === "output-available") {
+                              return (
+                                <p
+                                  className="text-[0.95rem] flex my-2 gap-2 items-center text-muted-foreground"
+                                  key={`${index}`}
+                                >
+                                  <span>
+                                    Searched for{" "}
+                                    <mark className="bg-transparent text-muted-foreground underline decoration-1 underline-offset-4">
+                                      &quot;{part.output?.query}&quot;
+                                    </mark>{" "}
+                                    found {part.output?.hits.length || "no"}{" "}
+                                    results
+                                  </span>
+                                </p>
+                              );
+                            } else if (part.state === "output-error") {
+                              return (
+                                <p
+                                  className="text-[0.95rem] flex my-2 gap-2 items-center text-muted-foreground"
+                                  key={`${index}`}
+                                >
+                                  {part.errorText}
+                                </p>
+                              );
+                            } else {
+                              return null;
+                            }
                           } else {
                             return null;
                           }
-                        } else {
-                          return null;
-                        }
-                      })}
-                    </div>
+                        })}
+                      </div>
+                      {
+                        <RelatedSources
+                          links={extractLinksFromMessage(
+                            exchange.assistantMessage,
+                          )}
+                        />
+                      }
+                    </>
                   ) : (
                     <div className="text-muted-foreground">
                       <AnimatedShinyText>
@@ -866,7 +1000,7 @@ const Sidepanel = memo(function Sidepanel({
       style={{ animationDuration: "0.2s" }}
     >
       <div
-        className={`bg-background w-full md:h-full flex flex-col shadow-2xl md:rounded-lg pointer-events-auto transition-all duration-300 ease-out ${
+        className={`bg-background w-full md:h-full flex flex-col shadow-2xl md:rounded-lg pointer-events-auto transition-all duration-300 border border-border ease-out ${
           isVisible
             ? "animate-in slide-in-from-right"
             : "animate-out slide-out-to-right"
