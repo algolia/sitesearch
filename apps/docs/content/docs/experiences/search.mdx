@@ -1,6 +1,6 @@
 ---
 title: Search
-description: "The default opinionated search experience built."
+description: "The default opinionated search experience."
 ---
 
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
@@ -71,6 +71,7 @@ import Search from "@/components/search";
     <TabsContent value="vanilla">
 
 ### Use our CDN bundle (recommended)
+
 ```html
 <link rel="stylesheet" href="https://unpkg.com/@algolia/sitesearch@latest/dist/search.min.css" />
 <div id="search-container"></div>
@@ -92,8 +93,8 @@ import Search from "@/components/search";
 </script>
 ```
 
-
 ### Build your own bundle (advanced)
+
 - Open [CodeSandbox](https://codesandbox.io/p/github/algolia/sitesearch).
 - Update the experience in `packages/standalone` to fit your needs (requires React skills)
 - Build the bundle `bun run bundle`
@@ -127,11 +128,13 @@ import Search from "@/components/search";
   });
 </script>
 ```
+
     </TabsContent>
   </TabsContents>
 </Tabs>
 
 ## References
+
 <TypeTable
   type={{
     applicationId: {
@@ -240,7 +243,6 @@ import Search from "@/components/search";
   }}
 />
 
-
 ## Extending further
 
 - Integrate Algolia Recommend for related product below the hit list.
@@ -249,3 +251,4 @@ import Search from "@/components/search";
 - Add a `SearchEmpty` slot to highlight help center content or contact actions when no results surface.
 - Shape it to infinity with full support for `react-instantsearch`.
 - Open in v0 for AI edits.
+

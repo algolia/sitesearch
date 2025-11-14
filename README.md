@@ -1,18 +1,18 @@
 # Algolia SiteSearch
 
-🫆 Opinionated search experiences for your search needs, powered by Algolia's [Instant Search](https://www.algolia.com/doc/guides/building-search-ui/what-is-instantsearch/js/) and [AskAI](https://www.algolia.com/products/ai/ask-ai)
+🫆 Opinionated search experiences for your search needs, powered by Algolia's [InstantSearch](https://www.algolia.com/doc/guides/building-search-ui/what-is-instantsearch/js/) and [Ask AI](https://www.algolia.com/products/ai/ask-ai)
 
 ## Overview
 
 SiteSearch provides opinionated search components that showcases Algolia's lightning-fast search capabilities in the form of experiences. Available as both React implementations and Vanilla JavaScript, it offers a complete search solution that can be integrated into any modern web application.
 
-### Key Features
+### Key features
 
-- **⚡ Instant Search** - Sub-50ms search powered by Algolia's global infrastructure
+- **⚡ Instant search** - Sub-50ms search powered by Algolia's global infrastructure
 - **🎨 Extensible** - UI with comprehensive theming system
-- **🤖 AI-Enhanced** - Conversational chat interface for complex queries using [Ask AI](https://www.algolia.com/products/ai/ask-ai)
+- **🤖 AI-enhanced** - Conversational chat interface for complex queries using [Ask AI](https://www.algolia.com/products/ai/ask-ai)
 - **♿ Accessible** - WCAG 2.1 AA compliant with screen reader support & full keyboard navigation with customizable shortcuts
-- **📦 Framework Agnostic** - Works with React and bundles to vanilla JS to use anywhere
+- **📦 Framework agnostic** - Works with React and bundles to vanilla JS to use anywhere
 
 ## Pre-requisites
 
@@ -20,9 +20,9 @@ SiteSearch provides opinionated search components that showcases Algolia's light
 2. Setup an index – grab the [Index name](https://dashboard.algolia.com/indices) and [Search API key](https://dashboard.algolia.com/account/api-keys)
 3. [Optional] Create an [Ask AI assistant](https://dashboard.algolia.com/apps/ask-ai) (only if you need Ask AI)
 
-## Quick Start
+## Quickstart
 
-Follow instructions on the [SiteSearch Documentation Website](https://sitesearch.algolia.com)
+Follow the instructions in the [SiteSearch documentation](https://sitesearch.algolia.com)
 
 ## Theming
 
