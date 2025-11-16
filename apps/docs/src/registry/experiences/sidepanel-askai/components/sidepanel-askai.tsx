@@ -608,7 +608,7 @@ const ChatWidget = memo(function ChatWidget({
           return (
             <article key={exchange.id} className="rounded-sm bg-background p-4">
               <div className="flex items-start gap-3">
-                <div className="font-semibold text-2xl text-foreground mb-2">
+                <div className="font-semibold text-xl text-foreground mb-2">
                   {exchange.userMessage.parts.map((part, index) =>
                     part.type === "text" ? (
                       <span key={index}>{part.text}</span>
@@ -724,9 +724,9 @@ const ChatWidget = memo(function ChatWidget({
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-start gap-2">
-                {exchange.assistantMessage && !isGenerating ? (
-                  acknowledgedExchangeIds.has(exchange.id) ? (
+              {exchange.assistantMessage && !isGenerating ? (
+                <div className="mt-4 flex items-center justify-start gap-2">
+                  {acknowledgedExchangeIds.has(exchange.id) ? (
                     <span className="text-muted-foreground text-[0.85rem] animate-in fade-in slide-in-from-bottom-1">
                       Thanks for your feedback!
                     </span>
@@ -734,135 +734,138 @@ const ChatWidget = memo(function ChatWidget({
                     <span className="text-muted-foreground text-[0.85rem] shimmer-text">
                       Submitting...
                     </span>
-                  ) : (
-                    <div className="inline-flex items-center gap-2">
-                      <button
-                        type="button"
-                        title="Like"
-                        aria-label="Like"
-                        className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
-                        disabled={
-                          !exchange.assistantMessage ||
-                          submittingExchangeId === exchange.id
-                        }
-                        onClick={async () => {
-                          if (!exchange.assistantMessage) return;
-                          try {
-                            setSubmittingExchangeId(exchange.id);
-                            if (onThumbsUp) {
-                              await onThumbsUp(exchange.userMessage.id);
-                            } else {
-                              await postFeedback({
-                                assistantId,
-                                appId: applicationId,
-                                messageId: exchange.userMessage.id,
-                                thumbs: 1,
-                              });
-                            }
-                            setAcknowledgedExchangeIds((prev) => {
-                              const next = new Set(prev);
-                              next.add(exchange.id);
-                              return next;
-                            });
-                          } catch {
-                            // ignore errors
-                          } finally {
-                            setSubmittingExchangeId(null);
-                          }
-                        }}
-                      >
-                        <ThumbsUp size={18} />
-                      </button>
-                      <button
-                        type="button"
-                        title="Dislike"
-                        aria-label="Dislike"
-                        className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
-                        disabled={
-                          !exchange.assistantMessage ||
-                          submittingExchangeId === exchange.id
-                        }
-                        onClick={async () => {
-                          if (!exchange.assistantMessage) return;
-                          try {
-                            setSubmittingExchangeId(exchange.id);
-                            if (onThumbsDown) {
-                              await onThumbsDown(exchange.userMessage.id);
-                            } else {
-                              await postFeedback({
-                                assistantId,
-                                appId: applicationId,
-                                messageId: exchange.userMessage.id,
-                                thumbs: 0,
-                              });
-                            }
-                            setAcknowledgedExchangeIds((prev) => {
-                              const next = new Set(prev);
-                              next.add(exchange.id);
-                              return next;
-                            });
-                          } catch {
-                            // ignore errors
-                          } finally {
-                            setSubmittingExchangeId(null);
-                          }
-                        }}
-                      >
-                        <ThumbsDown size={18} />
-                      </button>
-                    </div>
-                  )
-                ) : null}
-                <button
-                  type="button"
-                  className={`border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed ${
-                    copiedExchangeId === exchange.id
-                      ? "bg-blue-50 dark:bg-slate-900 text-blue-600 -translate-y-px"
-                      : ""
-                  }`}
-                  aria-label={
-                    copiedExchangeId === exchange.id ? "Copied" : "Copy answer"
-                  }
-                  title={
-                    copiedExchangeId === exchange.id ? "Copied" : "Copy answer"
-                  }
-                  disabled={
-                    !exchange.assistantMessage ||
-                    copiedExchangeId === exchange.id
-                  }
-                  onClick={async () => {
-                    const parts = exchange.assistantMessage?.parts ?? [];
-                    const textContent = parts
-                      .filter((part) => part.type === "text")
-                      .map((part) => part.text)
-                      .join("")
-                      .trim();
-                    if (!textContent) return;
-                    try {
-                      if (onCopy) {
-                        await onCopy(textContent);
-                      } else {
-                        await copyText(textContent);
+                  ) : null}
+                  <div className="inline-flex items-center gap-2">
+                    <button
+                      type="button"
+                      title="Like"
+                      aria-label="Like"
+                      className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
+                      disabled={
+                        !exchange.assistantMessage ||
+                        submittingExchangeId === exchange.id
                       }
-                      setCopiedExchangeId(exchange.id);
-                      if (copyResetTimeoutRef.current) {
-                        window.clearTimeout(copyResetTimeoutRef.current);
+                      onClick={async () => {
+                        if (!exchange.assistantMessage) return;
+                        try {
+                          setSubmittingExchangeId(exchange.id);
+                          if (onThumbsUp) {
+                            await onThumbsUp(exchange.userMessage.id);
+                          } else {
+                            await postFeedback({
+                              assistantId,
+                              appId: applicationId,
+                              messageId: exchange.userMessage.id,
+                              thumbs: 1,
+                            });
+                          }
+                          setAcknowledgedExchangeIds((prev) => {
+                            const next = new Set(prev);
+                            next.add(exchange.id);
+                            return next;
+                          });
+                        } catch {
+                          // ignore errors
+                        } finally {
+                          setSubmittingExchangeId(null);
+                        }
+                      }}
+                    >
+                      <ThumbsUp size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      title="Dislike"
+                      aria-label="Dislike"
+                      className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
+                      disabled={
+                        !exchange.assistantMessage ||
+                        submittingExchangeId === exchange.id
                       }
-                      copyResetTimeoutRef.current = window.setTimeout(() => {
-                        setCopiedExchangeId(null);
-                      }, 1500);
-                    } catch {
-                      // noop – copy may fail silently
+                      onClick={async () => {
+                        if (!exchange.assistantMessage) return;
+                        try {
+                          setSubmittingExchangeId(exchange.id);
+                          if (onThumbsDown) {
+                            await onThumbsDown(exchange.userMessage.id);
+                          } else {
+                            await postFeedback({
+                              assistantId,
+                              appId: applicationId,
+                              messageId: exchange.userMessage.id,
+                              thumbs: 0,
+                            });
+                          }
+                          setAcknowledgedExchangeIds((prev) => {
+                            const next = new Set(prev);
+                            next.add(exchange.id);
+                            return next;
+                          });
+                        } catch {
+                          // ignore errors
+                        } finally {
+                          setSubmittingExchangeId(null);
+                        }
+                      }}
+                    >
+                      <ThumbsDown size={18} />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    className={`border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed ${
+                      copiedExchangeId === exchange.id
+                        ? "bg-blue-50 dark:bg-slate-900 text-blue-600 -translate-y-px"
+                        : ""
+                    }`}
+                    aria-label={
+                      copiedExchangeId === exchange.id
+                        ? "Copied"
+                        : "Copy answer"
                     }
-                  }}
-                >
-                  {copiedExchangeId === exchange.id ? (
-                    <CheckIcon size={18} />
-                  ) : (
-                    <CopyIcon size={18} />
-                  )}
-                </button>
-              </div>
+                    title={
+                      copiedExchangeId === exchange.id
+                        ? "Copied"
+                        : "Copy answer"
+                    }
+                    disabled={
+                      !exchange.assistantMessage ||
+                      copiedExchangeId === exchange.id
+                    }
+                    onClick={async () => {
+                      const parts = exchange.assistantMessage?.parts ?? [];
+                      const textContent = parts
+                        .filter((part) => part.type === "text")
+                        .map((part) => part.text)
+                        .join("")
+                        .trim();
+                      if (!textContent) return;
+                      try {
+                        if (onCopy) {
+                          await onCopy(textContent);
+                        } else {
+                          await copyText(textContent);
+                        }
+                        setCopiedExchangeId(exchange.id);
+                        if (copyResetTimeoutRef.current) {
+                          window.clearTimeout(copyResetTimeoutRef.current);
+                        }
+                        copyResetTimeoutRef.current = window.setTimeout(() => {
+                          setCopiedExchangeId(null);
+                        }, 1500);
+                      } catch {
+                        // noop – copy may fail silently
+                      }
+                    }}
+                  >
+                    {copiedExchangeId === exchange.id ? (
+                      <CheckIcon size={18} />
+                    ) : (
+                      <CopyIcon size={18} />
+                    )}
+                  </button>
+                </div>
+              ) : null}
             </article>
           );
         })}
@@ -969,28 +972,7 @@ const Sidepanel = memo(function Sidepanel({
     return;
   }, [variant, isOpen, isMaximized]);
 
-  const handleSubmit = useCallback(
-    (e?: React.FormEvent) => {
-      e?.preventDefault();
-      const trimmed = inputValue.trim();
-      if (!trimmed || isGenerating) return;
-
-      sendMessage({ text: trimmed });
-      setInputValue("");
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 50);
-    },
-    [inputValue, isGenerating, sendMessage, inputRef],
-  );
-
-  const resizeSidepanel = useCallback(() => {
-    setIsMaximized((prev) => !prev);
-  }, []);
-
-  if (!shouldRender) return null;
-
-  const managePromptHeight = (): void => {
+  const managePromptHeight = useCallback((): void => {
     if (!inputRef.current) return;
 
     const textArea = inputRef.current;
@@ -1009,7 +991,30 @@ const Sidepanel = memo(function Sidepanel({
 
     textArea.style.overflowY = fullHeight > maxHeight ? "auto" : "hidden";
     textArea.style.height = `${Math.min(fullHeight, maxHeight)}px`;
-  };
+  }, [inputRef]);
+
+  const handleSubmit = useCallback(
+    (e?: React.FormEvent) => {
+      e?.preventDefault();
+      const trimmed = inputValue.trim();
+      if (!trimmed || isGenerating) return;
+
+      sendMessage({ text: trimmed });
+      setInputValue("");
+      // Reset textarea height after clearing input
+      setTimeout(() => {
+        managePromptHeight();
+        inputRef.current?.focus();
+      }, 50);
+    },
+    [inputValue, isGenerating, sendMessage, inputRef, managePromptHeight],
+  );
+
+  const resizeSidepanel = useCallback(() => {
+    setIsMaximized((prev) => !prev);
+  }, []);
+
+  if (!shouldRender) return null;
 
   const basePoweredByUrl =
     "https://www.algolia.com/developers?utm_medium=referral&utm_content=powered_by&utm_campaign=sitesearch";
@@ -1030,7 +1035,7 @@ const Sidepanel = memo(function Sidepanel({
       style={{ animationDuration: "0.2s" }}
     >
       <div
-        className={`bg-background h-screen w-full md:h-full flex flex-col shadow-2xl pointer-events-auto transition-all duration-300 border border-border ease-out ${variant === "inline" ? "rounded-none" : "md:rounded-lg"} ${
+        className={`bg-background h-screen w-full md:h-full flex flex-col pointer-events-auto transition-all duration-300 ease-out ${variant === "inline" ? "rounded-none border-l border-border" : "md:rounded-lg shadow-2xl"} ${
           isVisible
             ? "animate-in slide-in-from-right"
             : "animate-out slide-out-to-right"
@@ -1069,13 +1074,15 @@ const Sidepanel = memo(function Sidepanel({
               {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
             </Button>
             <Button
-              variant="outline"
-              className="px-2 text-xs text-muted-foreground cursor-pointer"
+              variant="ghost"
+              className="px-1 text-xs text-muted-foreground cursor-pointer"
               onClick={onClose}
               aria-label="Close"
               title="Close"
             >
-              <span className="hidden md:inline">esc</span>
+              <span className="hidden md:inline">
+                <XIcon size={18} />
+              </span>
               <span className="md:hidden">
                 <XIcon />
               </span>
