@@ -60,8 +60,6 @@ export interface SearchWithAskAIConfig {
   indexName: string;
   /** AI Assistant ID (required for chat functionality) */
   assistantId: string;
-  /** Base URL for AI chat API (optional, defaults to beta endpoint) */
-  baseAskaiUrl?: string;
   /** Placeholder text for search input (optional, defaults to "What are you looking for?") */
   placeholder?: string;
   /** Number of hits per page (optional, defaults to 8) */
@@ -1503,7 +1501,6 @@ function SearchModal({ onClose, config }: SearchModalProps) {
     apiKey: config.apiKey,
     indexName: config.indexName,
     assistantId: config.assistantId,
-    baseAskaiUrl: config.baseAskaiUrl,
   });
 
   const noResults = results.results?.nbHits === 0;

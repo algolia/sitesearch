@@ -10,7 +10,6 @@ export interface AskAIConfig {
   apiKey: string;
   indexName: string;
   assistantId: string;
-  baseAskaiUrl?: string;
 }
 
 export function useAskai(config: AskAIConfig) {
@@ -18,7 +17,7 @@ export function useAskai(config: AskAIConfig) {
     throw new Error("config is required for useAskai");
   }
 
-  const baseUrl = config.baseAskaiUrl || "https://askai.algolia.com";
+  const baseUrl = "https://askai.algolia.com";
 
   const transport = useMemo(() => {
     return new DefaultChatTransport({
@@ -36,7 +35,6 @@ export function useAskai(config: AskAIConfig) {
       },
     });
   }, [
-    baseUrl,
     config.apiKey,
     config.applicationId,
     config.indexName,

@@ -146,7 +146,6 @@ export function HighlightAskAI({
   apiKey,
   indexName,
   assistantId,
-  askAiBaseUrl,
   excludeElements = ["pre", "code"],
   side = "top",
   sideOffset = 8,
@@ -171,7 +170,6 @@ export function HighlightAskAI({
       apiKey,
       indexName,
       assistantId,
-      baseAskaiUrl: askAiBaseUrl,
     });
   const resetConversation = React.useCallback(() => {
     try {

@@ -115,7 +115,6 @@ function App() {
 - `keyboardShortcut`: Keyboard shortcut to open search (default: "cmd+k")
 - `buttonText`: Custom search button text
 - `buttonProps`: Additional props for the search button
-- `baseAskaiUrl`: Custom AI chat API endpoint
 
 ## 🎯 Key Components
 

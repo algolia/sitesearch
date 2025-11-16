@@ -54,8 +54,6 @@ export interface SidepanelAskAIConfig {
   indexName: string;
   /** AI Assistant ID (required for chat functionality) */
   assistantId: string;
-  /** Base URL for AI chat API (optional, defaults to beta endpoint) */
-  baseAskaiUrl?: string;
   /** Placeholder text for input (optional, defaults to "Ask AI anything about Algolia") */
   placeholder?: string;
   /** Custom button text (optional, defaults to "Ask AI") */
@@ -1169,7 +1167,6 @@ export default function SidepanelExperience(config: SidepanelAskAIConfig) {
     apiKey: config.apiKey,
     indexName: config.indexName,
     assistantId: config.assistantId,
-    baseAskaiUrl: config.baseAskaiUrl,
   });
 
   // Keyboard shortcut: Command+I (Mac) or Ctrl+I (Windows)
