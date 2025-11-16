@@ -53,7 +53,7 @@ export default function HomePage() {
                   "Powerful",
                 ]}
               />{" "}
-              Search Component Library
+              search component library
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600 font-sora dark:text-gray-400 max-w-2xl mx-auto">
               The ultimate{" "}
@@ -79,7 +79,7 @@ export default function HomePage() {
                 href="/docs/experiences/search"
                 className="rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-400 transition-colors"
               >
-                Browse Components
+                Browse components
               </Link>
               <Link
                 href="/docs/"
@@ -100,7 +100,7 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-                  Production-Ready Search Components
+                  Production-ready search components
                 </h2>
                 <p className="mt-2 text-lg max-w-2xl text-gray-600 dark:text-gray-400">
                   Our search components are designed to be fully composable so
@@ -238,7 +238,7 @@ export default function HomePage() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium"
                   >
-                    Let us know GitHub Discussions
+                    Let us know on GitHub Discussions
                   </Link>
                 </p>
               </div>
