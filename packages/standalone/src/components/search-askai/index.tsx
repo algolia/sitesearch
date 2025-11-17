@@ -1,6 +1,6 @@
 import { liteClient as algoliasearch } from "algoliasearch/lite";
 import type { ComponentProps, FC, RefObject } from "react";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Configure,
   InstantSearch,
@@ -20,6 +20,10 @@ import "./styles.css";
 import type { HitsAttributesMapping } from "../types";
 import { SearchButton } from "./search-button";
 import { Modal } from "./search-modal";
+import {
+  type SuggestedQuestionHit,
+  useSuggestedQuestions,
+} from "./use-suggested-questions";
 import useEffectiveDarkMode from "./useEffectiveDarkMode";
 
 export interface SearchWithAskAIConfig {
@@ -49,6 +53,8 @@ export interface SearchWithAskAIConfig {
   insights?: boolean;
   /** Additional Algolia search parameters (optional) - e.g., analytics, filters, distinct, etc. */
   searchParameters?: Record<string, unknown>;
+  /** Suggested Questions Enabled (optional, defaults to false) */
+  suggestedQuestionsEnabled?: boolean;
 }
 
 interface SearchBoxProps {
@@ -64,6 +70,7 @@ interface SearchBoxProps {
   onArrowDown?: () => void;
   onArrowUp?: () => void;
   onEnter?: (value: string) => boolean;
+  onNewChat?: () => void;
 }
 
 const SearchBox: FC<SearchBoxProps> = memo(function SearchBox(props) {
@@ -79,6 +86,7 @@ const SearchBox: FC<SearchBoxProps> = memo(function SearchBox(props) {
       onArrowDown={props.onArrowDown}
       onArrowUp={props.onArrowUp}
       onEnter={props.onEnter}
+      onNewChat={props.onNewChat}
     />
   );
 });
@@ -142,6 +150,7 @@ interface ResultsPanelProps {
   onHoverIndex?: (index: number) => void;
   scrollOnSelectionChange?: boolean;
   sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  suggestedQuestions?: SuggestedQuestionHit[];
 }
 
 const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
@@ -159,6 +168,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   onHoverIndex,
   scrollOnSelectionChange = true,
   sendEvent,
+  suggestedQuestions,
 }) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -212,6 +222,21 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
     lastSentRef.current = trimmed;
   }, [showChat, query, inputRef, sendMessage, refine]);
 
+  useEffect(() => {
+    if ((messages as Message[]).length === 0) {
+      lastSentRef.current = null;
+    }
+  }, [messages]);
+
+  const handleSuggestedQuestionClick = useCallback(
+    (question: string) => {
+      const trimmed = question.trim();
+      if (!trimmed || isGenerating) return;
+      sendMessage({ text: trimmed });
+    },
+    [isGenerating, sendMessage],
+  );
+
   if (showChat) {
     return (
       <ChatWidget
@@ -220,6 +245,8 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
         isGenerating={isGenerating}
         applicationId={config.applicationId}
         assistantId={config.assistantId}
+        suggestedQuestions={suggestedQuestions}
+        onSuggestedQuestionClick={handleSuggestedQuestionClick}
       />
     );
   }
@@ -268,11 +295,24 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
   }, []);
 
   // Lift chat state here to thread isGenerating to the SearchInput
-  const { messages, error, isGenerating, sendMessage } = useAskai({
+  const { messages, setMessages, error, isGenerating, sendMessage } = useAskai({
     applicationId: config.applicationId,
     apiKey: config.apiKey,
     indexName: config.indexName,
     assistantId: config.assistantId,
+  });
+
+  const suggestedQuestionsClient = useMemo(() => {
+    const client = algoliasearch(config.applicationId, config.apiKey);
+    client.addAlgoliaAgent("algolia-sitesearch");
+    return client;
+  }, [config.applicationId, config.apiKey]);
+
+  const suggestedQuestions = useSuggestedQuestions({
+    searchClient: suggestedQuestionsClient,
+    assistantId: config.assistantId,
+    suggestedQuestionsEnabled: config.suggestedQuestionsEnabled ?? false,
+    isOpen: showChat,
   });
 
   const noResults = results.results?.nbHits === 0;
@@ -305,6 +345,15 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
 
   const showResultsPanel = (!noResults && !!query) || showChat;
 
+  const handleNewChat = useCallback(() => {
+    setMessages?.([]);
+    setShowChat(true);
+    refine("");
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [setMessages, setShowChat, refine]);
+
   return (
     <>
       <Configure
@@ -333,6 +382,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             return handleActivateSelection();
           }}
           inputRef={inputRef}
+          onNewChat={handleNewChat}
         />
         {showResultsPanel && (
           <ResultsPanel
@@ -352,6 +402,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             onHoverIndex={hoverIndex}
             scrollOnSelectionChange={selectionOrigin !== "pointer"}
             sendEvent={sendEvent}
+            suggestedQuestions={suggestedQuestions}
           />
         )}
         {noResults && query && !showChat && (

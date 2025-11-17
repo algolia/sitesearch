@@ -173,6 +173,27 @@
   text-decoration: none;
 }
 
+.ssask-exp .ss-search-new-chat-button {
+  border: none;
+  background-color: transparent;
+  color: var(--search-secondary-color);
+  padding: var(--search-padding);
+  border-radius: var(--search-button-border-radius);
+  font-size: var(--search-button-font-size);
+  cursor: pointer;
+  transition: var(--search-button-transition);
+}
+
+.ssask-exp .ss-search-new-chat-button:not(:disabled):hover {
+  color: var(--search-primary-color);
+  background-color: var(--search-hover-color);
+}
+
+.ssask-exp .ss-search-new-chat-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .ssask-exp .ss-search-left-button {
   color: var(--search-secondary-color);
 }
@@ -367,6 +388,53 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.ssask-exp .ss-chat-welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem 0 0.5rem;
+}
+
+.ssask-exp .ss-chat-welcome-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--search-text-color);
+}
+
+.ssask-exp .ss-chat-welcome-subtitle {
+  margin: 0;
+  color: var(--search-secondary-color);
+  font-size: 0.95rem;
+}
+
+.ssask-exp .ss-suggested-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ssask-exp .ss-suggested-question-btn {
+  border: 1px solid var(--search-border-color);
+  background: var(--search-background-color);
+  color: var(--search-text-color);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--search-button-transition);
+}
+
+.ssask-exp .ss-suggested-question-btn:hover {
+  border-color: var(--search-primary-color);
+  color: var(--search-primary-color);
+}
+
+.ssask-exp .ss-suggested-question-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .ssask-exp .ss-qa-card {

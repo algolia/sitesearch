@@ -43,6 +43,7 @@ export function PreviewSiteSearch() {
           hitsPerPage={6}
           keyboardShortcut="cmd+k"
           buttonText="🎧 Search Podcasts"
+          suggestedQuestionsEnabled={true}
           attributes={{
             primaryText: "title",
             secondaryText: "description",
@@ -236,6 +237,7 @@ export function PreviewSidepanelAskAI() {
             assistantId="UpR727VnXnoG"
             buttonText="Ask AI (floating)"
             variant="floating"
+            suggestedQuestionsEnabled={true}
           />
           <SidepanelExperience
             applicationId="06YAZFOHSQ"
@@ -244,6 +246,7 @@ export function PreviewSidepanelAskAI() {
             assistantId="UpR727VnXnoG"
             buttonText="Ask AI (inline)"
             variant="inline"
+            suggestedQuestionsEnabled={true}
           />
         </div>
       </div>

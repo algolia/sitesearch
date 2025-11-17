@@ -11,6 +11,7 @@ import {
   SearchIcon,
 } from "./icons";
 import { MemoizedMarkdown } from "./markdown";
+import type { SuggestedQuestionHit } from "./use-suggested-questions";
 
 function useClipboard() {
   const copyText = useCallback(async (text: string) => {
@@ -35,6 +36,8 @@ interface ChatWidgetProps {
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
   assistantId: string;
+  suggestedQuestions?: SuggestedQuestionHit[];
+  onSuggestedQuestionClick?: (question: string) => void;
 }
 
 export interface SearchIndexTool {
@@ -78,6 +81,8 @@ export const ChatWidget = memo(function ChatWidget({
   onThumbsDown,
   applicationId,
   assistantId,
+  suggestedQuestions,
+  onSuggestedQuestionClick,
 }: ChatWidgetProps) {
   const { copyText } = useClipboard();
   const [copiedExchangeId, setCopiedExchangeId] = useState<string | null>(null);
@@ -129,9 +134,44 @@ export const ChatWidget = memo(function ChatWidget({
   return (
     <div className="ss-chat-root">
       <div className="ss-qa-list">
-        <p className="ss-hint">
-          Answers are generated using AI and may make mistakes.
-        </p>
+        {exchanges.length === 0 ? (
+          <>
+            <div className="ss-chat-welcome">
+              <h2 className="ss-chat-welcome-title">
+                How can I help you today?
+              </h2>
+              <p className="ss-chat-welcome-subtitle">
+                I search through your content to help you find answers to your
+                questions, fast.
+              </p>
+              {suggestedQuestions && suggestedQuestions.length > 0 ? (
+                <div className="ss-suggested-questions">
+                  {suggestedQuestions.map((question) => (
+                    <button
+                      key={question.objectID}
+                      type="button"
+                      className="ss-suggested-question-btn"
+                      disabled={isGenerating}
+                      onClick={() => {
+                        if (isGenerating) return;
+                        onSuggestedQuestionClick?.(question.question);
+                      }}
+                    >
+                      {question.question}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <p className="ss-hint">
+              Answers are generated using AI and may make mistakes.
+            </p>
+          </>
+        ) : (
+          <p className="ss-hint">
+            Answers are generated using AI and may make mistakes.
+          </p>
+        )}
         {/* errors */}
         {error && <div className="ss-error-banner">{error.message}</div>}
 

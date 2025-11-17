@@ -7,6 +7,7 @@
 
 import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
+import { liteClient } from "algoliasearch/lite";
 import {
   ArrowUpIcon,
   BrainIcon,
@@ -40,6 +41,10 @@ import {
   postFeedback,
   useAskai,
 } from "@/registry/experiences/sidepanel-askai/hooks/use-askai";
+import {
+  type SuggestedQuestionHit,
+  useSuggestedQuestions,
+} from "@/registry/experiences/sidepanel-askai/hooks/use-suggested-questions";
 
 // ============================================================================
 // Types
@@ -54,6 +59,8 @@ export interface SidepanelAskAIConfig {
   indexName: string;
   /** AI Assistant ID (required for chat functionality) */
   assistantId: string;
+  /** Suggested Questions Enabled (optional, defaults to false) */
+  suggestedQuestionsEnabled?: boolean;
   /** Placeholder text for input (optional, defaults to "Ask AI anything about Algolia") */
   placeholder?: string;
   /** Custom button text (optional, defaults to "Ask AI") */
@@ -488,7 +495,7 @@ const RelatedSources = memo(function RelatedSources({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-blue-50 dark:hover:bg-slate-900 hover:border-blue-600 transition-colors duration-200 no-underline"
             >
-              <Link2Icon size={16} />
+              <Link2Icon className="shrink-0" size={16} />
               <span>{displayText}</span>
             </a>
           );
@@ -511,6 +518,8 @@ interface ChatWidgetProps {
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
   assistantId: string;
+  suggestedQuestions: SuggestedQuestionHit[];
+  onSuggestedQuestionClick: (question: string) => void;
 }
 
 const ChatWidget = memo(function ChatWidget({
@@ -522,6 +531,8 @@ const ChatWidget = memo(function ChatWidget({
   onThumbsDown,
   applicationId,
   assistantId,
+  suggestedQuestions,
+  onSuggestedQuestionClick,
 }: ChatWidgetProps) {
   const { copyText } = useClipboard();
   const [copiedExchangeId, setCopiedExchangeId] = useState<string | null>(null);
@@ -589,6 +600,21 @@ const ChatWidget = memo(function ChatWidget({
               I search through your content to help you find answers to your
               questions, fast.
             </p>
+            {suggestedQuestions.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {suggestedQuestions.map((question) => (
+                  <Button
+                    key={question.objectID}
+                    type="button"
+                    variant="outline"
+                    className="cursor-pointer text-left"
+                    onClick={() => onSuggestedQuestionClick(question.question)}
+                  >
+                    {question.question}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         )}
         {/* errors */}
@@ -884,6 +910,7 @@ interface SidepanelProps {
   messages: Message[];
   error: Error | null;
   isGenerating: boolean;
+  suggestedQuestions: SuggestedQuestionHit[];
   sendMessage: (options: { text: string }) => void | Promise<void>;
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
   onOpenNewConversation: () => void;
@@ -898,6 +925,7 @@ const Sidepanel = memo(function Sidepanel({
   messages,
   error,
   isGenerating,
+  suggestedQuestions,
   sendMessage,
   inputRef,
   onOpenNewConversation,
@@ -991,10 +1019,9 @@ const Sidepanel = memo(function Sidepanel({
     textArea.style.height = `${Math.min(fullHeight, maxHeight)}px`;
   }, [inputRef]);
 
-  const handleSubmit = useCallback(
-    (e?: React.FormEvent) => {
-      e?.preventDefault();
-      const trimmed = inputValue.trim();
+  const sendMessageAndReset = useCallback(
+    (text: string) => {
+      const trimmed = text.trim();
       if (!trimmed || isGenerating) return;
 
       sendMessage({ text: trimmed });
@@ -1005,7 +1032,22 @@ const Sidepanel = memo(function Sidepanel({
         inputRef.current?.focus();
       }, 50);
     },
-    [inputValue, isGenerating, sendMessage, inputRef, managePromptHeight],
+    [isGenerating, sendMessage, inputRef, managePromptHeight],
+  );
+
+  const handleSubmit = useCallback(
+    (e?: React.FormEvent) => {
+      e?.preventDefault();
+      sendMessageAndReset(inputValue);
+    },
+    [inputValue, sendMessageAndReset],
+  );
+
+  const handleSuggestedQuestionClick = useCallback(
+    (question: string) => {
+      sendMessageAndReset(question);
+    },
+    [sendMessageAndReset],
   );
 
   const resizeSidepanel = useCallback(() => {
@@ -1095,6 +1137,8 @@ const Sidepanel = memo(function Sidepanel({
           isGenerating={isGenerating}
           applicationId={config.applicationId}
           assistantId={config.assistantId}
+          suggestedQuestions={suggestedQuestions}
+          onSuggestedQuestionClick={handleSuggestedQuestionClick}
         />
 
         {/* Input Bar */}
@@ -1162,11 +1206,24 @@ export default function SidepanelExperience(config: SidepanelAskAIConfig) {
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const searchClient = useMemo(() => {
+    const client = liteClient(config.applicationId, config.apiKey);
+    client.addAlgoliaAgent("algolia-sitesearch");
+    return client;
+  }, [config.applicationId, config.apiKey]);
+
   const { messages, setMessages, error, isGenerating, sendMessage } = useAskai({
     applicationId: config.applicationId,
     apiKey: config.apiKey,
     indexName: config.indexName,
     assistantId: config.assistantId,
+  });
+
+  const suggestedQuestions = useSuggestedQuestions({
+    searchClient,
+    assistantId: config.assistantId,
+    suggestedQuestionsEnabled: config.suggestedQuestionsEnabled ?? false,
+    isOpen,
   });
 
   // Keyboard shortcut: Command+I (Mac) or Ctrl+I (Windows)
@@ -1218,6 +1275,7 @@ export default function SidepanelExperience(config: SidepanelAskAIConfig) {
         messages={messages as unknown as Message[]}
         error={error as Error | null}
         isGenerating={isGenerating}
+        suggestedQuestions={suggestedQuestions}
         sendMessage={sendMessage}
         inputRef={inputRef}
         onOpenNewConversation={openNewConversation}

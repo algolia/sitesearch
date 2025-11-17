@@ -1,7 +1,7 @@
 import type { RefObject } from "react";
 import { memo, useEffect, useState } from "react";
 import { useInstantSearch, useSearchBox } from "react-instantsearch";
-import { ArrowLeftIcon, CloseIcon, SearchIcon } from "./icons";
+import { ArrowLeftIcon, CloseIcon, SearchIcon, SquarePenIcon } from "./icons";
 
 export interface SearchInputProps {
   placeholder?: string;
@@ -14,6 +14,7 @@ export interface SearchInputProps {
   onArrowDown?: () => void;
   onArrowUp?: () => void;
   onEnter?: (value: string) => boolean;
+  onNewChat?: () => void;
 }
 
 const SearchLeftButton = memo(function SearchLeftButton({
@@ -170,6 +171,19 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
         >
           Clear
         </button>
+        {props.showChat ? (
+          <button
+            type="button"
+            className="ss-search-new-chat-button"
+            disabled={props.isGenerating}
+            onClick={() => {
+              setChatInput("");
+              props.onNewChat?.();
+            }}
+          >
+            <SquarePenIcon size={18} />
+          </button>
+        ) : null}
         <button
           type="button"
           className="ss-search-close-button"

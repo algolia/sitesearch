@@ -58,18 +58,20 @@
       </div>
     </div>
 
-    <script src="./node_modules/@algolia/sitesearch/dist/search.min.js"></script>
+    <script src="./node_modules/@algolia/sitesearch/dist/search-askai.min.js"></script>
     <script>
       const applicationId = "06YAZFOHSQ";
       const apiKey = "94b6afdc316917b6e6cdf2763fa561df";
       const indexName = "algolia_podcast_sample_dataset";
 
       // Search experience
-      if (window.SiteSearch) {
-        window.SiteSearch.init({
+      if (window.SiteSearchAskAI) {
+        window.SiteSearchAskAI.init({
           container: "#search",
           applicationId,
           apiKey,
+          assistantId: "UpR727VnXnoG",
+          suggestedQuestionsEnabled: true,
           indexName,
           attributes: {
             primaryText: "title",
