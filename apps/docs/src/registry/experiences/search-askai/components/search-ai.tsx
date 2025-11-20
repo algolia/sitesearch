@@ -41,6 +41,7 @@ import {
   useSearchBox,
 } from "react-instantsearch";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   postFeedback,
   useAskai,
@@ -69,8 +70,6 @@ export interface SearchWithAskAIConfig {
   placeholder?: string;
   /** Number of hits per page (optional, defaults to 8) */
   hitsPerPage?: number;
-  /** Keyboard shortcut to open search (optional, defaults to "cmd+k") */
-  keyboardShortcut?: string;
   /** Custom search button text (optional) */
   buttonText?: string;
   /** Custom search button props (optional) */
@@ -85,26 +84,79 @@ export interface SearchWithAskAIConfig {
   suggestedQuestionsEnabled?: boolean;
 }
 
-interface SearchButtonProps {
-  onClick: () => void;
-  children?: React.ReactNode;
-}
+interface SearchButtonProps extends React.ComponentProps<typeof Button> {}
 
-export const SearchButton: React.FC<SearchButtonProps> = ({ onClick }) => {
+export const SearchButton: React.FC<SearchButtonProps> = ({
+  className,
+  ...buttonProps
+}) => {
+  const [modifierLabel, setModifierLabel] = useState("⌘");
+  const [isModifierPressed, setIsModifierPressed] = useState(false);
+  const [isKPressed, setIsKPressed] = useState(false);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined") return;
+    const isMac = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
+    setModifierLabel(isMac ? "⌘" : "Ctrl");
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey) setIsModifierPressed(true);
+      if (event.key.toLowerCase() === "k") setIsKPressed(true);
+    };
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (!event.metaKey && !event.ctrlKey) setIsModifierPressed(false);
+      if (event.key.toLowerCase() === "k") setIsKPressed(false);
+    };
+    const resetKeys = () => {
+      setIsModifierPressed(false);
+      setIsKPressed(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", resetKeys);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", resetKeys);
+    };
+  }, []);
+
+  const baseClassName =
+    "md:min-w-[200px] justify-between hover:shadow-md transition-transform duration-400 translate-y-0 py-3 h-auto cursor-pointer hover:bg-transparent hover:translate-y-[-2px] border shadow-none";
+
   return (
     <Button
       type="button"
-      onClick={onClick}
       variant="outline"
-      className="md:min-w-[200px] justify-between hover:shadow-md transition-transform duration-400 translate-y-0 py-3 h-auto cursor-pointer hover:bg-transparent hover:translate-y-[-2px] border shadow-none"
+      className={cn(baseClassName, className)}
       aria-label="Open search"
+      {...buttonProps}
     >
       <span className="flex items-center gap-2 opacity-80">
         <SearchIcon size={24} color="currentColor" />
         <span className="hidden sm:inline text-muted-foreground">Search</span>
       </span>
-      <div className="hidden md:inline-block rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-muted-foreground">
-        ⌘ K
+      <div className="hidden md:flex gap-0.5">
+        <kbd
+          className={`h-5 min-w-5 rounded grid place-items-center bg-muted text-xs text-muted-foreground transition-all duration-200 ${
+            isModifierPressed
+              ? "inset-shadow-sm inset-shadow-foreground/30"
+              : "shadow-none"
+          }`}
+        >
+          {modifierLabel}
+        </kbd>
+        <kbd
+          className={`h-5 min-w-5 rounded grid place-items-center bg-muted text-xs text-muted-foreground transition-all duration-200 ${
+            isKPressed
+              ? "inset-shadow-sm inset-shadow-foreground/30"
+              : "shadow-none"
+          }`}
+        >
+          K
+        </kbd>
       </div>
     </Button>
   );
@@ -1722,28 +1774,17 @@ export default function SearchExperience(config: SearchWithAskAIConfig) {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const shortcut = config.keyboardShortcut || "cmd+k";
-  const [modifierKey = "cmd", key = "k"] = shortcut.toLowerCase().split("+");
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: we don't to rerun
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const isModifierPressed =
-        modifierKey === "cmd"
-          ? event.metaKey || event.ctrlKey
-          : event.getModifierState(
-              modifierKey.charAt(0).toUpperCase() + modifierKey.slice(1),
-            );
-
-      if (isModifierPressed && event.key.toLowerCase() === key) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        openModal();
+        setIsModalOpen(true);
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [modifierKey, key]);
+  }, []);
 
   const buttonProps = {
     ...config.buttonProps,

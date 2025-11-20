@@ -149,6 +149,13 @@ Required props for using the `SearchWithAskAi` component:
   </TabsContents>
 </Tabs>
 
+## Behavior
+
+- **Keyboard shortcut**: Press `Cmd+K` (Mac) / `Ctrl+K` (Windows) to open the search modal
+- **Keyboard navigation**: Use arrow keys to navigate results, `Enter` to select, `Escape` to close
+- **AI chat**: Switch to chat mode to ask follow-up questions powered by Algolia's Ask AI
+- **Accessible**: Full keyboard support and ARIA labels for screen readers
+
 ## References
 
 <TypeTable
@@ -216,12 +223,6 @@ Required props for using the `SearchWithAskAi` component:
       description: "Number of hits per page (optional, defaults to 8)",
       type: "number",
       default: 8,
-      required: false,
-    },
-    keyboardShortcut: {
-      description: "Keyboard shortcut to open search (optional, defaults to \"cmd+k\")",
-      type: "string",
-      default: "\"cmd+k\"",
       required: false,
     },
     buttonText: {

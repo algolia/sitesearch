@@ -37,6 +37,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   postFeedback,
   useAskai,
@@ -1252,20 +1253,73 @@ export default function SidepanelExperience(config: SidepanelAskAIConfig) {
     onClick: openSidepanel,
   };
 
+  const [modifierLabel, setModifierLabel] = useState("⌘");
+  const [isModifierPressed, setIsModifierPressed] = useState(false);
+  const [isIPressed, setIsIPressed] = useState(false);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined") return;
+    const isMac = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
+    setModifierLabel(isMac ? "⌘" : "Ctrl");
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey) setIsModifierPressed(true);
+      if (event.key.toLowerCase() === "i") setIsIPressed(true);
+    };
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (!event.metaKey && !event.ctrlKey) setIsModifierPressed(false);
+      if (event.key.toLowerCase() === "i") setIsIPressed(false);
+    };
+    const resetKeys = () => {
+      setIsModifierPressed(false);
+      setIsIPressed(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", resetKeys);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", resetKeys);
+    };
+  }, []);
+
+  const baseClassName =
+    "justify-between hover:shadow-md transition-transform duration-400 translate-y-0 py-3 h-auto cursor-pointer hover:bg-transparent hover:translate-y-[-2px] border shadow-none";
+
   return (
     <>
       <Button
         {...buttonProps}
         variant="outline"
-        className="justify-between hover:shadow-md transition-transform duration-400 translate-y-0 py-3 h-auto cursor-pointer hover:bg-transparent hover:translate-y-[-2px] border shadow-none"
+        className={cn(baseClassName, buttonProps.className)}
       >
         <span className="flex items-center gap-2 opacity-80">
           <span className="inline text-muted-foreground">
             {config.buttonText || "Ask AI"}
           </span>
         </span>
-        <div className="hidden md:inline-block rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-muted-foreground">
-          ⌘ I
+        <div className="hidden md:flex gap-0.5">
+          <kbd
+            className={`h-5 min-w-5 rounded grid place-items-center bg-muted text-xs text-muted-foreground transition-all duration-200 ${
+              isModifierPressed
+                ? "inset-shadow-sm inset-shadow-foreground/30"
+                : "shadow-none"
+            }`}
+          >
+            {modifierLabel}
+          </kbd>
+          <kbd
+            className={`h-5 min-w-5 rounded grid place-items-center bg-muted text-xs text-muted-foreground transition-all duration-200 ${
+              isIPressed
+                ? "inset-shadow-sm inset-shadow-foreground/30"
+                : "shadow-none"
+            }`}
+          >
+            I
+          </kbd>
         </div>
       </Button>
       <Sidepanel
