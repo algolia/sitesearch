@@ -80,7 +80,8 @@
         "algoliasearch@^5",
         "react-instantsearch@^7.16.2",
         "tw-animate-css",
-        "lucide-react"
+        "lucide-react",
+        "marked"
       ],
       "css": {
         "@import \"tw-animate-css\"": {},
@@ -112,6 +113,10 @@
         },
         {
           "path": "src/registry/experiences/search-askai/hooks/use-askai.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/registry/experiences/search-askai/hooks/use-suggested-questions.ts",
           "type": "registry:hook"
         },
         {
@@ -185,6 +190,10 @@
         },
         {
           "path": "src/registry/experiences/sidepanel-askai/hooks/use-askai.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/registry/experiences/sidepanel-askai/hooks/use-suggested-questions.ts",
           "type": "registry:hook"
         },
         {
