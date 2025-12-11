@@ -41,6 +41,8 @@ import {
   useSearchBox,
 } from "react-instantsearch";
 import { Button } from "@/components/ui/button";
+import { ThreadDepthErrorBanner } from "@/components/thread-depth-error-banner";
+import { isThreadDepthError } from "@/registry/utils/error-utils";
 import {
   postFeedback,
   useAskai,
@@ -375,7 +377,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
         {children}
       </div>
     </div>,
-    document.body,
+    document.body
   );
 };
 
@@ -415,7 +417,7 @@ const MemoizedMarkdown = memo(function MemoizedMarkdown({
     const handleCopyClick = async (event: Event) => {
       const target = event.target as HTMLElement;
       const button = target.closest(
-        ".markdown-copy-button",
+        ".markdown-copy-button"
       ) as HTMLButtonElement;
 
       if (!button) return;
@@ -510,6 +512,7 @@ interface ChatWidgetProps {
   assistantId: string;
   suggestedQuestions?: SuggestedQuestionHit[];
   onSuggestedQuestionClick?: (question: string) => void;
+  onNewChat?: () => void;
 }
 
 const ChatWidget = memo(function ChatWidget({
@@ -523,6 +526,7 @@ const ChatWidget = memo(function ChatWidget({
   assistantId,
   suggestedQuestions,
   onSuggestedQuestionClick,
+  onNewChat,
 }: ChatWidgetProps) {
   const { copyText } = useClipboard();
   const [copiedExchangeId, setCopiedExchangeId] = useState<string | null>(null);
@@ -537,7 +541,22 @@ const ChatWidget = memo(function ChatWidget({
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
     const grouped: Exchange[] = [];
+    let skipLastUserMessage = false;
+
+    // If there's a thread depth error, don't show the last user message
+    if (isThreadDepthError(error) && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === "user") {
+        skipLastUserMessage = true;
+      }
+    }
+
     for (let i = 0; i < messages.length; i++) {
+      // Skip the last user message if it caused a thread depth error
+      if (skipLastUserMessage && i === messages.length - 1) {
+        continue;
+      }
+
       const current = messages[i];
       if (current.role === "user") {
         const userMessage = current as Message;
@@ -560,7 +579,7 @@ const ChatWidget = memo(function ChatWidget({
       }
     }
     return grouped;
-  }, [messages]);
+  }, [messages, error]);
 
   // Cleanup any pending reset timers on unmount
   useEffect(() => {
@@ -616,7 +635,11 @@ const ChatWidget = memo(function ChatWidget({
         {/* errors */}
         {error && (
           <div className="border border-red-300 bg-red-100 text-red-900 px-4 py-3 rounded-lg">
-            {error.message}
+            {isThreadDepthError(error) && onNewChat ? (
+              <ThreadDepthErrorBanner onNewChat={onNewChat} />
+            ) : (
+              error.message
+            )}
           </div>
         )}
 
@@ -637,7 +660,7 @@ const ChatWidget = memo(function ChatWidget({
                     {exchange.userMessage.parts.map((part, index) =>
                       part.type === "text" ? (
                         <span key={index}>{part.text}</span>
-                      ) : null,
+                      ) : null
                     )}
                   </div>
                 </div>
@@ -974,7 +997,7 @@ const HitsList = memo(function HitsList({
       url: attributes.url,
       image: attributes.image,
     }),
-    [attributes],
+    [attributes]
   );
 
   if (!attributes || !mapping.primaryText) {
@@ -1004,7 +1027,9 @@ const HitsList = memo(function HitsList({
             href={url ?? "#"}
             target={url ? "_blank" : undefined}
             rel="noopener noreferrer"
-            className={`my-1 p-4 rounded-lg bg-background gap-4 cursor-pointer no-underline text-foreground transition-all duration-150 block hover:bg-blue-50 hover:border-border hover:shadow-lg hover:-translate-y-px aria-selected:bg-blue-50 aria-selected:border-border aria-selected:shadow-lg aria-selected:-translate-y-px dark:hover:bg-slate-900 dark:aria-selected:bg-slate-900 animate-in fade-in-0 zoom-in-95 ${hasImage ? "flex flex-row items-center gap-4" : ""}`}
+            className={`my-1 p-4 rounded-lg bg-background gap-4 cursor-pointer no-underline text-foreground transition-all duration-150 block hover:bg-blue-50 hover:border-border hover:shadow-lg hover:-translate-y-px aria-selected:bg-blue-50 aria-selected:border-border aria-selected:shadow-lg aria-selected:-translate-y-px dark:hover:bg-slate-900 dark:aria-selected:bg-slate-900 animate-in fade-in-0 zoom-in-95 ${
+              hasImage ? "flex flex-row items-center gap-4" : ""
+            }`}
             role="option"
             aria-selected={isSel}
             onClick={() => {
@@ -1145,8 +1170,8 @@ const SearchInput = memo(function SearchInput(props: SearchInputProps) {
   const placeholder = props.isGenerating
     ? "Answering..."
     : props.showChat
-      ? "Ask AI anything about Algolia"
-      : props.placeholder;
+    ? "Ask AI anything about Algolia"
+    : props.placeholder;
 
   const currentValue = props.showChat ? chatInput : query || "";
 
@@ -1363,7 +1388,7 @@ const ResultsPanel = memo(function ResultsPanel({
     const container = containerRef.current;
     if (!container) return;
     const selectedEl = container.querySelector(
-      '[aria-selected="true"]',
+      '[aria-selected="true"]'
     ) as HTMLElement | null;
     if (!selectedEl) return;
 
@@ -1406,7 +1431,7 @@ const ResultsPanel = memo(function ResultsPanel({
       }
       sendMessage({ text: trimmed });
     },
-    [sendMessage, isGenerating],
+    [sendMessage, isGenerating]
   );
 
   if (showChat) {
@@ -1419,6 +1444,7 @@ const ResultsPanel = memo(function ResultsPanel({
         assistantId={config.assistantId}
         suggestedQuestions={suggestedQuestions}
         onSuggestedQuestionClick={handleSuggestedQuestionClick}
+        onNewChat={handleNewChat}
       />
     );
   }
@@ -1492,7 +1518,9 @@ const Footer = memo(function Footer({ showChat }: { showChat: boolean }) {
     "https://www.algolia.com/developers?utm_medium=referral&utm_content=powered_by&utm_campaign=sitesearch";
   const poweredByHref =
     typeof window !== "undefined"
-      ? `${basePoweredByUrl}&utm_source=${encodeURIComponent(window.location.hostname)}`
+      ? `${basePoweredByUrl}&utm_source=${encodeURIComponent(
+          window.location.hostname
+        )}`
       : basePoweredByUrl;
   return (
     <div className="flex items-center justify-between bg-background rounded-b-lg border-t border-border p-4">
@@ -1579,12 +1607,43 @@ function SearchModal({ onClose, config }: SearchModalProps) {
   const { items, sendEvent } = useHits();
   const { showChat, setShowChat, handleShowChat } = useSearchState();
 
-  const { messages, setMessages, error, isGenerating, sendMessage } = useAskai({
+  // Track the message count when a thread depth error occurred
+  const [threadDepthErrorAtMessageCount, setThreadDepthErrorAtMessageCount] =
+    useState<number | null>(null);
+
+  const {
+    messages,
+    setMessages,
+    error,
+    isGenerating,
+    sendMessage,
+    status,
+    resetConversation,
+  } = useAskai({
     applicationId: config.applicationId,
     apiKey: config.apiKey,
     indexName: config.indexName,
     assistantId: config.assistantId,
   });
+
+  // Monitor for thread depth errors (AI-217)
+  useEffect(() => {
+    const err = error as Error & { code?: string };
+    if (
+      status === "error" &&
+      (err?.code === "AI-217" || error?.message?.includes("AI-217"))
+    ) {
+      // Only record if we have an assistant message (real conversation)
+      messages.some((m) => m.role === "assistant") &&
+        setThreadDepthErrorAtMessageCount(messages.length);
+    } else if (
+      status !== "error" &&
+      threadDepthErrorAtMessageCount &&
+      messages.length < threadDepthErrorAtMessageCount
+    ) {
+      setThreadDepthErrorAtMessageCount(null);
+    }
+  }, [status, error, messages, threadDepthErrorAtMessageCount]);
 
   const suggestedQuestionsClient = useMemo(() => {
     const client = algoliasearch(config.applicationId, config.apiKey);
@@ -1630,13 +1689,16 @@ function SearchModal({ onClose, config }: SearchModalProps) {
   const showResultsPanel = (!noResults && !!query) || showChat;
 
   const handleNewChat = useCallback(() => {
-    setMessages?.([]);
+    // Generate a new conversation ID to force a fresh chat instance
+    // This will automatically clear messages and errors in the AI SDK
+    resetConversation();
+    setThreadDepthErrorAtMessageCount(null);
     setShowChat(true);
     refine("");
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [setMessages, setShowChat, refine]);
+  }, [resetConversation, setShowChat, refine]);
 
   return (
     <>
@@ -1732,7 +1794,7 @@ export default function SearchExperience(config: SearchWithAskAIConfig) {
         modifierKey === "cmd"
           ? event.metaKey || event.ctrlKey
           : event.getModifierState(
-              modifierKey.charAt(0).toUpperCase() + modifierKey.slice(1),
+              modifierKey.charAt(0).toUpperCase() + modifierKey.slice(1)
             );
 
       if (isModifierPressed && event.key.toLowerCase() === key) {

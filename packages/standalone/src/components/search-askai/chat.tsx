@@ -2,6 +2,7 @@ import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { postFeedback } from "./askai";
+import { isThreadDepthError, ThreadDepthErrorBanner } from "./error-utils";
 import {
   BrainIcon,
   CheckIcon,
@@ -38,6 +39,8 @@ interface ChatWidgetProps {
   assistantId: string;
   suggestedQuestions?: SuggestedQuestionHit[];
   onSuggestedQuestionClick?: (question: string) => void;
+  onNewChat?: () => void;
+  hasThreadDepthError?: boolean;
 }
 
 export interface SearchIndexTool {
@@ -83,6 +86,8 @@ export const ChatWidget = memo(function ChatWidget({
   assistantId,
   suggestedQuestions,
   onSuggestedQuestionClick,
+  onNewChat,
+  hasThreadDepthError,
 }: ChatWidgetProps) {
   const { copyText } = useClipboard();
   const [copiedExchangeId, setCopiedExchangeId] = useState<string | null>(null);
@@ -97,7 +102,22 @@ export const ChatWidget = memo(function ChatWidget({
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
     const grouped: Exchange[] = [];
+    let skipLastUserMessage = false;
+
+    // If there's a thread depth error, don't show the last user message
+    if (hasThreadDepthError && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === "user") {
+        skipLastUserMessage = true;
+      }
+    }
+
     for (let i = 0; i < messages.length; i++) {
+      // Skip the last user message if it caused a thread depth error
+      if (skipLastUserMessage && i === messages.length - 1) {
+        continue;
+      }
+
       const current = messages[i];
       if (current.role === "user") {
         const userMessage = current as Message;
@@ -120,7 +140,7 @@ export const ChatWidget = memo(function ChatWidget({
       }
     }
     return grouped;
-  }, [messages]);
+  }, [messages, hasThreadDepthError]);
 
   // Cleanup any pending reset timers on unmount
   useEffect(() => {
@@ -163,17 +183,19 @@ export const ChatWidget = memo(function ChatWidget({
                 </div>
               ) : null}
             </div>
-            <p className="ss-hint">
-              Answers are generated using AI and may make mistakes.
-            </p>
           </>
-        ) : (
-          <p className="ss-hint">
-            Answers are generated using AI and may make mistakes.
-          </p>
+        ) : null}
+        {/* thread depth error banner */}
+        {hasThreadDepthError && onNewChat && (
+          <ThreadDepthErrorBanner onNewChat={onNewChat} />
         )}
-        {/* errors */}
-        {error && <div className="ss-error-banner">{error.message}</div>}
+        <p className="ss-hint">
+          Answers are generated using AI and may make mistakes.
+        </p>
+        {/* other errors - never show AI-217 errors here */}
+        {error && !hasThreadDepthError && !isThreadDepthError(error) && (
+          <div className="ss-error-banner">{error.message}</div>
+        )}
 
         {/* exchanges */}
         {exchanges
@@ -190,7 +212,7 @@ export const ChatWidget = memo(function ChatWidget({
                       part.type === "text" ? (
                         // biome-ignore lint/suspicious/noArrayIndexKey: better
                         <span key={index}>{part.text}</span>
-                      ) : null,
+                      ) : null
                     )}
                   </div>
                 </div>

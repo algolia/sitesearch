@@ -4,12 +4,15 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { useMemo } from "react";
+import { isThreadDepthError } from "./error-utils";
 
 export interface AskAIConfig {
   applicationId: string;
   apiKey: string;
   indexName: string;
   assistantId: string;
+  /** Demo mode: Simulate thread depth error after N exchanges (for testing only) */
+  _demoThreadDepthLimit?: number;
 }
 
 export function useAskai(config: AskAIConfig) {
@@ -52,9 +55,19 @@ export function useAskai(config: AskAIConfig) {
   const isGenerating =
     chat.status === "submitted" || chat.status === "streaming";
 
+  // Check if there's a thread depth error (AI-217)
+  // Only show error if there are messages (conversation is active)
+  const hasThreadDepthError = useMemo(() => {
+    const isError = chat.status === 'error' && isThreadDepthError(chat.error as Error | null);
+    const hasMessages = chat.messages.length > 0;
+    // Clear error if conversation was reset (no messages)
+    return isError && hasMessages;
+  }, [chat.status, chat.error, chat.messages.length]);
+
   return {
     ...chat,
     isGenerating,
+    hasThreadDepthError,
   };
 }
 
@@ -81,7 +94,7 @@ const isExpired = (token?: string | null): boolean => {
 
 let inflight: Promise<string> | null = null;
 
-// call /token once, cache the promise while it’s running
+// call /token once, cache the promise while it's running
 // eslint-disable-next-line require-await
 export const getValidToken = async ({
   assistantId,

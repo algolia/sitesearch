@@ -63,6 +63,7 @@ interface SearchBoxProps {
   placeholder?: string;
   showChat: boolean;
   isGenerating?: boolean;
+  isThreadDepthError?: boolean;
   inputRef: RefObject<HTMLInputElement | null>;
   refine: (query: string) => void;
   setShowChat: (show: boolean) => void;
@@ -80,6 +81,7 @@ const SearchBox: FC<SearchBoxProps> = memo(function SearchBox(props) {
       placeholder={props.placeholder}
       showChat={props.showChat}
       isGenerating={props.isGenerating}
+      isThreadDepthError={props.isThreadDepthError}
       inputRef={props.inputRef}
       setShowChat={props.setShowChat}
       onClose={props.onClose || (() => {})}
@@ -151,6 +153,8 @@ interface ResultsPanelProps {
   scrollOnSelectionChange?: boolean;
   sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
   suggestedQuestions?: SuggestedQuestionHit[];
+  onNewChat?: () => void;
+  hasThreadDepthError?: boolean;
 }
 
 const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
@@ -169,6 +173,8 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   scrollOnSelectionChange = true,
   sendEvent,
   suggestedQuestions,
+  onNewChat,
+  hasThreadDepthError,
 }) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -193,7 +199,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
     const container = containerRef.current;
     if (!container) return;
     const selectedEl = container.querySelector(
-      '[aria-selected="true"]',
+      '[aria-selected="true"]'
     ) as HTMLElement | null;
     if (!selectedEl) return;
 
@@ -234,7 +240,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
       if (!trimmed || isGenerating) return;
       sendMessage({ text: trimmed });
     },
-    [isGenerating, sendMessage],
+    [isGenerating, sendMessage]
   );
 
   if (showChat) {
@@ -247,6 +253,8 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
         assistantId={config.assistantId}
         suggestedQuestions={suggestedQuestions}
         onSuggestedQuestionClick={handleSuggestedQuestionClick}
+        onNewChat={onNewChat}
+        hasThreadDepthError={hasThreadDepthError}
       />
     );
   }
@@ -295,7 +303,14 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
   }, []);
 
   // Lift chat state here to thread isGenerating to the SearchInput
-  const { messages, setMessages, error, isGenerating, sendMessage } = useAskai({
+  const {
+    messages,
+    setMessages,
+    error,
+    isGenerating,
+    sendMessage,
+    hasThreadDepthError,
+  } = useAskai({
     applicationId: config.applicationId,
     apiKey: config.apiKey,
     indexName: config.indexName,
@@ -346,7 +361,8 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
   const showResultsPanel = (!noResults && !!query) || showChat;
 
   const handleNewChat = useCallback(() => {
-    setMessages?.([]);
+    // Clear messages to start a fresh conversation
+    setMessages([]);
     setShowChat(true);
     refine("");
     if (inputRef.current) {
@@ -368,6 +384,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
           refine={refine}
           showChat={showChat}
           isGenerating={isGenerating}
+          isThreadDepthError={hasThreadDepthError}
           setShowChat={setShowChat}
           onClose={onClose}
           onArrowDown={moveDown}
@@ -403,6 +420,8 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             scrollOnSelectionChange={selectionOrigin !== "pointer"}
             sendEvent={sendEvent}
             suggestedQuestions={suggestedQuestions}
+            onNewChat={handleNewChat}
+            hasThreadDepthError={hasThreadDepthError}
           />
         )}
         {noResults && query && !showChat && (
@@ -430,7 +449,9 @@ const Footer = memo(function Footer({ showChat }: { showChat: boolean }) {
     "https://www.algolia.com/developers?utm_medium=referral&utm_content=powered_by&utm_campaign=sitesearch";
   const poweredByHref =
     typeof window !== "undefined"
-      ? `${basePoweredByUrl}&utm_source=${encodeURIComponent(window.location.hostname)}`
+      ? `${basePoweredByUrl}&utm_source=${encodeURIComponent(
+          window.location.hostname
+        )}`
       : basePoweredByUrl;
   return (
     <div className="ss-footer">
@@ -520,7 +541,7 @@ export default function SearchExperience(config: SearchWithAskAIConfig) {
         modifierKey === "cmd"
           ? event.metaKey || event.ctrlKey
           : event.getModifierState(
-              modifierKey.charAt(0).toUpperCase() + modifierKey.slice(1),
+              modifierKey.charAt(0).toUpperCase() + modifierKey.slice(1)
             );
 
       if (isModifierPressed && event.key.toLowerCase() === key) {

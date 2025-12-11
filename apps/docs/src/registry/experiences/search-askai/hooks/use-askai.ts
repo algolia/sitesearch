@@ -4,6 +4,7 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { useMemo } from "react";
+import { isThreadDepthError } from "@/registry/utils/error-utils";
 
 export interface AskAIConfig {
   applicationId: string;
@@ -52,9 +53,15 @@ export function useAskai(config: AskAIConfig) {
   const isGenerating =
     chat.status === "submitted" || chat.status === "streaming";
 
+  // Check if there's a thread depth error (AI-217)
+  const hasThreadDepthError = useMemo(() => {
+    return chat.status === 'error' && isThreadDepthError(chat.error as Error | null);
+  }, [chat.status, chat.error]);
+
   return {
     ...chat,
     isGenerating,
+    hasThreadDepthError,
   };
 }
 

@@ -8,6 +8,7 @@ export interface SearchInputProps {
   className?: string;
   showChat: boolean;
   isGenerating?: boolean;
+  isThreadDepthError?: boolean;
   inputRef: RefObject<HTMLInputElement | null>;
   onClose: () => void;
   setShowChat: (show: boolean) => void;
@@ -75,16 +76,20 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
   }, [props.showChat]);
 
   // Placeholder logic:
-  // - if generating, show "Answering..."
+  // - if thread depth error, show "Conversation limit reached"
+  // - else if generating, show "Answering..."
   // - else if showChat, show AI prompt placeholder
   // - else show provided placeholder
-  const placeholder = props.isGenerating
+  const placeholder = props.isThreadDepthError
+    ? "Conversation limit reached"
+    : props.isGenerating
     ? "Answering..."
     : props.showChat
-      ? "Ask AI anything about Algolia"
-      : props.placeholder;
+    ? "Ask AI anything about Algolia"
+    : props.placeholder;
 
   const currentValue = props.showChat ? chatInput : query || "";
+  const isInputDisabled = props.isGenerating || props.isThreadDepthError;
 
   return (
     <search
@@ -117,13 +122,13 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
         maxLength={512}
         type="search"
         value={currentValue}
-        disabled={props.isGenerating}
+        disabled={isInputDisabled}
         onChange={(event) => {
           setQuery(event.currentTarget.value);
         }}
         onKeyDown={(e) => {
-          if (props.isGenerating) {
-            // while answering, block interactions
+          if (isInputDisabled) {
+            // while answering or thread depth error, block interactions
             e.preventDefault();
             return;
           }
