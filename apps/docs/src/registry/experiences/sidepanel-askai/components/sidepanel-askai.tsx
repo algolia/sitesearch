@@ -37,6 +37,8 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
+import { ThreadDepthErrorBanner } from "@/components/thread-depth-error-banner";
+import { isThreadDepthError } from "@/registry/utils/error-utils";
 import {
   postFeedback,
   useAskai,
@@ -520,6 +522,7 @@ interface ChatWidgetProps {
   assistantId: string;
   suggestedQuestions: SuggestedQuestionHit[];
   onSuggestedQuestionClick: (question: string) => void;
+  onNewChat?: () => void;
 }
 
 const ChatWidget = memo(function ChatWidget({
@@ -533,6 +536,7 @@ const ChatWidget = memo(function ChatWidget({
   assistantId,
   suggestedQuestions,
   onSuggestedQuestionClick,
+  onNewChat,
 }: ChatWidgetProps) {
   const { copyText } = useClipboard();
   const [copiedExchangeId, setCopiedExchangeId] = useState<string | null>(null);
@@ -620,7 +624,11 @@ const ChatWidget = memo(function ChatWidget({
         {/* errors */}
         {error && (
           <div className="border border-red-300 bg-red-100 text-red-900 px-4 py-3 rounded-lg">
-            {error.message}
+            {isThreadDepthError(error) && onNewChat ? (
+              <ThreadDepthErrorBanner onNewChat={onNewChat} />
+            ) : (
+              error.message
+            )}
           </div>
         )}
 
@@ -1139,6 +1147,7 @@ const Sidepanel = memo(function Sidepanel({
           assistantId={config.assistantId}
           suggestedQuestions={suggestedQuestions}
           onSuggestedQuestionClick={handleSuggestedQuestionClick}
+          onNewChat={openNewConversation}
         />
 
         {/* Input Bar */}
