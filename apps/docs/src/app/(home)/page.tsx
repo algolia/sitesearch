@@ -142,7 +142,6 @@ export default function HomePage() {
                   applicationId="06YAZFOHSQ"
                   apiKey="94b6afdc316917b6e6cdf2763fa561df"
                   indexName="algolia_podcast_sample_dataset"
-                  keyboardShortcut="cmd+/"
                   attributes={{
                     primaryText: "title",
                     secondaryText: "description",
@@ -188,7 +187,6 @@ export default function HomePage() {
                   apiKey="94b6afdc316917b6e6cdf2763fa561df"
                   indexName="algolia_podcast_sample_dataset"
                   assistantId="UpR727VnXnoG"
-                  keyboardShortcut="cmd+."
                   attributes={{
                     primaryText: "title",
                     secondaryText: "description",

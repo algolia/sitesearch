@@ -41,7 +41,6 @@ export function PreviewSiteSearch() {
           assistantId="UpR727VnXnoG"
           placeholder="Search for podcasts..."
           hitsPerPage={6}
-          keyboardShortcut="cmd+k"
           buttonText="🎧 Search Podcasts"
           suggestedQuestionsEnabled={true}
           attributes={{
@@ -87,7 +86,6 @@ export function PreviewSearchNoAskAI() {
           indexName="algolia_podcast_sample_dataset"
           placeholder="Search for podcasts..."
           hitsPerPage={15}
-          keyboardShortcut="cmd+k"
           buttonText="🎧 Search Podcasts"
           attributes={{
             primaryText: "title",

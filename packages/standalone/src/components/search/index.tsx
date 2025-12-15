@@ -30,8 +30,6 @@ export interface SearchConfig {
   placeholder?: string;
   /** Number of hits per page (optional, defaults to 8) */
   hitsPerPage?: number;
-  /** Keyboard shortcut to open search (optional, defaults to "cmd+k") */
-  keyboardShortcut?: string;
   /** Custom search button text (optional) */
   buttonText?: string;
   /** Custom search button props (optional) */
@@ -353,29 +351,17 @@ export default function SearchExperience(config: SearchConfig) {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // Parse keyboard shortcut (defaults to cmd+k)
-  const shortcut = config.keyboardShortcut || "cmd+k";
-  const [modifierKey, key] = shortcut.toLowerCase().split("+");
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: we don't to rerun
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const isModifierPressed =
-        modifierKey === "cmd"
-          ? event.metaKey || event.ctrlKey
-          : event.getModifierState(
-              modifierKey.charAt(0).toUpperCase() + modifierKey.slice(1),
-            );
-
-      if (isModifierPressed && event.key.toLowerCase() === key) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        openModal();
+        setIsModalOpen(true);
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [modifierKey, key]);
+  }, []);
 
   const buttonProps = {
     ...config.buttonProps,
