@@ -1148,7 +1148,7 @@ const Sidepanel = memo(function Sidepanel({
           assistantId={config.assistantId}
           suggestedQuestions={suggestedQuestions}
           onSuggestedQuestionClick={handleSuggestedQuestionClick}
-          onNewChat={openNewConversation}
+          onNewChat={onOpenNewConversation}
         />
 
         {/* Input Bar */}
