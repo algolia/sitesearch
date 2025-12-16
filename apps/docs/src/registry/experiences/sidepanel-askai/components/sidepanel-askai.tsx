@@ -37,12 +37,11 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { ThreadDepthErrorBanner } from "@/components/thread-depth-error-banner";
-import { isThreadDepthError } from "@/registry/utils/error-utils";
 import { cn } from "@/lib/utils";
 import {
   postFeedback,
   useAskai,
+  isThreadDepthError,
 } from "@/registry/experiences/sidepanel-askai/hooks/use-askai";
 import {
   type SuggestedQuestionHit,
@@ -507,6 +506,28 @@ const RelatedSources = memo(function RelatedSources({
     </div>
   );
 });
+
+// ============================================================================
+// Thread Depth Error Banner Component
+// ============================================================================
+
+interface ThreadDepthErrorBannerProps {
+  onNewChat: () => void;
+}
+
+const ThreadDepthErrorBanner = ({ onNewChat }: ThreadDepthErrorBannerProps) => (
+  <div className="text-gray-900 text-sm leading-normal">
+    This conversation is now closed to keep responses accurate.{" "}
+    <button
+      type="button"
+      className="text-blue-600 underline font-normal cursor-pointer bg-transparent border-none p-0 hover:text-blue-800 focus:outline-2 focus:outline-blue-600 focus:outline-offset-2 focus:rounded-sm"
+      onClick={onNewChat}
+    >
+      Start a new conversation
+    </button>{" "}
+    to continue.
+  </div>
+);
 
 // ============================================================================
 // Chat Component
