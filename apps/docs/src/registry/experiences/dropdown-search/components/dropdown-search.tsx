@@ -437,7 +437,7 @@ function DropdownSearchInner({ config }: DropdownSearchInnerProps) {
                 Start typing to search
               </div>
             )}
-            <div className="px-2 py-1 border-t border-text-muted-foreground text-right text-[10px] text-muted-foreground">
+            <div className="px-2 py-1 border-t border-text-muted-foreground text-right text-xs text-muted-foreground">
               Powered by Algolia
             </div>
           </Popover.Content>
