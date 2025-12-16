@@ -1346,6 +1346,7 @@ interface ResultsPanelProps {
   scrollOnSelectionChange?: boolean;
   sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
   suggestedQuestions?: SuggestedQuestionHit[];
+  onNewChat?: () => void;
 }
 
 const ResultsPanel = memo(function ResultsPanel({
@@ -1364,6 +1365,7 @@ const ResultsPanel = memo(function ResultsPanel({
   scrollOnSelectionChange = true,
   sendEvent,
   suggestedQuestions,
+  onNewChat,
 }: ResultsPanelProps) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1444,7 +1446,7 @@ const ResultsPanel = memo(function ResultsPanel({
         assistantId={config.assistantId}
         suggestedQuestions={suggestedQuestions}
         onSuggestedQuestionClick={handleSuggestedQuestionClick}
-        onNewChat={handleNewChat}
+        onNewChat={onNewChat}
       />
     );
   }
@@ -1747,6 +1749,7 @@ function SearchModal({ onClose, config }: SearchModalProps) {
             scrollOnSelectionChange={selectionOrigin !== "pointer"}
             sendEvent={sendEvent}
             suggestedQuestions={suggestedQuestions}
+            onNewChat={handleNewChat}
           />
         )}
         {noResults && query && !showChat && (
