@@ -1672,7 +1672,6 @@ function SearchModal({ onClose, config }: SearchModalProps) {
     isGenerating,
     sendMessage,
     status,
-    resetConversation,
   } = useAskai({
     applicationId: config.applicationId,
     apiKey: config.apiKey,
@@ -1743,16 +1742,15 @@ function SearchModal({ onClose, config }: SearchModalProps) {
   const showResultsPanel = (!noResults && !!query) || showChat;
 
   const handleNewChat = useCallback(() => {
-    // Generate a new conversation ID to force a fresh chat instance
-    // This will automatically clear messages and errors in the AI SDK
-    resetConversation();
+    // Clear messages to start a fresh conversation
+    setMessages([]);
     setThreadDepthErrorAtMessageCount(null);
     setShowChat(true);
     refine("");
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [resetConversation, setShowChat, refine]);
+  }, [setMessages, setShowChat, refine]);
 
   return (
     <>
