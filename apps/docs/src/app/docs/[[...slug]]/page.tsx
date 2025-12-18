@@ -15,10 +15,15 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  // @ts-expect-error - type definitions are outdated for fumadocs v16
   const MDXContent = page.data.body;
+  // @ts-expect-error - type definitions are outdated for fumadocs v16
+  const toc = page.data.toc;
+  // @ts-expect-error - type definitions are outdated for fumadocs v16
+  const full = page.data.full;
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage toc={toc} full={full}>
       <DocsTitle className="font-sora md:text-5xl font-light">
         {page.data.title}
       </DocsTitle>
