@@ -75,8 +75,8 @@
       "devDependencies": ["tw-animate-css"],
       "description": "Opinionated search experience with Ask AI, powered by Algolia's InstantSearch and Ask AI",
       "dependencies": [
-        "@ai-sdk/react@^2.0.4",
-        "ai@^5.0.30",
+        "@ai-sdk/react@^2.0.117",
+        "ai@^5.0.115",
         "algoliasearch@^5",
         "react-instantsearch@^7.16.2",
         "tw-animate-css",
@@ -135,8 +135,8 @@
       "registryDependencies": ["button", "input"],
       "dependencies": [
         "@floating-ui/react",
-        "@ai-sdk/react@^2.0.4",
-        "ai@^5.0.30",
+        "@ai-sdk/react@^2.0.117",
+        "ai@^5.0.115",
         "lucide-react",
         "marked"
       ],
@@ -165,8 +165,8 @@
       "registryDependencies": ["button"],
       "devDependencies": ["tw-animate-css"],
       "dependencies": [
-        "@ai-sdk/react@^2.0.4",
-        "ai@^5.0.30",
+        "@ai-sdk/react@^2.0.117",
+        "ai@^5.0.115",
         "lucide-react",
         "marked",
         "tw-animate-css"

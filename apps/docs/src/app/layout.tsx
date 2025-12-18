@@ -1,6 +1,6 @@
 import "@/app/global.css";
 import "@docsearch/css";
-import { RootProvider } from "fumadocs-ui/provider";
+import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Sora } from "next/font/google";
 import AlgoliaSearch from "@/components/algolia-search";
