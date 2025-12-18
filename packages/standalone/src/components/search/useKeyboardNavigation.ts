@@ -10,8 +10,9 @@ interface UseKeyboardNavigationReturn {
 }
 
 export function useKeyboardNavigation(
-  hits: any[],
+  hits: Array<Record<string, unknown>>,
   query: string,
+  openResultsInNewTab = true,
 ): UseKeyboardNavigationReturn {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [selectionOrigin, setSelectionOrigin] = useState<
@@ -41,12 +42,17 @@ export function useKeyboardNavigation(
 
   const activateSelection = useCallback((): boolean => {
     const hit = hits[selectedIndex];
-    if (hit?.url) {
-      window.open(hit.url, "_blank", "noopener,noreferrer");
+    const url = typeof hit?.url === "string" ? hit.url : undefined;
+    if (url) {
+      if (openResultsInNewTab) {
+        window.open(url, "_blank", "noopener,noreferrer");
+      } else {
+        window.location.assign(url);
+      }
       return true;
     }
     return false;
-  }, [selectedIndex, hits]);
+  }, [selectedIndex, hits, openResultsInNewTab]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: expected
   useEffect(() => {

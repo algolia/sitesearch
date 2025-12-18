@@ -60,6 +60,7 @@ interface HitsListProps {
   onHoverIndex?: (index: number) => void;
   hoverEnabled?: boolean;
   sendEvent?: (eventType: "click", hit: SearchHit, eventName: string) => void;
+  openResultsInNewTab?: boolean;
 }
 
 export const HitsList = memo(function HitsList({
@@ -71,6 +72,7 @@ export const HitsList = memo(function HitsList({
   onHoverIndex,
   hoverEnabled,
   sendEvent,
+  openResultsInNewTab = true,
 }: HitsListProps) {
   const mapping: Required<Pick<HitsAttributesMapping, "primaryText">> &
     Partial<HitsAttributesMapping> = useMemo(
@@ -96,8 +98,8 @@ export const HitsList = memo(function HitsList({
           <a
             key={hit.objectID}
             href={hit.url}
-            target="_blank"
-            rel="noopener noreferrer"
+            target={openResultsInNewTab ? "_blank" : undefined}
+            rel={openResultsInNewTab ? "noopener noreferrer" : undefined}
             className="ss-infinite-hits-item ss-infinite-hits-anchor"
             role="option"
             aria-selected={isSel}

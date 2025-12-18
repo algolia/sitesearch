@@ -53,6 +53,8 @@ export interface SearchWithAskAIConfig {
   searchParameters?: Record<string, unknown>;
   /** Suggested Questions Enabled (optional, defaults to false) */
   suggestedQuestionsEnabled?: boolean;
+  /** Open hit URLs in a new tab (optional, defaults to true) */
+  openResultsInNewTab?: boolean;
 }
 
 interface SearchBoxProps {
@@ -153,6 +155,7 @@ interface ResultsPanelProps {
   suggestedQuestions?: SuggestedQuestionHit[];
   onNewChat?: () => void;
   hasThreadDepthError?: boolean;
+  openResultsInNewTab?: boolean;
 }
 
 const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
@@ -173,6 +176,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   suggestedQuestions,
   onNewChat,
   hasThreadDepthError,
+  openResultsInNewTab = true,
 }) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -270,6 +274,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
           onHoverIndex={onHoverIndex}
           hoverEnabled={hoverEnabled}
           sendEvent={sendEvent}
+          openResultsInNewTab={openResultsInNewTab}
         />
       </div>
     </>
@@ -336,7 +341,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
     activateSelection,
     hoverIndex,
     selectionOrigin,
-  } = useKeyboardNavigation(showChat, items, query);
+  } = useKeyboardNavigation(showChat, items, query, config.openResultsInNewTab ?? true);
 
   const handleActivateSelection = useCallback((): boolean => {
     // Send click event for keyboard navigation before activating
@@ -420,6 +425,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             suggestedQuestions={suggestedQuestions}
             onNewChat={handleNewChat}
             hasThreadDepthError={hasThreadDepthError}
+            openResultsInNewTab={config.openResultsInNewTab}
           />
         )}
         {noResults && query && !showChat && (

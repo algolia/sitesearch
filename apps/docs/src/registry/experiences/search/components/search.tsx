@@ -43,6 +43,8 @@ export interface SearchConfig {
   searchParameters?: Record<string, unknown>;
   /** Enable Algolia Insights (optional, defaults to true) */
   insights?: boolean;
+  /** Open hit URLs in a new tab (optional, defaults to true) */
+  openResultsInNewTab?: boolean;
 }
 // =========================================================================
 // Attribute Mapping
@@ -278,6 +280,7 @@ interface HitsListProps {
   onHoverIndex?: (index: number) => void;
   hoverEnabled?: boolean;
   sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  openResultsInNewTab?: boolean;
 }
 
 const HitsList = memo(function HitsList({
@@ -287,6 +290,7 @@ const HitsList = memo(function HitsList({
   onHoverIndex,
   hoverEnabled,
   sendEvent,
+  openResultsInNewTab = true,
 }: HitsListProps) {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const mapping = useMemo(
@@ -317,8 +321,8 @@ const HitsList = memo(function HitsList({
           <a
             key={hit.objectID}
             href={url ?? "#"}
-            target={url ? "_blank" : undefined}
-            rel="noopener noreferrer"
+            target={openResultsInNewTab && url ? "_blank" : undefined}
+            rel={openResultsInNewTab && url ? "noopener noreferrer" : undefined}
             className="flex flex-row items-center gap-4 cursor-pointer text-decoration-none text-foreground bg-background rounded-sm p-4 aria-selected:bg-blue-50 dark:aria-selected:bg-slate-900 animate-in fade-in-0 zoom-in-95"
             role="option"
             aria-selected={isSel}
@@ -621,6 +625,7 @@ const ResultsPanel = memo(function ResultsPanel({
           onHoverIndex={onHoverIndex}
           hoverEnabled={hoverEnabled}
           sendEvent={sendEvent}
+          openResultsInNewTab={config.openResultsInNewTab}
         />
       </div>
     </>
@@ -647,7 +652,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
     activateSelection,
     hoverIndex,
     selectionOrigin,
-  } = useKeyboardNavigation(items, query);
+  } = useKeyboardNavigation(items, query, config.openResultsInNewTab ?? true);
 
   const handleActivateSelection = useCallback((): boolean => {
     // Send click event for keyboard navigation before activating

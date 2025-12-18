@@ -83,6 +83,8 @@ export interface SearchWithAskAIConfig {
   insights?: boolean;
   /** Suggested Questions Enabled (optional, defaults to false) */
   suggestedQuestionsEnabled?: boolean;
+  /** Open hit URLs in a new tab (optional, defaults to true) */
+  openResultsInNewTab?: boolean;
 }
 
 interface SearchButtonProps extends React.ComponentProps<typeof Button> {}
@@ -1049,6 +1051,7 @@ interface HitsListProps {
   onHoverIndex?: (index: number) => void;
   hoverEnabled?: boolean;
   sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  openResultsInNewTab?: boolean;
 }
 
 const HitsList = memo(function HitsList({
@@ -1060,6 +1063,7 @@ const HitsList = memo(function HitsList({
   onHoverIndex,
   hoverEnabled,
   sendEvent,
+  openResultsInNewTab = true,
 }: HitsListProps) {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const mapping = useMemo(
@@ -1098,8 +1102,8 @@ const HitsList = memo(function HitsList({
           <a
             key={hit.objectID}
             href={url ?? "#"}
-            target={url ? "_blank" : undefined}
-            rel="noopener noreferrer"
+            target={openResultsInNewTab && url ? "_blank" : undefined}
+            rel={openResultsInNewTab && url ? "noopener noreferrer" : undefined}
             className={`my-1 p-4 rounded-lg bg-background gap-4 cursor-pointer no-underline text-foreground transition-all duration-150 block hover:bg-blue-50 hover:border-border hover:shadow-lg hover:-translate-y-px aria-selected:bg-blue-50 aria-selected:border-border aria-selected:shadow-lg aria-selected:-translate-y-px dark:hover:bg-slate-900 dark:aria-selected:bg-slate-900 animate-in fade-in-0 zoom-in-95 ${
               hasImage ? "flex flex-row items-center gap-4" : ""
             }`}
@@ -1540,6 +1544,7 @@ const ResultsPanel = memo(function ResultsPanel({
           onHoverIndex={onHoverIndex}
           hoverEnabled={hoverEnabled}
           sendEvent={sendEvent}
+          openResultsInNewTab={config.openResultsInNewTab}
         />
       </div>
     </>
@@ -1734,7 +1739,7 @@ function SearchModal({ onClose, config }: SearchModalProps) {
     activateSelection,
     hoverIndex,
     selectionOrigin,
-  } = useKeyboardNavigation(showChat, items, query);
+  } = useKeyboardNavigation(showChat, items, query, config.openResultsInNewTab ?? true);
 
   const handleActivateSelection = useCallback((): boolean => {
     // Send click event for keyboard navigation before activating

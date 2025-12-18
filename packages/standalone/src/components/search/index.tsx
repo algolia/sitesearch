@@ -42,6 +42,8 @@ export interface SearchConfig {
   insights?: boolean;
   /** Additional Algolia search parameters (optional) - e.g., analytics, filters, distinct, etc. */
   searchParameters?: Record<string, unknown>;
+  /** Open hit URLs in a new tab (optional, defaults to true) */
+  openResultsInNewTab?: boolean;
 }
 
 interface SearchBoxProps {
@@ -104,6 +106,7 @@ interface ResultsPanelProps {
   onHoverIndex?: (index: number) => void;
   scrollOnSelectionChange?: boolean;
   sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  openResultsInNewTab?: boolean;
 }
 
 const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
@@ -113,6 +116,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   onHoverIndex,
   scrollOnSelectionChange = true,
   sendEvent,
+  openResultsInNewTab = true,
 }) {
   const { items } = useHits();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -163,6 +167,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
           onHoverIndex={onHoverIndex}
           hoverEnabled={hoverEnabled}
           sendEvent={sendEvent}
+          openResultsInNewTab={openResultsInNewTab}
         />
       </div>
     </>
@@ -200,7 +205,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
     activateSelection,
     hoverIndex,
     selectionOrigin,
-  } = useKeyboardNavigation(items, query);
+  } = useKeyboardNavigation(items, query, config.openResultsInNewTab ?? true);
 
   const handleActivateSelection = useCallback((): boolean => {
     // Send click event for keyboard navigation before activating
@@ -247,6 +252,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             onHoverIndex={hoverIndex}
             scrollOnSelectionChange={selectionOrigin !== "pointer"}
             sendEvent={sendEvent}
+            openResultsInNewTab={config.openResultsInNewTab}
           />
         )}
         {noResults && query && (

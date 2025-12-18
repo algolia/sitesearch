@@ -11,8 +11,9 @@ interface UseKeyboardNavigationReturn {
 
 export function useKeyboardNavigation(
   showChat: boolean,
-  hits: any[],
+  hits: Array<Record<string, unknown>>,
   query: string,
+  openResultsInNewTab = true,
 ): UseKeyboardNavigationReturn {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [selectionOrigin, setSelectionOrigin] = useState<
@@ -49,13 +50,18 @@ export function useKeyboardNavigation(
     }
     if (selectedIndex > 0) {
       const hit = hits[selectedIndex - 1];
-      if (hit?.url) {
-        window.open(hit.url, "_blank", "noopener,noreferrer");
+      const url = typeof hit?.url === "string" ? hit.url : undefined;
+      if (url) {
+        if (openResultsInNewTab) {
+          window.open(url, "_blank", "noopener,noreferrer");
+        } else {
+          window.location.assign(url);
+        }
         return true;
       }
     }
     return false;
-  }, [showChat, selectedIndex, hits]);
+  }, [showChat, selectedIndex, hits, openResultsInNewTab]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: expected
   useEffect(() => {
