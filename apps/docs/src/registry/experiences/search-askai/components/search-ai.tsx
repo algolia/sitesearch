@@ -85,6 +85,8 @@ export interface SearchWithAskAIConfig {
   suggestedQuestionsEnabled?: boolean;
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
+  /** Transform items before rendering (optional) - useful for proxying images or modifying hit data */
+  transformItems?: (items: any[]) => any[];
 }
 
 interface SearchButtonProps extends React.ComponentProps<typeof Button> {}
@@ -1444,7 +1446,9 @@ const ResultsPanel = memo(function ResultsPanel({
   suggestedQuestions,
   onNewChat,
 }: ResultsPanelProps) {
-  const { items } = useHits();
+  const { items } = useHits(
+    config.transformItems ? { transformItems: config.transformItems } : {}
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverEnabled, setHoverEnabled] = useState(false);
 
@@ -1684,7 +1688,9 @@ function SearchModal({ onClose, config }: SearchModalProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const results = useInstantSearch();
-  const { items, sendEvent } = useHits();
+  const { items, sendEvent } = useHits(
+    config.transformItems ? { transformItems: config.transformItems } : {}
+  );
   const { showChat, setShowChat, handleShowChat } = useSearchState();
 
   // Track the message count when a thread depth error occurred
