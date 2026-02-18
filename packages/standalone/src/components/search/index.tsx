@@ -120,7 +120,9 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   sendEvent,
   openResultsInNewTab = true,
 }) {
-  const { items } = useHits();
+  const { items } = useHits(
+    config.transformItems ? { transformItems: config.transformItems } : {}
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverEnabled, setHoverEnabled] = useState(false);
 
