@@ -55,6 +55,8 @@ export interface SearchWithAskAIConfig {
   suggestedQuestionsEnabled?: boolean;
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
+  /** Transform items before rendering (optional) - useful for proxying images or modifying hit data */
+  transformItems?: (items: any[]) => any[];
 }
 
 interface SearchBoxProps {
@@ -178,7 +180,9 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   hasThreadDepthError,
   openResultsInNewTab = true,
 }) {
-  const { items } = useHits();
+  const { items } = useHits(
+    config.transformItems ? { transformItems: config.transformItems } : {}
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverEnabled, setHoverEnabled] = useState(false);
 
@@ -291,7 +295,9 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const results = useInstantSearch();
-  const { items, sendEvent } = useHits();
+  const { items, sendEvent } = useHits(
+    config.transformItems ? { transformItems: config.transformItems } : {}
+  );
   const { showChat, setShowChat, handleShowChat } = useSearchState();
 
   // Focus input when modal opens
