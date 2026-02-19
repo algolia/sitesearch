@@ -55,6 +55,8 @@ export interface SearchWithAskAIConfig {
   suggestedQuestionsEnabled?: boolean;
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
+  /** Route Ask AI requests through Agent Studio endpoints (optional, defaults to false). */
+  agentStudio?: boolean;
 }
 
 interface SearchBoxProps {
@@ -253,6 +255,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
         isGenerating={isGenerating}
         applicationId={config.applicationId}
         assistantId={config.assistantId}
+        agentStudio={config.agentStudio}
         suggestedQuestions={suggestedQuestions}
         onSuggestedQuestionClick={handleSuggestedQuestionClick}
         onNewChat={onNewChat}
@@ -318,6 +321,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
     apiKey: config.apiKey,
     indexName: config.indexName,
     assistantId: config.assistantId,
+    agentStudio: config.agentStudio,
   });
 
   const suggestedQuestionsClient = useMemo(() => {

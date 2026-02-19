@@ -11,8 +11,23 @@ export interface AskAIConfig {
   apiKey: string;
   indexName: string;
   assistantId: string;
+  agentStudio?: boolean;
   /** Demo mode: Simulate thread depth error after N exchanges (for testing only) */
   _demoThreadDepthLimit?: number;
+}
+
+const BASE_ASKAI_URL = "https://askai.algolia.com";
+
+/**
+ * Resolves the chat API URL for the given config.
+ * When agentStudio is true, uses Agent Studio completions endpoint.
+ */
+function getChatApiUrl(config: AskAIConfig): string {
+  if (config.agentStudio) {
+    const base = `https://${config.applicationId}.algolia.net/agent-studio`;
+    return `${base}/1/agents/${config.assistantId}/completions?stream=true&compatibilityMode=ai-sdk-5`;
+  }
+  return `${BASE_ASKAI_URL}/chat`;
 }
 
 export function useAskai(config: AskAIConfig) {
@@ -20,12 +35,17 @@ export function useAskai(config: AskAIConfig) {
     throw new Error("config is required for useAskai");
   }
 
-  const baseUrl = "https://askai.algolia.com";
-
   const transport = useMemo(() => {
     return new DefaultChatTransport({
-      api: `${baseUrl}/chat`,
+      api: getChatApiUrl(config),
       headers: async () => {
+        if (config.agentStudio) {
+          return {
+            "content-type": "application/json",
+            "x-algolia-api-key": config.apiKey,
+            "x-algolia-application-id": config.applicationId,
+          } as Record<string, string>;
+        }
         const token = await getValidToken({ assistantId: config.assistantId });
         return {
           "x-algolia-api-key": config.apiKey,
@@ -42,6 +62,7 @@ export function useAskai(config: AskAIConfig) {
     config.applicationId,
     config.indexName,
     config.assistantId,
+    config.agentStudio,
   ]);
 
   const chat = useChat({
@@ -68,7 +89,6 @@ export function useAskai(config: AskAIConfig) {
   };
 }
 
-const BASE_ASKAI_URL = "https://askai.algolia.com";
 const TOKEN_KEY = "askai_token";
 
 type TokenPayload = { exp: number };
