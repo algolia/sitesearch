@@ -41,7 +41,6 @@ export function useAskai(config: AskAIConfig) {
       headers: async () => {
         if (config.agentStudio) {
           return {
-            "content-type": "application/json",
             "x-algolia-api-key": config.apiKey,
             "x-algolia-application-id": config.applicationId,
           } as Record<string, string>;
