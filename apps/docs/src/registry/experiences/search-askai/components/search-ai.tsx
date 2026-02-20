@@ -85,6 +85,8 @@ export interface SearchWithAskAIConfig {
   suggestedQuestionsEnabled?: boolean;
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
+  /** Route Ask AI requests through Agent Studio endpoints (optional, defaults to false). */
+  agentStudio?: boolean;
 }
 
 interface SearchButtonProps extends React.ComponentProps<typeof Button> {}
@@ -585,6 +587,7 @@ interface ChatWidgetProps {
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
   assistantId: string;
+  agentStudio?: boolean;
   suggestedQuestions?: SuggestedQuestionHit[];
   onSuggestedQuestionClick?: (question: string) => void;
   onNewChat?: () => void;
@@ -599,6 +602,7 @@ const ChatWidget = memo(function ChatWidget({
   onThumbsDown,
   applicationId,
   assistantId,
+  agentStudio,
   suggestedQuestions,
   onSuggestedQuestionClick,
   onNewChat,
@@ -842,7 +846,7 @@ const ChatWidget = memo(function ChatWidget({
                 </div>
 
                 <div className="mt-4 flex items-center justify-end gap-2">
-                  {exchange.assistantMessage && !isGenerating ? (
+                  {exchange.assistantMessage && !isGenerating && !agentStudio ? (
                     acknowledgedExchangeIds.has(exchange.id) ? (
                       <span className="text-muted-foreground text-[0.85rem] animate-in fade-in slide-in-from-bottom-1">
                         Thanks for your feedback!
@@ -1521,6 +1525,7 @@ const ResultsPanel = memo(function ResultsPanel({
         isGenerating={isGenerating}
         applicationId={config.applicationId}
         assistantId={config.assistantId}
+        agentStudio={config.agentStudio}
         suggestedQuestions={suggestedQuestions}
         onSuggestedQuestionClick={handleSuggestedQuestionClick}
         onNewChat={onNewChat}
@@ -1697,6 +1702,7 @@ function SearchModal({ onClose, config }: SearchModalProps) {
       apiKey: config.apiKey,
       indexName: config.indexName,
       assistantId: config.assistantId,
+      agentStudio: config.agentStudio,
     });
 
   // Monitor for thread depth errors (AI-217)
