@@ -37,6 +37,8 @@ interface ChatWidgetProps {
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
   assistantId: string;
+  /** When true, feedback (thumbs) is not sent to the AskAI backend. */
+  agentStudio?: boolean;
   suggestedQuestions?: SuggestedQuestionHit[];
   onSuggestedQuestionClick?: (question: string) => void;
   onNewChat?: () => void;
@@ -84,6 +86,7 @@ export const ChatWidget = memo(function ChatWidget({
   onThumbsDown,
   applicationId,
   assistantId,
+  agentStudio,
   suggestedQuestions,
   onSuggestedQuestionClick,
   onNewChat,
@@ -309,7 +312,7 @@ export const ChatWidget = memo(function ChatWidget({
                 </div>
 
                 <div className="ss-qa-actions">
-                  {exchange.assistantMessage && !isGenerating ? (
+                  {exchange.assistantMessage && !isGenerating && !agentStudio ? (
                     acknowledgedExchangeIds.has(exchange.id) ? (
                       <span className="ss-qa-feedback-ack ss-fade">
                         Thanks for your feedback!
