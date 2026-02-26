@@ -56,6 +56,7 @@ Required props for using the `SidepanelExperience` component:
 - `apiKey`: The Algolia API key
 - `indexName`: The Algolia index name
 - `assistantId`: The Ask AI assistant ID
+- `agentStudio`: Use [Agent Studio](https://www.algolia.com/products/ai/agent-studio) endpoints for chat (optional, defaults to false)
 
 ### Structure
 
@@ -106,6 +107,12 @@ Required props for using the `SidepanelExperience` component:
       description: "AI Assistant ID (required for chat functionality)",
       type: "string",
       required: true,
+    },
+    agentStudio: {
+      description: "When true, route Ask AI requests through Agent Studio endpoints. Uses API key + application ID; no chat token. When false or unset, uses default Ask AI endpoints.",
+      type: "boolean",
+      default: false,
+      required: false,
     },
     suggestedQuestionsEnabled: {
       description: "Suggested Questions Enabled (optional, defaults to false)",
