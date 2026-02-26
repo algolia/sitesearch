@@ -64,6 +64,7 @@ Required props for using the `SearchWithAskAi` component:
 - `apiKey`: The Algolia API key
 - `indexName`: The Algolia index name
 - `assistantId`: The Ask AI assistant ID
+- `agentStudio`: Use [Agent Studio](https://www.algolia.com/products/ai/agent-studio) endpoints for chat (optional, defaults to false)
 
 ### Structure
 
@@ -107,6 +108,8 @@ Required props for using the `SearchWithAskAi` component:
   });
 </script>
 ```
+
+To use [Agent Studio](https://www.algolia.com/products/ai/agent-studio) instead of the default Ask AI endpoints, set `agentStudio: true`. Chat will then use the Agent Studio completions API with your API key and application ID.
 
 ### Build your own bundle (advanced)
 
@@ -179,6 +182,12 @@ Required props for using the `SearchWithAskAi` component:
       description: "AI Assistant ID (required for chat functionality)",
       type: "string",
       required: true,
+    },
+    agentStudio: {
+      description: "When true, route Ask AI requests through Agent Studio endpoints (https://{applicationId}.algolia.net/agent-studio). Uses API key + application ID; no chat token. When false or unset, uses default Ask AI endpoints (token-based).",
+      type: "boolean",
+      default: false,
+      required: false,
     },
     attributes: {
       description: "Map which hit attributes to render (supports dotted paths)",

@@ -115,6 +115,7 @@ function App() {
 - `keyboardShortcut`: Keyboard shortcut to open search (default: "cmd+k")
 - `buttonText`: Custom search button text
 - `buttonProps`: Additional props for the search button
+- `agentStudio`: Use Agent Studio endpoints for Ask AI chat (optional, defaults to false)
 
 ## 🎯 Key Components
 
@@ -220,6 +221,7 @@ pnpm lint         # Lint code for style and errors
 - `indexName: string` - Required index name
 - `assistantId: string` - Required for AI chat
 - `baseAskaiUrl?: string` - Optional AI API endpoint
+- `agentStudio?: boolean` - When true, use Agent Studio endpoints for Ask AI (default: false)
 - `placeholder?: string` - Search input placeholder
 - `hitsPerPage?: number` - Results per page
 - `keyboardShortcut?: string` - Keyboard shortcut
