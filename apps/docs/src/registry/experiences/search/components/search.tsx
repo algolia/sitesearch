@@ -45,6 +45,8 @@ export interface SearchConfig {
   insights?: boolean;
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
+  /** Transform items before rendering (optional) - useful for proxying images or modifying hit data */
+  transformItems?: (items: any[]) => any[];
 }
 // =========================================================================
 // Attribute Mapping
@@ -573,7 +575,9 @@ const ResultsPanel = memo(function ResultsPanel({
   scrollOnSelectionChange = true,
   sendEvent,
 }: ResultsPanelProps) {
-  const { items } = useHits();
+  const { items } = useHits(
+    config.transformItems ? { transformItems: config.transformItems } : {}
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverEnabled, setHoverEnabled] = useState(false);
 
@@ -642,7 +646,9 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const results = useInstantSearch();
-  const { items, sendEvent } = useHits();
+  const { items, sendEvent } = useHits(
+    config.transformItems ? { transformItems: config.transformItems } : {}
+  );
 
   const noResults = results.results?.nbHits === 0;
   const {

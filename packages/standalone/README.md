@@ -41,7 +41,13 @@ Add CSS + JS from unpkg, then initialize.
       tertiaryText: "itunesAuthor", // optional tertiary text
       url: "url" // optional url attribute
       image: 'image', // optional URL attribute
-    }
+    },
+    // Optional: Transform items before rendering (e.g., proxy images)
+    transformItems: (items) => 
+      items.map(item => ({
+        ...item,
+        image: item.image ? `https://your-proxy.com/${item.image}` : item.image
+      }))
   });
 </script>
 ```
@@ -77,6 +83,13 @@ Key variables include:
 - `--search-results-max-height`
 
 Tip: The components auto-detect dark mode if `html.dark` is present or if the OS prefers dark, unless `darkMode` is explicitly set.
+
+## Transform Items
+
+The `transformItems` option allows you to modify search results before they are rendered. This is useful for:
+
+- **Proxying images** – Work around CORS issues or use a CDN
+- **Formatting data** – Transform dates, prices, or other fields
 
 ## Accessibility & Keyboard
 
