@@ -310,6 +310,34 @@
   color: var(--search-secondary-color);
 }
 
+.ssask-exp .ss-infinite-hits-item-image-container {
+  width: 100px;
+  height: 100px;
+  flex: 0 0 100px;
+  border-radius: var(--search-hit-border-radius);
+  background: var(--search-background-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ssask-exp .ss-infinite-hits-item-image {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--search-hit-border-radius);
+  object-fit: contain;
+}
+
+.ssask-exp .ss-infinite-hits-item-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--search-subtle-color);
+}
+
 .ssask-exp .ss-infinite-hits-item-title {
   font-size: var(--search-hit-title-font-size);
   color: var(--search-text-color);
@@ -352,6 +380,7 @@
 
 .ssask-exp .ss-infinite-hits-anchor {
   gap: 1rem;
+  display: flex;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
