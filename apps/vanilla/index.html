@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Algolia SiteSearch Vanilla Demo</title>
   <link rel="stylesheet" href="./node_modules/@algolia/sitesearch/dist/search.min.css" />
+  <link rel="stylesheet" href="./node_modules/@algolia/sitesearch/dist/search-askai.min.css" />
   <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -20,6 +21,12 @@
             <h2>Search Only</h2>
             <div class="demo-container">
               <div id="search"></div>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Search + Ask AI</h2>
+            <div class="demo-container">
+              <div id="searchAskAi"></div>
             </div>
           </div>
         </div>
@@ -57,21 +64,46 @@
       </div>
     </div>
 
-    <script src="./node_modules/@algolia/sitesearch/dist/search-askai.min.js"></script>
+    <script src="./node_modules/@algolia/sitesearch/dist/search.min.js"></script>
     <script>
       const applicationId = "06YAZFOHSQ";
       const apiKey = "94b6afdc316917b6e6cdf2763fa561df";
       const indexName = "algolia_podcast_sample_dataset";
 
       // Search experience
-      if (window.SiteSearchAskAI) {
-        window.SiteSearchAskAI.init({
+      if (window.SiteSearch) {
+        window.SiteSearch.init({
           container: "#search",
           applicationId,
           apiKey,
+          indexName,
+          attributes: {
+            primaryText: "title",
+            secondaryText: "description",
+            tertiaryText: "itunesAuthor",
+            url: "url",
+            image: "imageUrl",
+          },
+        });
+      }
+    </script>
+
+
+    <script src="./node_modules/@algolia/sitesearch/dist/search-askai.min.js"></script>
+    <script>
+      const aaApplicationId = "06YAZFOHSQ";
+      const aaApiKey = "94b6afdc316917b6e6cdf2763fa561df";
+      const aaIndexName = "algolia_podcast_sample_dataset";
+
+      // Search + Ask AI experience
+      if (window.SiteSearchAskAI) {
+        window.SiteSearchAskAI.init({
+          container: "#searchAskAi",
+          applicationId: aaApplicationId,
+          apiKey: aaApiKey,
           assistantId: "UpR727VnXnoG",
           suggestedQuestionsEnabled: true,
-          indexName,
+          indexName: aaIndexName,
           attributes: {
             primaryText: "title",
             secondaryText: "description",

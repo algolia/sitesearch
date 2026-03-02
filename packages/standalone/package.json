@@ -1,13 +1,11 @@
 {
   "name": "@algolia/sitesearch",
   "private": false,
-  "version": "1.0.11",
+  "version": "1.0.12",
   "type": "module",
   "main": "dist/search.min.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "style": "dist/search.min.css",
   "publishConfig": {
     "access": "public"

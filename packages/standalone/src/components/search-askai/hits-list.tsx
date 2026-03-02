@@ -2,11 +2,11 @@
 /** biome-ignore-all lint/a11y/useSemanticElements: . */
 /** biome-ignore-all lint/a11y/useSemanticElements: hand crafted interactions */
 
-import { memo, useMemo } from "react";
+import { memo, useMemo, useState } from "react";
 import { Highlight } from "react-instantsearch";
 import type { HitsAttributesMapping, SearchHit } from "../types";
-import { toAttributePath } from "../types";
-import { SparklesIcon } from "./icons";
+import { getByPath, toAttributePath } from "../types";
+import { SearchIcon, SparklesIcon } from "./icons";
 
 interface HitsActionsProps {
   query: string;
@@ -80,9 +80,13 @@ export const HitsList = memo(function HitsList({
       primaryText: attributes?.primaryText || "title",
       secondaryText: attributes?.secondaryText || "description",
       tertiaryText: attributes?.tertiaryText,
+      url: attributes?.url || "url",
+      image: attributes?.image,
     }),
     [attributes],
   );
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+
   return (
     <>
       <HitsActions
@@ -94,10 +98,15 @@ export const HitsList = memo(function HitsList({
       />
       {hits.map((hit: SearchHit, idx: number) => {
         const isSel = selectedIndex === idx + 1;
+        const primaryVal = getByPath<string>(hit, mapping.primaryText);
+        const url = getByPath<string>(hit, mapping.url);
+        const imageUrl = getByPath<string>(hit, mapping.image);
+        const hasImage = Boolean(imageUrl);
+        const isImageFailed = failedImages[hit.objectID] || !hasImage;
         return (
           <a
             key={hit.objectID}
-            href={hit.url}
+            href={url ?? "#"}
             target={openResultsInNewTab ? "_blank" : undefined}
             rel={openResultsInNewTab ? "noopener noreferrer" : undefined}
             className="ss-infinite-hits-item ss-infinite-hits-anchor"
@@ -115,28 +124,55 @@ export const HitsList = memo(function HitsList({
               onHoverIndex?.(idx + 1);
             }}
           >
-            <p className="ss-infinite-hits-item-title">
-              <Highlight
-                attribute={toAttributePath(mapping.primaryText)}
-                hit={hit}
-              />
-            </p>
-            <p className="ss-infinite-hits-item-description">
-              {mapping.secondaryText ? (
+            {imageUrl ? (
+              <div className="ss-infinite-hits-item-image-container">
+                {!isImageFailed ? (
+                  <img
+                    src={imageUrl as string}
+                    alt={primaryVal}
+                    className="ss-infinite-hits-item-image"
+                    onError={() =>
+                      setFailedImages((prev) => ({
+                        ...prev,
+                        [hit.objectID]: true,
+                      }))
+                    }
+                  />
+                ) : (
+                  <div
+                    className="ss-infinite-hits-item-placeholder"
+                    aria-hidden="true"
+                  >
+                    <SearchIcon />
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            <div className="ss-infinite-hits-item-content">
+              <p className="ss-infinite-hits-item-title">
                 <Highlight
-                  attribute={toAttributePath(mapping.secondaryText)}
-                  hit={hit}
-                />
-              ) : null}
-            </p>
-            {mapping.tertiaryText ? (
-              <p className="ss-infinite-hits-item-description">
-                <Highlight
-                  attribute={toAttributePath(mapping.tertiaryText)}
+                  attribute={toAttributePath(mapping.primaryText)}
                   hit={hit}
                 />
               </p>
-            ) : null}
+              {mapping.secondaryText ? (
+                <p className="ss-infinite-hits-item-description">
+                  <Highlight
+                    attribute={toAttributePath(mapping.secondaryText)}
+                    hit={hit}
+                  />
+                </p>
+              ) : null}
+              {mapping.tertiaryText ? (
+                <p className="ss-infinite-hits-item-description">
+                  <Highlight
+                    attribute={toAttributePath(mapping.tertiaryText)}
+                    hit={hit}
+                  />
+                </p>
+              ) : null}
+            </div>
           </a>
         );
       })}
