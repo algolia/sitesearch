@@ -80,7 +80,7 @@ export const HitsList = memo(function HitsList({
       primaryText: attributes?.primaryText || "title",
       secondaryText: attributes?.secondaryText || "description",
       tertiaryText: attributes?.tertiaryText,
-      url: attributes?.url,
+      url: attributes?.url || "url",
       image: attributes?.image,
     }),
     [attributes],
@@ -156,14 +156,14 @@ export const HitsList = memo(function HitsList({
                   hit={hit}
                 />
               </p>
-              <p className="ss-infinite-hits-item-description">
-                {mapping.secondaryText ? (
+              {mapping.secondaryText ? (
+                <p className="ss-infinite-hits-item-description">
                   <Highlight
                     attribute={toAttributePath(mapping.secondaryText)}
                     hit={hit}
                   />
-                ) : null}
-              </p>
+                </p>
+              ) : null}
               {mapping.tertiaryText ? (
                 <p className="ss-infinite-hits-item-description">
                   <Highlight
