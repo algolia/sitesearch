@@ -175,6 +175,40 @@ export function HighlightAskAI({
       assistantId,
       agentStudio,
     });
+
+  const handleFeedback = async (vote: 0 | 1) => {
+    const messageToFeedback = (messages || []).find(
+      (m: unknown) =>
+        (m as { role?: string }).role === (agentStudio ? "assistant" : "user"),
+    ) as { id?: string } | undefined;
+
+    if (!messageToFeedback?.id) return;
+
+    setSubmittingFeedback(true);
+    try {
+      if (agentStudio) {
+        await postAgentStudioFeedback({
+          agentId: assistantId,
+          vote,
+          messageId: messageToFeedback.id,
+          appId: applicationId,
+          apiKey,
+        });
+      } else {
+        await postFeedback({
+          assistantId,
+          appId: applicationId,
+          messageId: messageToFeedback.id,
+          thumbs: vote,
+        });
+      }
+      setFeedbackGiven(true);
+    } catch {
+      // ignore errors
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
   const resetConversation = React.useCallback(() => {
     try {
       stop?.();
@@ -569,17 +603,6 @@ export function HighlightAskAI({
                   );
                   if (!hasAssistantResponse || isGenerating) return null;
 
-                  const userMessage = (messages || []).find(
-                    (m: unknown) => (m as { role?: string }).role === "user",
-                  ) as { id?: string } | undefined;
-
-                  const assistantMessage = (messages || [])
-                    .filter(
-                      (m: unknown) =>
-                        (m as { role?: string }).role === "assistant",
-                    )
-                    .pop() as { id?: string } | undefined;
-
                   return (
                     <>
                       <div className="">
@@ -600,34 +623,7 @@ export function HighlightAskAI({
                                 aria-label="Like"
                                 className="border-none bg-transparent rounded-md px-2 py-1 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-accent disabled:text-foreground disabled:cursor-not-allowed"
                                 disabled={submittingFeedback}
-                                onClick={async () => {
-                                  if (!userMessage?.id) return;
-                                  setSubmittingFeedback(true);
-                                  try {
-                                    if (agentStudio) {
-                                      if (!assistantMessage?.id) return;
-                                      await postAgentStudioFeedback({
-                                        agentId: assistantId,
-                                        vote: 1,
-                                        messageId: assistantMessage.id,
-                                        appId: applicationId,
-                                        apiKey,
-                                      });
-                                    } else {
-                                      await postFeedback({
-                                        assistantId,
-                                        appId: applicationId,
-                                        messageId: userMessage.id,
-                                        thumbs: 1,
-                                      });
-                                    }
-                                    setFeedbackGiven(true);
-                                  } catch {
-                                    // ignore errors
-                                  } finally {
-                                    setSubmittingFeedback(false);
-                                  }
-                                }}
+                                onClick={() => handleFeedback(1)}
                               >
                                 <ThumbsUp size={14} />
                               </button>
@@ -637,34 +633,7 @@ export function HighlightAskAI({
                                 aria-label="Dislike"
                                 className="border-none bg-transparent rounded-md px-2 py-1 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-accent disabled:text-foreground disabled:cursor-not-allowed"
                                 disabled={submittingFeedback}
-                                onClick={async () => {
-                                  if (!userMessage?.id) return;
-                                  try {
-                                    setSubmittingFeedback(true);
-                                    if (agentStudio) {
-                                      if (!assistantMessage?.id) return;
-                                      await postAgentStudioFeedback({
-                                        agentId: assistantId,
-                                        vote: 0,
-                                        messageId: assistantMessage.id,
-                                        appId: applicationId,
-                                        apiKey,
-                                      });
-                                    } else {
-                                      await postFeedback({
-                                        assistantId,
-                                        appId: applicationId,
-                                        messageId: userMessage.id,
-                                        thumbs: 0,
-                                      });
-                                    }
-                                    setFeedbackGiven(true);
-                                  } catch {
-                                    // ignore errors
-                                  } finally {
-                                    setSubmittingFeedback(false);
-                                  }
-                                }}
+                                onClick={() => handleFeedback(0)}
                               >
                                 <ThumbsDown size={14} />
                               </button>

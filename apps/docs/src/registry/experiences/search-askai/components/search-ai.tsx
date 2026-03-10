@@ -622,6 +622,41 @@ const ChatWidget = memo(function ChatWidget({
     string | null
   >(null);
 
+  const handleFeedback = async (exchange: Exchange, vote: 0 | 1) => {
+    if (!exchange.assistantMessage) return;
+    const customHandler = vote === 1 ? onThumbsUp : onThumbsDown;
+    try {
+      setSubmittingExchangeId(exchange.id);
+      if (customHandler) {
+        await customHandler(exchange.userMessage.id);
+      } else if (agentStudio) {
+        await postAgentStudioFeedback({
+          agentId: assistantId,
+          vote,
+          messageId: exchange.assistantMessage.id,
+          appId: applicationId,
+          apiKey: apiKey ?? "",
+        });
+      } else {
+        await postFeedback({
+          assistantId,
+          appId: applicationId,
+          messageId: exchange.userMessage.id,
+          thumbs: vote,
+        });
+      }
+      setAcknowledgedExchangeIds((prev) => {
+        const next = new Set(prev);
+        next.add(exchange.id);
+        return next;
+      });
+    } catch {
+      // ignore errors
+    } finally {
+      setSubmittingExchangeId(null);
+    }
+  };
+
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
     const grouped: Exchange[] = [];
@@ -871,39 +906,7 @@ const ChatWidget = memo(function ChatWidget({
                             !exchange.assistantMessage ||
                             submittingExchangeId === exchange.id
                           }
-                          onClick={async () => {
-                            if (!exchange.assistantMessage) return;
-                            try {
-                              setSubmittingExchangeId(exchange.id);
-                              if (onThumbsUp) {
-                                await onThumbsUp(exchange.userMessage.id);
-                              } else if (agentStudio) {
-                                await postAgentStudioFeedback({
-                                  agentId: assistantId,
-                                  vote: 1,
-                                  messageId: exchange.assistantMessage.id,
-                                  appId: applicationId,
-                                  apiKey: apiKey ?? "",
-                                });
-                              } else {
-                                await postFeedback({
-                                  assistantId,
-                                  appId: applicationId,
-                                  messageId: exchange.userMessage.id,
-                                  thumbs: 1,
-                                });
-                              }
-                              setAcknowledgedExchangeIds((prev) => {
-                                const next = new Set(prev);
-                                next.add(exchange.id);
-                                return next;
-                              });
-                            } catch {
-                              // ignore errors
-                            } finally {
-                              setSubmittingExchangeId(null);
-                            }
-                          }}
+                          onClick={() => handleFeedback(exchange, 1)}
                         >
                           <ThumbsUp size={18} />
                         </button>
@@ -916,39 +919,7 @@ const ChatWidget = memo(function ChatWidget({
                             !exchange.assistantMessage ||
                             submittingExchangeId === exchange.id
                           }
-                          onClick={async () => {
-                            if (!exchange.assistantMessage) return;
-                            try {
-                              setSubmittingExchangeId(exchange.id);
-                              if (onThumbsDown) {
-                                await onThumbsDown(exchange.userMessage.id);
-                              } else if (agentStudio) {
-                                await postAgentStudioFeedback({
-                                  agentId: assistantId,
-                                  vote: 0,
-                                  messageId: exchange.assistantMessage.id,
-                                  appId: applicationId,
-                                  apiKey: apiKey ?? "",
-                                });
-                              } else {
-                                await postFeedback({
-                                  assistantId,
-                                  appId: applicationId,
-                                  messageId: exchange.userMessage.id,
-                                  thumbs: 0,
-                                });
-                              }
-                              setAcknowledgedExchangeIds((prev) => {
-                                const next = new Set(prev);
-                                next.add(exchange.id);
-                                return next;
-                              });
-                            } catch {
-                              // ignore errors
-                            } finally {
-                              setSubmittingExchangeId(null);
-                            }
-                          }}
+                          onClick={() => handleFeedback(exchange, 0)}
                         >
                           <ThumbsDown size={18} />
                         </button>
