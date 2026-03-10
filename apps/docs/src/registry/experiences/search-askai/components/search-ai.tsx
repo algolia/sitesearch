@@ -6,6 +6,7 @@
 import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { liteClient as algoliasearch } from "algoliasearch/lite";
+import type { BaseHit, Hit } from "instantsearch.js";
 import {
   ArrowLeftIcon,
   BrainIcon,
@@ -43,9 +44,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
+  isThreadDepthError,
   postFeedback,
   useAskai,
-  isThreadDepthError,
 } from "@/registry/experiences/search-askai/hooks/use-askai";
 import { useKeyboardNavigation } from "@/registry/experiences/search-askai/hooks/use-keyboard-navigation";
 import { useSearchState } from "@/registry/experiences/search-askai/hooks/use-search-state";
@@ -86,7 +87,7 @@ export interface SearchWithAskAIConfig {
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
   /** Transform items before rendering (optional) - useful for proxying images or modifying hit data */
-  transformItems?: (items: any[]) => any[];
+  transformItems?: (items: Hit<BaseHit>[]) => Hit<BaseHit>[];
   /** Route Ask AI requests through Agent Studio endpoints (optional, defaults to false). */
   agentStudio?: boolean;
 }
@@ -175,8 +176,7 @@ export interface SearchIndexTool {
   };
   output: {
     query: string;
-    // biome-ignore lint/suspicious/noExplicitAny: too ambiguous
-    hits: any[];
+    hits: Hit<BaseHit>[];
   };
 }
 
@@ -434,7 +434,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
         {children}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 
@@ -474,7 +474,7 @@ const MemoizedMarkdown = memo(function MemoizedMarkdown({
     const handleCopyClick = async (event: Event) => {
       const target = event.target as HTMLElement;
       const button = target.closest(
-        ".markdown-copy-button"
+        ".markdown-copy-button",
       ) as HTMLButtonElement;
 
       if (!button) return;
@@ -741,7 +741,7 @@ const ChatWidget = memo(function ChatWidget({
                     {exchange.userMessage.parts.map((part, index) =>
                       part.type === "text" ? (
                         <span key={index}>{part.text}</span>
-                      ) : null
+                      ) : null,
                     )}
                   </div>
                 </div>
@@ -848,7 +848,9 @@ const ChatWidget = memo(function ChatWidget({
                 </div>
 
                 <div className="mt-4 flex items-center justify-end gap-2">
-                  {exchange.assistantMessage && !isGenerating && !agentStudio ? (
+                  {exchange.assistantMessage &&
+                  !isGenerating &&
+                  !agentStudio ? (
                     acknowledgedExchangeIds.has(exchange.id) ? (
                       <span className="text-muted-foreground text-[0.85rem] animate-in fade-in slide-in-from-bottom-1">
                         Thanks for your feedback!
@@ -960,8 +962,9 @@ const ChatWidget = memo(function ChatWidget({
                     onClick={async () => {
                       const parts = exchange.assistantMessage?.parts ?? [];
                       const textContent = parts
-                        .filter((part) => part.type === "text")
-                        .map((part) => part.text)
+                        .flatMap((part) =>
+                          part.type === "text" ? [part.text] : [],
+                        )
                         .join("")
                         .trim();
                       if (!textContent) return;
@@ -1049,14 +1052,18 @@ const HitsActions = memo(function HitsActions({
 });
 
 interface HitsListProps {
-  hits: any[];
+  hits: Hit<BaseHit>[];
   query: string;
   selectedIndex: number;
   onAskAI: () => void;
   attributes: HitsAttributesMapping;
   onHoverIndex?: (index: number) => void;
   hoverEnabled?: boolean;
-  sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  sendEvent?: (
+    eventType: "click",
+    hit: Hit<BaseHit>,
+    eventName: string,
+  ) => void;
   openResultsInNewTab?: boolean;
 }
 
@@ -1080,7 +1087,7 @@ const HitsList = memo(function HitsList({
       url: attributes.url,
       image: attributes.image,
     }),
-    [attributes]
+    [attributes],
   );
 
   if (!attributes || !mapping.primaryText) {
@@ -1097,7 +1104,7 @@ const HitsList = memo(function HitsList({
         hoverEnabled={hoverEnabled}
       />
       <p className="text-muted-foreground text-sm mt-4 mb-2">Results</p>
-      {hits.map((hit: any, idx: number) => {
+      {hits.map((hit, idx) => {
         const isSel = selectedIndex === idx + 1;
         const primaryVal = getByPath<string>(hit, mapping.primaryText);
         const imageUrl = getByPath<string>(hit, mapping.image);
@@ -1253,8 +1260,8 @@ const SearchInput = memo(function SearchInput(props: SearchInputProps) {
   const placeholder = props.isGenerating
     ? "Answering..."
     : props.showChat
-    ? "Ask AI anything about Algolia"
-    : props.placeholder;
+      ? "Ask AI anything about Algolia"
+      : props.placeholder;
 
   const currentValue = props.showChat ? chatInput : query || "";
 
@@ -1427,7 +1434,11 @@ interface ResultsPanelProps {
   sendMessage: (options: { text: string }) => void | Promise<void>;
   onHoverIndex?: (index: number) => void;
   scrollOnSelectionChange?: boolean;
-  sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  sendEvent?: (
+    eventType: "click",
+    hit: Hit<BaseHit>,
+    eventName: string,
+  ) => void;
   suggestedQuestions?: SuggestedQuestionHit[];
   onNewChat?: () => void;
 }
@@ -1451,7 +1462,7 @@ const ResultsPanel = memo(function ResultsPanel({
   onNewChat,
 }: ResultsPanelProps) {
   const { items } = useHits(
-    config.transformItems ? { transformItems: config.transformItems } : {}
+    config.transformItems ? { transformItems: config.transformItems } : {},
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverEnabled, setHoverEnabled] = useState(false);
@@ -1463,9 +1474,9 @@ const ResultsPanel = memo(function ResultsPanel({
     if (!container) return;
     setHoverEnabled(false);
     const enable = () => setHoverEnabled(true);
-    container.addEventListener("pointermove", enable, { once: true } as any);
+    container.addEventListener("pointermove", enable, { once: true });
     return () => {
-      container.removeEventListener("pointermove", enable as any);
+      container.removeEventListener("pointermove", enable);
     };
   }, [showChat]);
 
@@ -1475,7 +1486,7 @@ const ResultsPanel = memo(function ResultsPanel({
     const container = containerRef.current;
     if (!container) return;
     const selectedEl = container.querySelector(
-      '[aria-selected="true"]'
+      '[aria-selected="true"]',
     ) as HTMLElement | null;
     if (!selectedEl) return;
 
@@ -1518,7 +1529,7 @@ const ResultsPanel = memo(function ResultsPanel({
       }
       sendMessage({ text: trimmed });
     },
-    [sendMessage, isGenerating]
+    [sendMessage, isGenerating],
   );
 
   if (showChat) {
@@ -1545,7 +1556,7 @@ const ResultsPanel = memo(function ResultsPanel({
         role="listbox"
       >
         <HitsList
-          hits={items as unknown[]}
+          hits={items}
           query={query}
           selectedIndex={selectedIndex}
           onAskAI={() => setShowChat(true)}
@@ -1608,7 +1619,7 @@ const Footer = memo(function Footer({ showChat }: { showChat: boolean }) {
   const poweredByHref =
     typeof window !== "undefined"
       ? `${basePoweredByUrl}&utm_source=${encodeURIComponent(
-          window.location.hostname
+          window.location.hostname,
         )}`
       : basePoweredByUrl;
   return (
@@ -1694,7 +1705,7 @@ function SearchModal({ onClose, config }: SearchModalProps) {
 
   const results = useInstantSearch();
   const { items, sendEvent } = useHits(
-    config.transformItems ? { transformItems: config.transformItems } : {}
+    config.transformItems ? { transformItems: config.transformItems } : {},
   );
   const { showChat, setShowChat, handleShowChat } = useSearchState();
 
@@ -1751,7 +1762,12 @@ function SearchModal({ onClose, config }: SearchModalProps) {
     activateSelection,
     hoverIndex,
     selectionOrigin,
-  } = useKeyboardNavigation(showChat, items, query, config.openResultsInNewTab ?? true);
+  } = useKeyboardNavigation(
+    showChat,
+    items,
+    query,
+    config.openResultsInNewTab ?? true,
+  );
 
   const handleActivateSelection = useCallback((): boolean => {
     // Send click event for keyboard navigation before activating

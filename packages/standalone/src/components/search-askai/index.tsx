@@ -1,4 +1,5 @@
 import { liteClient as algoliasearch } from "algoliasearch/lite";
+import type { BaseHit, Hit } from "instantsearch.js";
 import type { ComponentProps, FC, RefObject } from "react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -56,7 +57,7 @@ export interface SearchWithAskAIConfig {
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
   /** Transform items before rendering (optional) - useful for proxying images or modifying hit data */
-  transformItems?: (items: any[]) => any[];
+  transformItems?: (items: Hit<BaseHit>[]) => Hit<BaseHit>[];
   /** Route Ask AI requests through Agent Studio endpoints (optional, defaults to false). */
   agentStudio?: boolean;
 }
@@ -155,7 +156,11 @@ interface ResultsPanelProps {
   sendMessage: (options: { text: string }) => void | Promise<void>;
   onHoverIndex?: (index: number) => void;
   scrollOnSelectionChange?: boolean;
-  sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  sendEvent?: (
+    eventType: "click",
+    hit: Hit<BaseHit>,
+    eventName: string,
+  ) => void;
   suggestedQuestions?: SuggestedQuestionHit[];
   onNewChat?: () => void;
   hasThreadDepthError?: boolean;
@@ -183,7 +188,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   openResultsInNewTab = true,
 }) {
   const { items } = useHits(
-    config.transformItems ? { transformItems: config.transformItems } : {}
+    config.transformItems ? { transformItems: config.transformItems } : {},
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverEnabled, setHoverEnabled] = useState(false);
@@ -195,9 +200,9 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
     if (!container) return;
     setHoverEnabled(false);
     const enable = () => setHoverEnabled(true);
-    container.addEventListener("pointermove", enable, { once: true } as any);
+    container.addEventListener("pointermove", enable, { once: true });
     return () => {
-      container.removeEventListener("pointermove", enable as any);
+      container.removeEventListener("pointermove", enable);
     };
   }, [showChat]);
 
@@ -207,7 +212,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
     const container = containerRef.current;
     if (!container) return;
     const selectedEl = container.querySelector(
-      '[aria-selected="true"]'
+      '[aria-selected="true"]',
     ) as HTMLElement | null;
     if (!selectedEl) return;
 
@@ -248,7 +253,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
       if (!trimmed || isGenerating) return;
       sendMessage({ text: trimmed });
     },
-    [isGenerating, sendMessage]
+    [isGenerating, sendMessage],
   );
 
   if (showChat) {
@@ -273,7 +278,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
       {/** biome-ignore lint/a11y/useSemanticElements: . */}
       <div ref={containerRef} className="ss-hits-container" role="listbox">
         <HitsList
-          hits={items as unknown[]}
+          hits={items}
           query={query}
           selectedIndex={selectedIndex}
           onAskAI={() => setShowChat(true)}
@@ -299,7 +304,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
 
   const results = useInstantSearch();
   const { items, sendEvent } = useHits(
-    config.transformItems ? { transformItems: config.transformItems } : {}
+    config.transformItems ? { transformItems: config.transformItems } : {},
   );
   const { showChat, setShowChat, handleShowChat } = useSearchState();
 
@@ -351,7 +356,12 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
     activateSelection,
     hoverIndex,
     selectionOrigin,
-  } = useKeyboardNavigation(showChat, items, query, config.openResultsInNewTab ?? true);
+  } = useKeyboardNavigation(
+    showChat,
+    items,
+    query,
+    config.openResultsInNewTab ?? true,
+  );
 
   const handleActivateSelection = useCallback((): boolean => {
     // Send click event for keyboard navigation before activating
@@ -464,7 +474,7 @@ const Footer = memo(function Footer({ showChat }: { showChat: boolean }) {
   const poweredByHref =
     typeof window !== "undefined"
       ? `${basePoweredByUrl}&utm_source=${encodeURIComponent(
-          window.location.hostname
+          window.location.hostname,
         )}`
       : basePoweredByUrl;
   return (

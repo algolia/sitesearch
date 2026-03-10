@@ -26,14 +26,16 @@ export default function AlgoliaSearch(props: SharedProps) {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         // Find the search input in the DocSearch modal
-        const searchInput = document.querySelector('.DocSearch-Input') as HTMLInputElement;
-        
-        if (searchInput && searchInput.value) {
+        const searchInput = document.querySelector(
+          ".DocSearch-Input",
+        ) as HTMLInputElement;
+
+        if (searchInput?.value) {
           // If there's text in the input, let DocSearch handle clearing it
           // (Don't close the modal yet)
           return;
         }
-        
+
         // If input is empty, close the modal
         event.preventDefault();
         event.stopPropagation();

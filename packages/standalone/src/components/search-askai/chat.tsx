@@ -1,6 +1,7 @@
 import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SearchHit } from "../types";
 import { postFeedback } from "./askai";
 import { isThreadDepthError, ThreadDepthErrorBanner } from "./error-utils";
 import {
@@ -51,8 +52,7 @@ export interface SearchIndexTool {
   };
   output: {
     query: string;
-    // biome-ignore lint/suspicious/noExplicitAny: too ambiguous
-    hits: any[];
+    hits: SearchHit[];
   };
 }
 
@@ -158,35 +158,31 @@ export const ChatWidget = memo(function ChatWidget({
     <div className="ss-chat-root">
       <div className="ss-qa-list">
         {exchanges.length === 0 ? (
-          <>
-            <div className="ss-chat-welcome">
-              <h2 className="ss-chat-welcome-title">
-                How can I help you today?
-              </h2>
-              <p className="ss-chat-welcome-subtitle">
-                I search through your content to help you find answers to your
-                questions, fast.
-              </p>
-              {suggestedQuestions && suggestedQuestions.length > 0 ? (
-                <div className="ss-suggested-questions">
-                  {suggestedQuestions.map((question) => (
-                    <button
-                      key={question.objectID}
-                      type="button"
-                      className="ss-suggested-question-btn"
-                      disabled={isGenerating}
-                      onClick={() => {
-                        if (isGenerating) return;
-                        onSuggestedQuestionClick?.(question.question);
-                      }}
-                    >
-                      {question.question}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          </>
+          <div className="ss-chat-welcome">
+            <h2 className="ss-chat-welcome-title">How can I help you today?</h2>
+            <p className="ss-chat-welcome-subtitle">
+              I search through your content to help you find answers to your
+              questions, fast.
+            </p>
+            {suggestedQuestions && suggestedQuestions.length > 0 ? (
+              <div className="ss-suggested-questions">
+                {suggestedQuestions.map((question) => (
+                  <button
+                    key={question.objectID}
+                    type="button"
+                    className="ss-suggested-question-btn"
+                    disabled={isGenerating}
+                    onClick={() => {
+                      if (isGenerating) return;
+                      onSuggestedQuestionClick?.(question.question);
+                    }}
+                  >
+                    {question.question}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
         ) : null}
         {/* thread depth error banner */}
         {hasThreadDepthError && onNewChat && (
@@ -215,7 +211,7 @@ export const ChatWidget = memo(function ChatWidget({
                       part.type === "text" ? (
                         // biome-ignore lint/suspicious/noArrayIndexKey: better
                         <span key={index}>{part.text}</span>
-                      ) : null
+                      ) : null,
                     )}
                   </div>
                 </div>
@@ -312,7 +308,9 @@ export const ChatWidget = memo(function ChatWidget({
                 </div>
 
                 <div className="ss-qa-actions">
-                  {exchange.assistantMessage && !isGenerating && !agentStudio ? (
+                  {exchange.assistantMessage &&
+                  !isGenerating &&
+                  !agentStudio ? (
                     acknowledgedExchangeIds.has(exchange.id) ? (
                       <span className="ss-qa-feedback-ack ss-fade">
                         Thanks for your feedback!
@@ -422,8 +420,9 @@ export const ChatWidget = memo(function ChatWidget({
                     onClick={async () => {
                       const parts = exchange.assistantMessage?.parts ?? [];
                       const textContent = parts
-                        .filter((part) => part.type === "text")
-                        .map((part) => part.text)
+                        .flatMap((part) =>
+                          part.type === "text" ? [part.text] : [],
+                        )
                         .join("")
                         .trim();
                       if (!textContent) return;

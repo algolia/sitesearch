@@ -83,10 +83,10 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
   const placeholder = props.isThreadDepthError
     ? "Conversation limit reached"
     : props.isGenerating
-    ? "Answering..."
-    : props.showChat
-    ? "Ask AI anything about Algolia"
-    : props.placeholder;
+      ? "Answering..."
+      : props.showChat
+        ? "Ask AI anything about Algolia"
+        : props.placeholder;
 
   const currentValue = props.showChat ? chatInput : query || "";
   const isInputDisabled = props.isGenerating || props.isThreadDepthError;

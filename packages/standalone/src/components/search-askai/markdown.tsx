@@ -1,5 +1,5 @@
-import { marked, type Tokens } from 'marked';
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { marked, type Tokens } from "marked";
+import { memo, useEffect, useMemo, useRef } from "react";
 
 interface MemoizedMarkdownProps {
   children: string;
@@ -9,19 +9,19 @@ interface MemoizedMarkdownProps {
 // Escape HTML special characters for safe insertion
 function escapeHtml(html: string): string {
   return html
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 // Create a custom renderer
 const renderer = new marked.Renderer();
 
 // Custom code block renderer with copy functionality
-renderer.code = ({ text, lang = '', escaped }: Tokens.Code): string => {
-  const languageClass = lang ? `language-${lang}` : '';
+renderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
+  const languageClass = lang ? `language-${lang}` : "";
   const safeCode = escaped ? text : escapeHtml(text);
   const encodedCode = encodeURIComponent(text);
 
@@ -51,16 +51,16 @@ renderer.code = ({ text, lang = '', escaped }: Tokens.Code): string => {
 
 // Ensure markdown links open in new tab with security attributes
 renderer.link = ({ href, title, text }: Tokens.Link): string => {
-  const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
-  const hrefAttr = href ? escapeHtml(href) : '';
-  const textContent = text || '';
+  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+  const hrefAttr = href ? escapeHtml(href) : "";
+  const textContent = text || "";
 
   return `<a href="${hrefAttr}" target="_blank" rel="noopener noreferrer"${titleAttr}>${textContent}</a>`;
 };
 
 export const MemoizedMarkdown = memo(function MemoizedMarkdown({
   children,
-  className = '',
+  className = "",
 }: MemoizedMarkdownProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +72,7 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
         gfm: true,
       });
     } catch (error) {
-      console.error('Error parsing markdown:', error);
+      console.error("Error parsing markdown:", error);
       return escapeHtml(children);
     }
   }, [children]);
@@ -85,14 +85,16 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
 
     const handleCopyClick = async (event: Event) => {
       const target = event.target as HTMLElement;
-      const button = target.closest('.ss-markdown-copy-button') as HTMLButtonElement;
+      const button = target.closest(
+        ".ss-markdown-copy-button",
+      ) as HTMLButtonElement;
 
       if (!button) return;
 
       event.preventDefault();
       event.stopPropagation();
 
-      const encodedCode = button.getAttribute('data-code');
+      const encodedCode = button.getAttribute("data-code");
       if (!encodedCode) return;
 
       try {
@@ -100,21 +102,21 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
         await navigator.clipboard.writeText(code);
 
         // Show success state
-        button.classList.add('ss-markdown-copied');
+        button.classList.add("ss-markdown-copied");
 
         // Reset after 2 seconds
         setTimeout(() => {
-          button.classList.remove('ss-markdown-copied');
+          button.classList.remove("ss-markdown-copied");
         }, 2000);
       } catch (error) {
-        console.error('Failed to copy code:', error);
+        console.error("Failed to copy code:", error);
       }
     };
 
-    container.addEventListener('click', handleCopyClick);
+    container.addEventListener("click", handleCopyClick);
 
     return () => {
-      container.removeEventListener('click', handleCopyClick);
+      container.removeEventListener("click", handleCopyClick);
     };
   }, [html]);
 

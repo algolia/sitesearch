@@ -1,4 +1,5 @@
 import { liteClient as algoliasearch } from "algoliasearch/lite";
+import type { BaseHit, Hit } from "instantsearch.js";
 import type { ComponentProps, FC, RefObject } from "react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -45,7 +46,7 @@ export interface SearchConfig {
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
   /** Transform items before rendering (optional) - useful for proxying images or modifying hit data */
-  transformItems?: (items: any[]) => any[];
+  transformItems?: (items: Hit<BaseHit>[]) => Hit<BaseHit>[];
 }
 
 interface SearchBoxProps {
@@ -107,7 +108,11 @@ interface ResultsPanelProps {
   config: SearchConfig;
   onHoverIndex?: (index: number) => void;
   scrollOnSelectionChange?: boolean;
-  sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  sendEvent?: (
+    eventType: "click",
+    hit: Hit<BaseHit>,
+    eventName: string,
+  ) => void;
   openResultsInNewTab?: boolean;
 }
 
@@ -121,7 +126,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   openResultsInNewTab = true,
 }) {
   const { items } = useHits(
-    config.transformItems ? { transformItems: config.transformItems } : {}
+    config.transformItems ? { transformItems: config.transformItems } : {},
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverEnabled, setHoverEnabled] = useState(false);
@@ -132,9 +137,9 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
     if (!container) return;
     setHoverEnabled(false);
     const enable = () => setHoverEnabled(true);
-    container.addEventListener("pointermove", enable, { once: true } as any);
+    container.addEventListener("pointermove", enable, { once: true });
     return () => {
-      container.removeEventListener("pointermove", enable as any);
+      container.removeEventListener("pointermove", enable);
     };
   }, []);
 
@@ -164,7 +169,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
       {/** biome-ignore lint/a11y/useSemanticElements: . */}
       <div ref={containerRef} className="ss-hits-container" role="listbox">
         <HitsList
-          hits={items as any[]}
+          hits={items}
           query={query}
           selectedIndex={selectedIndex}
           attributes={config.attributes}
@@ -189,7 +194,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
 
   const results = useInstantSearch();
   const { items, sendEvent } = useHits(
-    config.transformItems ? { transformItems: config.transformItems } : {}
+    config.transformItems ? { transformItems: config.transformItems } : {},
   );
 
   // Focus input when modal opens

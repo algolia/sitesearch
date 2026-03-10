@@ -27,6 +27,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
         <MDXContent
           components={getMDXComponents({
             // this allows you to link to other pages with relative file paths
+            // biome-ignore lint/suspicious/noExplicitAny: fumadocs type mismatch
             a: createRelativeLink(source, page) as any,
           })}
         />

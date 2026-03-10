@@ -1,3 +1,4 @@
+import type { BaseHit, Hit } from "instantsearch.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface UseKeyboardNavigationReturn {
@@ -10,7 +11,7 @@ interface UseKeyboardNavigationReturn {
 }
 
 export function useKeyboardNavigation(
-  hits: any[],
+  hits: Hit<BaseHit>[],
   query: string,
 ): UseKeyboardNavigationReturn {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -41,8 +42,9 @@ export function useKeyboardNavigation(
 
   const activateSelection = useCallback((): boolean => {
     const hit = hits[selectedIndex];
-    if (hit?.url) {
-      window.open(hit.url, "_blank", "noopener,noreferrer");
+    const url = typeof hit?.url === "string" ? hit.url : undefined;
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
       return true;
     }
     return false;

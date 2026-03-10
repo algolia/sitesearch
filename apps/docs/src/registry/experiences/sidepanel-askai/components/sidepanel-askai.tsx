@@ -8,6 +8,7 @@
 import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { liteClient } from "algoliasearch/lite";
+import type { BaseHit, Hit } from "instantsearch.js";
 import {
   ArrowUpIcon,
   BrainIcon,
@@ -39,9 +40,9 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
+  isThreadDepthError,
   postFeedback,
   useAskai,
-  isThreadDepthError,
 } from "@/registry/experiences/sidepanel-askai/hooks/use-askai";
 import {
   type SuggestedQuestionHit,
@@ -81,8 +82,7 @@ export interface SearchIndexTool {
   };
   output: {
     query: string;
-    // biome-ignore lint/suspicious/noExplicitAny: too ambiguous
-    hits: any[];
+    hits: Hit<BaseHit>[];
   };
 }
 
@@ -784,96 +784,93 @@ const ChatWidget = memo(function ChatWidget({
 
               {exchange.assistantMessage && !isGenerating ? (
                 <div className="mt-4 flex items-center justify-start gap-2">
-                  {!agentStudio && (
-                    <>
-                      {acknowledgedExchangeIds.has(exchange.id) ? (
-                        <span className="text-muted-foreground text-[0.85rem] animate-in fade-in slide-in-from-bottom-1">
-                          Thanks for your feedback!
-                        </span>
-                      ) : submittingExchangeId === exchange.id ? (
-                        <span className="text-muted-foreground text-[0.85rem] shimmer-text">
-                          Submitting...
-                        </span>
-                      ) : (
-                        <div className="inline-flex items-center gap-2">
-                          <button
-                            type="button"
-                            title="Like"
-                            aria-label="Like"
-                            className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
-                            disabled={
-                              !exchange.assistantMessage ||
-                              submittingExchangeId === exchange.id
-                            }
-                            onClick={async () => {
-                              if (!exchange.assistantMessage) return;
-                              try {
-                                setSubmittingExchangeId(exchange.id);
-                                if (onThumbsUp) {
-                                  await onThumbsUp(exchange.userMessage.id);
-                                } else {
-                                  await postFeedback({
-                                    assistantId,
-                                    appId: applicationId,
-                                    messageId: exchange.userMessage.id,
-                                    thumbs: 1,
-                                  });
-                                }
-                                setAcknowledgedExchangeIds((prev) => {
-                                  const next = new Set(prev);
-                                  next.add(exchange.id);
-                                  return next;
+                  {!agentStudio &&
+                    (acknowledgedExchangeIds.has(exchange.id) ? (
+                      <span className="text-muted-foreground text-[0.85rem] animate-in fade-in slide-in-from-bottom-1">
+                        Thanks for your feedback!
+                      </span>
+                    ) : submittingExchangeId === exchange.id ? (
+                      <span className="text-muted-foreground text-[0.85rem] shimmer-text">
+                        Submitting...
+                      </span>
+                    ) : (
+                      <div className="inline-flex items-center gap-2">
+                        <button
+                          type="button"
+                          title="Like"
+                          aria-label="Like"
+                          className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
+                          disabled={
+                            !exchange.assistantMessage ||
+                            submittingExchangeId === exchange.id
+                          }
+                          onClick={async () => {
+                            if (!exchange.assistantMessage) return;
+                            try {
+                              setSubmittingExchangeId(exchange.id);
+                              if (onThumbsUp) {
+                                await onThumbsUp(exchange.userMessage.id);
+                              } else {
+                                await postFeedback({
+                                  assistantId,
+                                  appId: applicationId,
+                                  messageId: exchange.userMessage.id,
+                                  thumbs: 1,
                                 });
-                              } catch {
-                                // ignore errors
-                              } finally {
-                                setSubmittingExchangeId(null);
                               }
-                            }}
-                          >
-                            <ThumbsUp size={18} />
-                          </button>
-                          <button
-                            type="button"
-                            title="Dislike"
-                            aria-label="Dislike"
-                            className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
-                            disabled={
-                              !exchange.assistantMessage ||
-                              submittingExchangeId === exchange.id
+                              setAcknowledgedExchangeIds((prev) => {
+                                const next = new Set(prev);
+                                next.add(exchange.id);
+                                return next;
+                              });
+                            } catch {
+                              // ignore errors
+                            } finally {
+                              setSubmittingExchangeId(null);
                             }
-                            onClick={async () => {
-                              if (!exchange.assistantMessage) return;
-                              try {
-                                setSubmittingExchangeId(exchange.id);
-                                if (onThumbsDown) {
-                                  await onThumbsDown(exchange.userMessage.id);
-                                } else {
-                                  await postFeedback({
-                                    assistantId,
-                                    appId: applicationId,
-                                    messageId: exchange.userMessage.id,
-                                    thumbs: 0,
-                                  });
-                                }
-                                setAcknowledgedExchangeIds((prev) => {
-                                  const next = new Set(prev);
-                                  next.add(exchange.id);
-                                  return next;
+                          }}
+                        >
+                          <ThumbsUp size={18} />
+                        </button>
+                        <button
+                          type="button"
+                          title="Dislike"
+                          aria-label="Dislike"
+                          className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
+                          disabled={
+                            !exchange.assistantMessage ||
+                            submittingExchangeId === exchange.id
+                          }
+                          onClick={async () => {
+                            if (!exchange.assistantMessage) return;
+                            try {
+                              setSubmittingExchangeId(exchange.id);
+                              if (onThumbsDown) {
+                                await onThumbsDown(exchange.userMessage.id);
+                              } else {
+                                await postFeedback({
+                                  assistantId,
+                                  appId: applicationId,
+                                  messageId: exchange.userMessage.id,
+                                  thumbs: 0,
                                 });
-                              } catch {
-                                // ignore errors
-                              } finally {
-                                setSubmittingExchangeId(null);
                               }
-                            }}
-                          >
-                            <ThumbsDown size={18} />
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
+                              setAcknowledgedExchangeIds((prev) => {
+                                const next = new Set(prev);
+                                next.add(exchange.id);
+                                return next;
+                              });
+                            } catch {
+                              // ignore errors
+                            } finally {
+                              setSubmittingExchangeId(null);
+                            }
+                          }}
+                        >
+                          <ThumbsDown size={18} />
+                        </button>
+                      </div>
+                    ))}
                   <button
                     type="button"
                     className={`border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed ${
@@ -898,8 +895,9 @@ const ChatWidget = memo(function ChatWidget({
                     onClick={async () => {
                       const parts = exchange.assistantMessage?.parts ?? [];
                       const textContent = parts
-                        .filter((part) => part.type === "text")
-                        .map((part) => part.text)
+                        .flatMap((part) =>
+                          part.type === "text" ? [part.text] : [],
+                        )
                         .join("")
                         .trim();
                       if (!textContent) return;

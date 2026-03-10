@@ -14,6 +14,7 @@
     "lint": "biome lint .",
     "check": "biome check .",
     "fix": "biome check --write .",
+    "force-fix": "biome check --write --unsafe .",
     "fix:staged": "biome check --write --staged --no-errors-on-unmatched && git update-index --again"
   },
   "keywords": [],

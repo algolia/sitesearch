@@ -36,7 +36,7 @@ type HighlightContextType<T extends string> = {
 };
 
 const HighlightContext = React.createContext<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: generic context type
   HighlightContextType<any> | undefined
 >(undefined);
 
@@ -183,6 +183,7 @@ function Highlight<T extends React.ElementType = "div">({
         return newBounds;
       });
     },
+    // biome-ignore lint/correctness/useExhaustiveDependencies: props used for boundsOffset from union type
     [props],
   );
 
@@ -265,6 +266,7 @@ function Highlight<T extends React.ElementType = "div">({
     [
       mode,
       Component,
+      // biome-ignore lint/correctness/useExhaustiveDependencies: props used for containerClassName from union type
       props,
       boundsState,
       transition,
