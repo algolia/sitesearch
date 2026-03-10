@@ -118,7 +118,7 @@ export default function HomePage() {
           </div>
 
           {/* Component Cards Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Search Component Card */}
             <div className="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-6 hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-200">
               <div className="flex items-start gap-3 mb-4">
@@ -187,6 +187,52 @@ export default function HomePage() {
                   apiKey="94b6afdc316917b6e6cdf2763fa561df"
                   indexName="algolia_podcast_sample_dataset"
                   assistantId="UpR727VnXnoG"
+                  attributes={{
+                    primaryText: "title",
+                    secondaryText: "description",
+                    tertiaryText: "title",
+                    url: "url",
+                    image: "imageUrl",
+                  }}
+                />
+              </div>
+
+              <div className="mt-4 flex items-center gap-2">
+                <Link
+                  href="/docs/experiences/search-askai"
+                  className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300 flex items-center gap-1"
+                >
+                  View details
+                  <ArrowRightIcon className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Search AI (Agent Studio) Component Card */}
+            <div className="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-6 hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-200">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                  <SparklesIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Search with Agent Studio
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    AI-powered conversational search with natural language
+                    understanding
+                  </p>
+                </div>
+              </div>
+
+              {/* Interactive Demo */}
+              <div className="mt-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-6 overflow-hidden">
+                <SearchAskAI
+                  indexName="docsearch-markdown"
+                  applicationId="PMZUYBQDAK"
+                  apiKey="a00716d83c64f6c61905c078b7d5ab66"
+                  assistantId="ccdec697-e3fe-465b-a1c3-657e7bf18aef"
+                  agentStudio={true}
                   attributes={{
                     primaryText: "title",
                     secondaryText: "description",

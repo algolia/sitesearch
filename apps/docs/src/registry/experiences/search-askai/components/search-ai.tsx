@@ -7,51 +7,51 @@ import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { liteClient as algoliasearch } from "algoliasearch/lite";
 import {
-  ArrowLeftIcon,
-  BrainIcon,
-  CheckIcon,
-  CopyIcon,
-  CornerDownLeftIcon,
-  SearchIcon,
-  SparklesIcon,
-  SquarePen,
-  ThumbsDown,
-  ThumbsUp,
+	ArrowLeftIcon,
+	BrainIcon,
+	CheckIcon,
+	CopyIcon,
+	CornerDownLeftIcon,
+	SearchIcon,
+	SparklesIcon,
+	SquarePen,
+	ThumbsDown,
+	ThumbsUp,
 } from "lucide-react";
 import { marked, type Tokens } from "marked";
 import type React from "react";
 import {
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-  type FC,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+	type ComponentPropsWithoutRef,
+	type CSSProperties,
+	type FC,
+	memo,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
 } from "react";
 import { createPortal } from "react-dom";
 import {
-  Configure,
-  Highlight,
-  InstantSearch,
-  useHits,
-  useInstantSearch,
-  useSearchBox,
+	Configure,
+	Highlight,
+	InstantSearch,
+	useHits,
+	useInstantSearch,
+	useSearchBox,
 } from "react-instantsearch";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  postFeedback,
-  useAskai,
-  isThreadDepthError,
+	postFeedback,
+	useAskai,
+	isThreadDepthError,
 } from "@/registry/experiences/search-askai/hooks/use-askai";
 import { useKeyboardNavigation } from "@/registry/experiences/search-askai/hooks/use-keyboard-navigation";
 import { useSearchState } from "@/registry/experiences/search-askai/hooks/use-search-state";
 import {
-  type SuggestedQuestionHit,
-  useSuggestedQuestions,
+	type SuggestedQuestionHit,
+	useSuggestedQuestions,
 } from "@/registry/experiences/search-askai/hooks/use-suggested-questions";
 
 // ============================================================================
@@ -848,7 +848,7 @@ const ChatWidget = memo(function ChatWidget({
                 </div>
 
                 <div className="mt-4 flex items-center justify-end gap-2">
-                  {exchange.assistantMessage && !isGenerating && !agentStudio ? (
+                  {exchange.assistantMessage && !isGenerating ? (
                     acknowledgedExchangeIds.has(exchange.id) ? (
                       <span className="text-muted-foreground text-[0.85rem] animate-in fade-in slide-in-from-bottom-1">
                         Thanks for your feedback!
@@ -960,8 +960,9 @@ const ChatWidget = memo(function ChatWidget({
                     onClick={async () => {
                       const parts = exchange.assistantMessage?.parts ?? [];
                       const textContent = parts
-                        .filter((part) => part.type === "text")
-                        .map((part) => part.text)
+                        .flatMap((part) =>
+                          part.type === "text" ? [part.text] : []
+                        )
                         .join("")
                         .trim();
                       if (!textContent) return;

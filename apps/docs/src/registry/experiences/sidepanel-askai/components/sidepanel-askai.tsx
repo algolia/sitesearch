@@ -543,6 +543,7 @@ interface ChatWidgetProps {
   onThumbsUp?: (userMessageId: string) => Promise<void> | void;
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
+  apiKey: string;
   assistantId: string;
   agentStudio?: boolean;
   suggestedQuestions: SuggestedQuestionHit[];
@@ -558,6 +559,7 @@ const ChatWidget = memo(function ChatWidget({
   onThumbsUp,
   onThumbsDown,
   applicationId,
+  apiKey,
   assistantId,
   agentStudio,
   suggestedQuestions,
@@ -815,6 +817,8 @@ const ChatWidget = memo(function ChatWidget({
                                   await postFeedback({
                                     assistantId,
                                     appId: applicationId,
+                                    apiKey,
+                                    agentStudio,
                                     messageId: exchange.userMessage.id,
                                     thumbs: 1,
                                   });
@@ -852,6 +856,8 @@ const ChatWidget = memo(function ChatWidget({
                                   await postFeedback({
                                     assistantId,
                                     appId: applicationId,
+                                    apiKey,
+                                    agentStudio,
                                     messageId: exchange.userMessage.id,
                                     thumbs: 0,
                                   });
@@ -898,8 +904,9 @@ const ChatWidget = memo(function ChatWidget({
                     onClick={async () => {
                       const parts = exchange.assistantMessage?.parts ?? [];
                       const textContent = parts
-                        .filter((part) => part.type === "text")
-                        .map((part) => part.text)
+                        .flatMap((part) =>
+                          part.type === "text" ? [part.text] : []
+                        )
                         .join("")
                         .trim();
                       if (!textContent) return;
@@ -1175,6 +1182,7 @@ const Sidepanel = memo(function Sidepanel({
           error={error}
           isGenerating={isGenerating}
           applicationId={config.applicationId}
+          apiKey={config.apiKey}
           assistantId={config.assistantId}
           agentStudio={config.agentStudio}
           suggestedQuestions={suggestedQuestions}

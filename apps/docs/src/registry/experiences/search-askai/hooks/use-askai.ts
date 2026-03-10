@@ -1,7 +1,7 @@
 import { useChat } from "@ai-sdk/react";
 import {
-  DefaultChatTransport,
-  lastAssistantMessageIsCompleteWithToolCalls,
+	DefaultChatTransport,
+	lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { useMemo } from "react";
 
@@ -26,19 +26,22 @@ export function isThreadDepthError(error?: Error | null): boolean {
 
   // Check if error has a code property
   const errorWithCode = error as Error & { code?: string };
-  if (errorWithCode.code === 'AI-217') return true;
+  if (errorWithCode.code === "AI-217") return true;
 
   // Check message content for AI-217 or thread depth references
-  const message = error.message?.toLowerCase() || '';
-  return message.includes('ai-217') || message.includes('thread depth');
+  const message = error.message?.toLowerCase() || "";
+  return message.includes("ai-217") || message.includes("thread depth");
 }
 
 const BASE_ASKAI_URL = "https://askai.algolia.com";
 
+export const agentStudioBaseUrl = (applicationId: string): string =>
+  `https://${applicationId}.algolia.net/agent-studio/1`;
+
 function getChatApiUrl(config: AskAIConfig): string {
   if (config.agentStudio) {
-    const base = `https://${config.applicationId}.algolia.net/agent-studio`;
-    return `${base}/1/agents/${config.assistantId}/completions?stream=true&compatibilityMode=ai-sdk-5`;
+    const base = agentStudioBaseUrl(config.applicationId);
+    return `${base}/agents/${config.assistantId}/completions?stream=true&compatibilityMode=ai-sdk-5`;
   }
   return `${BASE_ASKAI_URL}/chat`;
 }
@@ -87,7 +90,9 @@ export function useAskai(config: AskAIConfig) {
 
   // Check if there's a thread depth error (AI-217)
   const hasThreadDepthError = useMemo(() => {
-    return chat.status === 'error' && isThreadDepthError(chat.error as Error | null);
+    return (
+      chat.status === "error" && isThreadDepthError(chat.error as Error | null)
+    );
   }, [chat.status, chat.error]);
 
   return {
@@ -155,6 +160,37 @@ export const postFeedback = async ({
   thumbs,
   messageId,
   appId,
+  agentStudio = false,
+  apiKey,
+}: {
+  assistantId: string;
+  thumbs: 0 | 1;
+  messageId: string;
+  appId: string;
+  agentStudio?: boolean;
+  apiKey?: string;
+}): Promise<Response> => {
+  if (agentStudio) {
+    if (!apiKey) {
+      throw new Error("apiKey is required when agentStudio is enabled");
+    }
+
+    return postAgentStudioFeedback({
+      agentId: assistantId,
+      vote: thumbs,
+      messageId,
+      appId,
+      apiKey,
+    });
+  }
+  return postAskAIFeedback({ assistantId, thumbs, messageId, appId });
+};
+
+export const postAskAIFeedback = async ({
+  assistantId,
+  thumbs,
+  messageId,
+  appId,
 }: {
   assistantId: string;
   thumbs: 0 | 1;
@@ -174,6 +210,37 @@ export const postFeedback = async ({
       appId,
       messageId,
       thumbs,
+    }),
+    headers,
+  });
+};
+
+export const postAgentStudioFeedback = ({
+  agentId,
+  vote,
+  messageId,
+  appId,
+  apiKey,
+}: {
+  agentId: string;
+  vote: 0 | 1;
+  messageId: string;
+  appId: string;
+  apiKey: string;
+}): Promise<Response> => {
+  const headers = new Headers();
+  headers.set("x-algolia-application-id", appId);
+  headers.set("x-algolia-api-key", apiKey);
+  headers.set("content-type", "application/json");
+
+  const baseUrl = `${agentStudioBaseUrl(appId)}/feedback`;
+
+  return fetch(baseUrl, {
+    method: "POST",
+    body: JSON.stringify({
+      messageId,
+      agentId,
+      vote,
     }),
     headers,
   });

@@ -36,6 +36,7 @@ interface ChatWidgetProps {
   onThumbsUp?: (userMessageId: string) => Promise<void> | void;
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
+  apiKey: string;
   assistantId: string;
   /** When true, feedback (thumbs) is not sent to the AskAI backend. */
   agentStudio?: boolean;
@@ -85,6 +86,7 @@ export const ChatWidget = memo(function ChatWidget({
   onThumbsUp,
   onThumbsDown,
   applicationId,
+  apiKey,
   assistantId,
   agentStudio,
   suggestedQuestions,
@@ -342,6 +344,8 @@ export const ChatWidget = memo(function ChatWidget({
                                 await postFeedback({
                                   assistantId,
                                   appId: applicationId,
+                                  apiKey,
+                                  agentStudio,
                                   messageId: exchange.userMessage.id,
                                   thumbs: 1,
                                 });
@@ -379,6 +383,8 @@ export const ChatWidget = memo(function ChatWidget({
                                 await postFeedback({
                                   assistantId,
                                   appId: applicationId,
+                                  apiKey,
+                                  agentStudio,
                                   messageId: exchange.userMessage.id,
                                   thumbs: 0,
                                 });
@@ -422,8 +428,9 @@ export const ChatWidget = memo(function ChatWidget({
                     onClick={async () => {
                       const parts = exchange.assistantMessage?.parts ?? [];
                       const textContent = parts
-                        .filter((part) => part.type === "text")
-                        .map((part) => part.text)
+                        .flatMap((part) =>
+                          part.type === "text" ? [part.text] : []
+                        )
                         .join("")
                         .trim();
                       if (!textContent) return;

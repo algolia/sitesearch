@@ -4,26 +4,26 @@
 
 import type { Placement, ReferenceType } from "@floating-ui/react";
 import {
-  FloatingPortal,
-  flip,
-  offset,
-  shift,
-  useFloating,
+	FloatingPortal,
+	flip,
+	offset,
+	shift,
+	useFloating,
 } from "@floating-ui/react";
 import {
-  BrainIcon,
-  CornerDownLeftIcon,
-  SearchIcon,
-  ThumbsDown,
-  ThumbsUp,
+	BrainIcon,
+	CornerDownLeftIcon,
+	SearchIcon,
+	ThumbsDown,
+	ThumbsUp,
 } from "lucide-react";
 import { marked } from "marked";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  postFeedback,
-  useAskai,
+	postFeedback,
+	useAskai,
 } from "@/registry/experiences/highlight-to-askai/hooks/use-askai";
 
 type OnAskPayload = {
@@ -39,6 +39,7 @@ export type HighlightAskAIProps = {
   apiKey: string;
   indexName: string;
   assistantId: string;
+  agentStudio?: boolean;
   excludeElements?: string[];
   side?: Placement;
   sideOffset?: number;
@@ -146,6 +147,7 @@ export function HighlightAskAI({
   apiKey,
   indexName,
   assistantId,
+  agentStudio = false,
   excludeElements = ["pre", "code"],
   side = "top",
   sideOffset = 8,
@@ -170,6 +172,7 @@ export function HighlightAskAI({
       apiKey,
       indexName,
       assistantId,
+      agentStudio,
     });
   const resetConversation = React.useCallback(() => {
     try {
@@ -596,6 +599,8 @@ export function HighlightAskAI({
                                     await postFeedback({
                                       assistantId,
                                       appId: applicationId,
+                                      apiKey,
+                                      agentStudio,
                                       messageId: userMessage.id,
                                       thumbs: 1,
                                     });
@@ -622,6 +627,8 @@ export function HighlightAskAI({
                                     await postFeedback({
                                       assistantId,
                                       appId: applicationId,
+                                      apiKey,
+                                      agentStudio,
                                       messageId: userMessage.id,
                                       thumbs: 0,
                                     });
