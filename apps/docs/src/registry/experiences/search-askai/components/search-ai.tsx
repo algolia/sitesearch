@@ -881,7 +881,7 @@ const ChatWidget = memo(function ChatWidget({
                                 await postAgentStudioFeedback({
                                   agentId: assistantId,
                                   vote: 1,
-                                  messageId: exchange.userMessage.id,
+                                  messageId: exchange.assistantMessage.id,
                                   appId: applicationId,
                                   apiKey: apiKey ?? "",
                                 });
@@ -926,7 +926,7 @@ const ChatWidget = memo(function ChatWidget({
                                 await postAgentStudioFeedback({
                                   agentId: assistantId,
                                   vote: 0,
-                                  messageId: exchange.userMessage.id,
+                                  messageId: exchange.assistantMessage.id,
                                   appId: applicationId,
                                   apiKey: apiKey ?? "",
                                 });

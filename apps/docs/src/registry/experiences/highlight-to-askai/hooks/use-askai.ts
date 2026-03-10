@@ -6,6 +6,7 @@ import {
 import { useMemo } from "react";
 
 export interface AskAIConfig {
+  agentStudio?: boolean;
   applicationId: string;
   apiKey: string;
   indexName: string;
@@ -28,17 +29,28 @@ export function isThreadDepthError(error?: Error | null): boolean {
   return message.includes("ai-217") || message.includes("thread depth");
 }
 
+function getChatApiUrl(config: AskAIConfig): string {
+  if (config.agentStudio) {
+    return `https://${config.applicationId}.algolia.net/agent-studio/1/agents/${config.assistantId}/completions?stream=true&compatibilityMode=ai-sdk-5`;
+  }
+  return `${BASE_ASKAI_URL}/chat`;
+}
+
 export function useAskai(config: AskAIConfig) {
   if (!config) {
     throw new Error("config is required for useAskai");
   }
 
-  const baseUrl = "https://askai.algolia.com";
-
   const transport = useMemo(() => {
     return new DefaultChatTransport({
-      api: `${baseUrl}/chat`,
+      api: getChatApiUrl(config),
       headers: async () => {
+        if (config.agentStudio) {
+          return {
+            "x-algolia-api-key": config.apiKey,
+            "x-algolia-application-id": config.applicationId,
+          } as Record<string, string>;
+        }
         const token = await getValidToken({ assistantId: config.assistantId });
         return {
           "x-algolia-api-key": config.apiKey,
@@ -55,6 +67,8 @@ export function useAskai(config: AskAIConfig) {
     config.applicationId,
     config.indexName,
     config.assistantId,
+    config.agentStudio,
+    config,
   ]);
 
   const chat = useChat({

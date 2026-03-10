@@ -22,6 +22,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  postAgentStudioFeedback,
   postFeedback,
   useAskai,
 } from "@/registry/experiences/highlight-to-askai/hooks/use-askai";
@@ -35,6 +36,7 @@ type OnAskPayload = {
 };
 
 export type HighlightAskAIProps = {
+  agentStudio?: boolean;
   applicationId: string;
   apiKey: string;
   indexName: string;
@@ -142,6 +144,7 @@ const AlgoliaLogo = ({ size = 52 }: { size?: number | string }) => (
 );
 
 export function HighlightAskAI({
+  agentStudio = false,
   applicationId,
   apiKey,
   indexName,
@@ -170,6 +173,7 @@ export function HighlightAskAI({
       apiKey,
       indexName,
       assistantId,
+      agentStudio,
     });
   const resetConversation = React.useCallback(() => {
     try {
@@ -569,6 +573,13 @@ export function HighlightAskAI({
                     (m: unknown) => (m as { role?: string }).role === "user",
                   ) as { id?: string } | undefined;
 
+                  const assistantMessage = (messages || [])
+                    .filter(
+                      (m: unknown) =>
+                        (m as { role?: string }).role === "assistant",
+                    )
+                    .pop() as { id?: string } | undefined;
+
                   return (
                     <>
                       <div className="">
@@ -591,14 +602,25 @@ export function HighlightAskAI({
                                 disabled={submittingFeedback}
                                 onClick={async () => {
                                   if (!userMessage?.id) return;
+                                  setSubmittingFeedback(true);
                                   try {
-                                    setSubmittingFeedback(true);
-                                    await postFeedback({
-                                      assistantId,
-                                      appId: applicationId,
-                                      messageId: userMessage.id,
-                                      thumbs: 1,
-                                    });
+                                    if (agentStudio) {
+                                      if (!assistantMessage?.id) return;
+                                      await postAgentStudioFeedback({
+                                        agentId: assistantId,
+                                        vote: 1,
+                                        messageId: assistantMessage.id,
+                                        appId: applicationId,
+                                        apiKey,
+                                      });
+                                    } else {
+                                      await postFeedback({
+                                        assistantId,
+                                        appId: applicationId,
+                                        messageId: userMessage.id,
+                                        thumbs: 1,
+                                      });
+                                    }
                                     setFeedbackGiven(true);
                                   } catch {
                                     // ignore errors
@@ -619,12 +641,23 @@ export function HighlightAskAI({
                                   if (!userMessage?.id) return;
                                   try {
                                     setSubmittingFeedback(true);
-                                    await postFeedback({
-                                      assistantId,
-                                      appId: applicationId,
-                                      messageId: userMessage.id,
-                                      thumbs: 0,
-                                    });
+                                    if (agentStudio) {
+                                      if (!assistantMessage?.id) return;
+                                      await postAgentStudioFeedback({
+                                        agentId: assistantId,
+                                        vote: 0,
+                                        messageId: assistantMessage.id,
+                                        appId: applicationId,
+                                        apiKey,
+                                      });
+                                    } else {
+                                      await postFeedback({
+                                        assistantId,
+                                        appId: applicationId,
+                                        messageId: userMessage.id,
+                                        thumbs: 0,
+                                      });
+                                    }
                                     setFeedbackGiven(true);
                                   } catch {
                                     // ignore errors
