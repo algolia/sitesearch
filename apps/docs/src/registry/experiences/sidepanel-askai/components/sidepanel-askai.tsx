@@ -585,13 +585,15 @@ const ChatWidget = memo(function ChatWidget({
       if (customHandler) {
         await customHandler(exchange.userMessage.id);
       } else if (agentStudio) {
-        await postAgentStudioFeedback({
-          agentId: assistantId,
-          vote,
-          messageId: exchange.assistantMessage.id,
-          appId: applicationId,
-          apiKey: apiKey ?? "",
-        });
+        if (apiKey) {
+          await postAgentStudioFeedback({
+            agentId: assistantId,
+            vote,
+            messageId: exchange.assistantMessage.id,
+            appId: applicationId,
+            apiKey,
+          });
+        }
       } else {
         await postFeedback({
           assistantId,
