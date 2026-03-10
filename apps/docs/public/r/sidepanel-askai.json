@@ -11,12 +11,8 @@
     "marked",
     "tw-animate-css"
   ],
-  "devDependencies": [
-    "tw-animate-css"
-  ],
-  "registryDependencies": [
-    "button"
-  ],
+  "devDependencies": ["tw-animate-css"],
+  "registryDependencies": ["button"],
   "files": [
     {
       "path": "src/registry/experiences/sidepanel-askai/components/sidepanel-askai.tsx",
@@ -52,8 +48,5 @@
       "30%,60%": "{\nbackground-position: calc(100% + var(--shiny-width)) 0;\n}"
     }
   },
-  "categories": [
-    "ai",
-    "chat"
-  ]
+  "categories": ["ai", "chat"]
 }

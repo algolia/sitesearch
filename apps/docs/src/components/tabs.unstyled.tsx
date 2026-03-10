@@ -1,5 +1,7 @@
-'use client';
+"use client";
 
+import * as Primitive from "@radix-ui/react-tabs";
+import { useEffectEvent } from "fumadocs-core/utils/use-effect-event";
 import {
   type ComponentProps,
   createContext,
@@ -8,10 +10,8 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import * as Primitive from '@radix-ui/react-tabs';
-import { mergeRefs } from '../lib/merge-refs';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
+} from "react";
+import { mergeRefs } from "../lib/merge-refs";
 
 type ChangeListener = (v: string) => void;
 const listeners = new Map<string, ChangeListener[]>();
@@ -53,7 +53,7 @@ const TabsContext = createContext<{
 
 function useTabContext() {
   const ctx = useContext(TabsContext);
-  if (!ctx) throw new Error('You must wrap your component in <Tabs>');
+  if (!ctx) throw new Error("You must wrap your component in <Tabs>");
   return ctx;
 }
 
@@ -77,7 +77,7 @@ export function Tabs({
   const tabsRef = useRef<HTMLDivElement>(null);
   const [value, setValue] =
     _value === undefined
-      ? // eslint-disable-next-line react-hooks/rules-of-hooks -- not supposed to change controlled/uncontrolled
+      ? // biome-ignore lint/correctness/useHookAtTopLevel: not supposed to change controlled/uncontrolled
         useState(defaultValue)
       : [_value, _onValueChange ?? (() => undefined)];
 
@@ -95,7 +95,7 @@ export function Tabs({
     return () => {
       removeChangeListener(groupId, onChange);
     };
-  }, [groupId, persist]);
+  }, [groupId, persist, onChange]);
 
   useLayoutEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -108,7 +108,7 @@ export function Tabs({
         break;
       }
     }
-  }, [valueToIdMap]);
+  }, [valueToIdMap, onChange]);
 
   // Handle navigation to anchors inside tabs
   useLayoutEffect(() => {
@@ -122,18 +122,25 @@ export function Tabs({
 
       // Find which tab contains this element
       const tabsContainer = tabsRef.current;
-      const allTabContents = tabsContainer.querySelectorAll('[role="tabpanel"]');
-      
+      const allTabContents =
+        tabsContainer.querySelectorAll('[role="tabpanel"]');
+
       for (const tabContent of allTabContents) {
         if (tabContent.contains(targetElement)) {
-          const tabValue = tabContent.getAttribute('data-value');
-          
+          const tabValue = tabContent.getAttribute("data-value");
+
           // Only switch tabs if the target is in an inactive tab
-          if (tabValue && tabContent.getAttribute('data-state') === 'inactive') {
+          if (
+            tabValue &&
+            tabContent.getAttribute("data-state") === "inactive"
+          ) {
             onChange(tabValue);
             // Scroll to the element after tab animation completes
             setTimeout(() => {
-              targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              targetElement.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
             }, 350); // Wait for tab animation
           }
           break;
@@ -142,14 +149,14 @@ export function Tabs({
     };
 
     // Listen for hash changes (clicking TOC links)
-    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener("hashchange", handleHashChange);
     // Also check on mount in case we loaded with a hash
     handleHashChange();
 
     return () => {
-      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener("hashchange", handleHashChange);
     };
-  }, [valueToIdMap, onChange]);
+  }, [onChange]);
 
   return (
     <Primitive.Tabs
@@ -160,7 +167,7 @@ export function Tabs({
           const id = valueToIdMap.get(v);
 
           if (id) {
-            window.history.replaceState(null, '', `#${id}`);
+            window.history.replaceState(null, "", `#${id}`);
           }
         }
 

@@ -1,27 +1,25 @@
-import * as React from 'react';
-
 import {
-  Tabs as TabsPrimitive,
-  TabsList as TabsListPrimitive,
-  TabsTrigger as TabsTriggerPrimitive,
   TabsContent as TabsContentPrimitive,
-  TabsContents as TabsContentsPrimitive,
-  TabsHighlight as TabsHighlightPrimitive,
-  TabsHighlightItem as TabsHighlightItemPrimitive,
-  type TabsProps as TabsPrimitiveProps,
-  type TabsListProps as TabsListPrimitiveProps,
-  type TabsTriggerProps as TabsTriggerPrimitiveProps,
   type TabsContentProps as TabsContentPrimitiveProps,
+  TabsContents as TabsContentsPrimitive,
   type TabsContentsProps as TabsContentsPrimitiveProps,
-} from '@/components/animate-ui/primitives/animate/tabs';
-import { cn } from '@/lib/utils';
+  TabsHighlightItem as TabsHighlightItemPrimitive,
+  TabsHighlight as TabsHighlightPrimitive,
+  TabsList as TabsListPrimitive,
+  type TabsListProps as TabsListPrimitiveProps,
+  Tabs as TabsPrimitive,
+  type TabsProps as TabsPrimitiveProps,
+  TabsTrigger as TabsTriggerPrimitive,
+  type TabsTriggerProps as TabsTriggerPrimitiveProps,
+} from "@/components/animate-ui/primitives/animate/tabs";
+import { cn } from "@/lib/utils";
 
 type TabsProps = TabsPrimitiveProps;
 
 function Tabs({ className, ...props }: TabsProps) {
   return (
     <TabsPrimitive
-      className={cn('flex flex-col gap-2', className)}
+      className={cn("flex flex-col gap-2", className)}
       {...props}
     />
   );
@@ -34,7 +32,7 @@ function TabsList({ className, ...props }: TabsListProps) {
     <TabsHighlightPrimitive className="absolute z-0 inset-0 border border-transparent rounded-md bg-background dark:border-input dark:bg-input/30 shadow-sm">
       <TabsListPrimitive
         className={cn(
-          'bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]',
+          "bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]",
           className,
         )}
         {...props}
@@ -70,7 +68,7 @@ type TabsContentProps = TabsContentPrimitiveProps;
 function TabsContent({ className, ...props }: TabsContentProps) {
   return (
     <TabsContentPrimitive
-      className={cn('outline-none', className)}
+      className={cn("outline-none", className)}
       {...props}
     />
   );

@@ -51,8 +51,7 @@ export interface SearchIndexTool {
   };
   output: {
     query: string;
-    // biome-ignore lint/suspicious/noExplicitAny: too ambiguous
-    hits: any[];
+    hits: Record<string, unknown>[];
   };
 }
 
@@ -158,35 +157,31 @@ export const ChatWidget = memo(function ChatWidget({
     <div className="ss-chat-root">
       <div className="ss-qa-list">
         {exchanges.length === 0 ? (
-          <>
-            <div className="ss-chat-welcome">
-              <h2 className="ss-chat-welcome-title">
-                How can I help you today?
-              </h2>
-              <p className="ss-chat-welcome-subtitle">
-                I search through your content to help you find answers to your
-                questions, fast.
-              </p>
-              {suggestedQuestions && suggestedQuestions.length > 0 ? (
-                <div className="ss-suggested-questions">
-                  {suggestedQuestions.map((question) => (
-                    <button
-                      key={question.objectID}
-                      type="button"
-                      className="ss-suggested-question-btn"
-                      disabled={isGenerating}
-                      onClick={() => {
-                        if (isGenerating) return;
-                        onSuggestedQuestionClick?.(question.question);
-                      }}
-                    >
-                      {question.question}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          </>
+          <div className="ss-chat-welcome">
+            <h2 className="ss-chat-welcome-title">How can I help you today?</h2>
+            <p className="ss-chat-welcome-subtitle">
+              I search through your content to help you find answers to your
+              questions, fast.
+            </p>
+            {suggestedQuestions && suggestedQuestions.length > 0 ? (
+              <div className="ss-suggested-questions">
+                {suggestedQuestions.map((question) => (
+                  <button
+                    key={question.objectID}
+                    type="button"
+                    className="ss-suggested-question-btn"
+                    disabled={isGenerating}
+                    onClick={() => {
+                      if (isGenerating) return;
+                      onSuggestedQuestionClick?.(question.question);
+                    }}
+                  >
+                    {question.question}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
         ) : null}
         {/* thread depth error banner */}
         {hasThreadDepthError && onNewChat && (
@@ -215,7 +210,7 @@ export const ChatWidget = memo(function ChatWidget({
                       part.type === "text" ? (
                         // biome-ignore lint/suspicious/noArrayIndexKey: better
                         <span key={index}>{part.text}</span>
-                      ) : null
+                      ) : null,
                     )}
                   </div>
                 </div>
@@ -312,7 +307,9 @@ export const ChatWidget = memo(function ChatWidget({
                 </div>
 
                 <div className="ss-qa-actions">
-                  {exchange.assistantMessage && !isGenerating && !agentStudio ? (
+                  {exchange.assistantMessage &&
+                  !isGenerating &&
+                  !agentStudio ? (
                     acknowledgedExchangeIds.has(exchange.id) ? (
                       <span className="ss-qa-feedback-ack ss-fade">
                         Thanks for your feedback!

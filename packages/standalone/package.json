@@ -5,7 +5,9 @@
   "type": "module",
   "main": "dist/search.min.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "style": "dist/search.min.css",
   "publishConfig": {
     "access": "public"

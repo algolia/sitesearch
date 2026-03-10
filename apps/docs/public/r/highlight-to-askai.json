@@ -11,10 +11,7 @@
     "lucide-react",
     "marked"
   ],
-  "registryDependencies": [
-    "button",
-    "input"
-  ],
+  "registryDependencies": ["button", "input"],
   "files": [
     {
       "path": "src/registry/experiences/highlight-to-askai/components/highlight-to-askai.tsx",
@@ -33,7 +30,5 @@
       "target": "app/highlight-to-askai/page.tsx"
     }
   ],
-  "categories": [
-    "ai"
-  ]
+  "categories": ["ai"]
 }

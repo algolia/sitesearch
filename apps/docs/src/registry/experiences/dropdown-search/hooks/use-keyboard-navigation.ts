@@ -10,7 +10,7 @@ interface UseKeyboardNavigationReturn {
 }
 
 export function useKeyboardNavigation(
-  hits: any[],
+  hits: Record<string, unknown>[],
   query: string,
 ): UseKeyboardNavigationReturn {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);

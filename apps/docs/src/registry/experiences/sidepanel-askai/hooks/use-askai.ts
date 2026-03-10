@@ -22,11 +22,11 @@ export function isThreadDepthError(error?: Error | null): boolean {
 
   // Check if error has a code property
   const errorWithCode = error as Error & { code?: string };
-  if (errorWithCode.code === 'AI-217') return true;
+  if (errorWithCode.code === "AI-217") return true;
 
   // Check message content for AI-217 or thread depth references
-  const message = error.message?.toLowerCase() || '';
-  return message.includes('ai-217') || message.includes('thread depth');
+  const message = error.message?.toLowerCase() || "";
+  return message.includes("ai-217") || message.includes("thread depth");
 }
 
 const BASE_ASKAI_URL = "https://askai.algolia.com";
@@ -71,6 +71,7 @@ export function useAskai(config: AskAIConfig) {
     config.indexName,
     config.assistantId,
     config.agentStudio,
+    config,
   ]);
 
   const chat = useChat({
@@ -83,7 +84,9 @@ export function useAskai(config: AskAIConfig) {
 
   // Check if there's a thread depth error (AI-217)
   const hasThreadDepthError = useMemo(() => {
-    return chat.status === 'error' && isThreadDepthError(chat.error as Error | null);
+    return (
+      chat.status === "error" && isThreadDepthError(chat.error as Error | null)
+    );
   }, [chat.status, chat.error]);
 
   return {

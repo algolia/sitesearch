@@ -37,4 +37,4 @@ export function getByPath<T = unknown>(
   return current as T | undefined;
 }
 
-export type SearchHit = any;
+export type SearchHit = Record<string, unknown>;

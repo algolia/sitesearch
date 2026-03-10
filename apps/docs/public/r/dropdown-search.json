@@ -10,9 +10,7 @@
     "lucide-react",
     "@radix-ui/react-popover"
   ],
-  "registryDependencies": [
-    "input"
-  ],
+  "registryDependencies": ["input"],
   "files": [
     {
       "path": "src/registry/experiences/dropdown-search/components/dropdown-search.tsx",
@@ -31,7 +29,5 @@
       "target": "app/dropdown-search/page.tsx"
     }
   ],
-  "categories": [
-    "search"
-  ]
+  "categories": ["search"]
 }

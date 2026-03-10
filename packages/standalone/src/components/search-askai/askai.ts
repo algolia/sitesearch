@@ -62,6 +62,7 @@ export function useAskai(config: AskAIConfig) {
     config.indexName,
     config.assistantId,
     config.agentStudio,
+    config,
   ]);
 
   const chat = useChat({
@@ -75,7 +76,8 @@ export function useAskai(config: AskAIConfig) {
   // Check if there's a thread depth error (AI-217)
   // Only show error if there are messages (conversation is active)
   const hasThreadDepthError = useMemo(() => {
-    const isError = chat.status === 'error' && isThreadDepthError(chat.error as Error | null);
+    const isError =
+      chat.status === "error" && isThreadDepthError(chat.error as Error | null);
     const hasMessages = chat.messages.length > 0;
     // Clear error if conversation was reset (no messages)
     return isError && hasMessages;

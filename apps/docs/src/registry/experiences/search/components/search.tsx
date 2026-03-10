@@ -576,7 +576,7 @@ const ResultsPanel = memo(function ResultsPanel({
   sendEvent,
 }: ResultsPanelProps) {
   const { items } = useHits(
-    config.transformItems ? { transformItems: config.transformItems } : {}
+    config.transformItems ? { transformItems: config.transformItems } : {},
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverEnabled, setHoverEnabled] = useState(false);
@@ -647,7 +647,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
 
   const results = useInstantSearch();
   const { items, sendEvent } = useHits(
-    config.transformItems ? { transformItems: config.transformItems } : {}
+    config.transformItems ? { transformItems: config.transformItems } : {},
   );
 
   const noResults = results.results?.nbHits === 0;

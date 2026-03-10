@@ -174,10 +174,6 @@
   text-decoration: none;
 }
 
-.ss-exp .ss-searchbox-form:focus-within .ss-search-left-button {
-  color: var(--search-primary-color);
-}
-
 .ss-exp .ss-searchbox-form input {
   width: 90%;
   outline: none;
@@ -251,6 +247,10 @@
   align-items: center;
   justify-content: center;
   transition: var(--search-button-transition);
+}
+
+.ss-exp .ss-searchbox-form:focus-within .ss-search-left-button {
+  color: var(--search-primary-color);
 }
 
 .ss-exp .ss-search-close-button {

@@ -1,6 +1,7 @@
-'use client';
+/** biome-ignore-all lint/correctness/useHookAtTopLevel: conditional hooks are intentional in this file - value is not supposed to change */
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 import {
   type ComponentProps,
   createContext,
@@ -10,16 +11,16 @@ import {
   useId,
   useMemo,
   useState,
-} from 'react';
-import { cn } from '../lib/cn';
-import * as Unstyled from './tabs.unstyled';
+} from "react";
+import { cn } from "../lib/cn";
+import * as Unstyled from "./tabs.unstyled";
 
 type CollectionKey = string | symbol;
 
 export interface TabsProps
   extends Omit<
     ComponentProps<typeof Unstyled.Tabs>,
-    'value' | 'onValueChange'
+    "value" | "onValueChange"
   > {
   /**
    * Use simple mode instead of advanced usage as documented in https://radix-ui.com/primitives/docs/components/tabs.
@@ -46,7 +47,7 @@ const TabsContext = createContext<{
 
 function useTabContext() {
   const ctx = useContext(TabsContext);
-  if (!ctx) throw new Error('You must wrap your component in <Tabs>');
+  if (!ctx) throw new Error("You must wrap your component in <Tabs>");
   return ctx;
 }
 
@@ -58,12 +59,12 @@ export const TabsList = React.forwardRef<
     ref={ref}
     {...props}
     className={cn(
-      'flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose',
+      "flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose",
       props.className,
     )}
   />
 ));
-TabsList.displayName = 'TabsList';
+TabsList.displayName = "TabsList";
 
 export const TabsTrigger = React.forwardRef<
   React.ComponentRef<typeof Unstyled.TabsTrigger>,
@@ -73,12 +74,12 @@ export const TabsTrigger = React.forwardRef<
     ref={ref}
     {...props}
     className={cn(
-      'inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary',
+      "inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary",
       props.className,
     )}
   />
 ));
-TabsTrigger.displayName = 'TabsTrigger';
+TabsTrigger.displayName = "TabsTrigger";
 
 export function Tabs({
   ref,
@@ -96,7 +97,7 @@ export function Tabs({
     <Unstyled.Tabs
       ref={ref}
       className={cn(
-        'flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4',
+        "flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4",
         className,
       )}
       value={value}
@@ -128,7 +129,7 @@ export function Tabs({
 }
 
 export interface TabProps
-  extends Omit<ComponentProps<typeof Unstyled.TabsContent>, 'value'> {
+  extends Omit<ComponentProps<typeof Unstyled.TabsContent>, "value"> {
   /**
    * Value of tab, detect from index if unspecified.
    */
@@ -137,13 +138,10 @@ export interface TabProps
 
 export function Tab({ value, ...props }: TabProps) {
   const { items } = useTabContext();
-  const resolved =
-    value ??
-    // eslint-disable-next-line react-hooks/rules-of-hooks -- `value` is not supposed to change
-    items?.at(useCollectionIndex());
+  const resolved = value ?? items?.at(useCollectionIndex());
   if (!resolved)
     throw new Error(
-      'Failed to resolve tab `value`, please pass a `value` prop to the Tab component.',
+      "Failed to resolve tab `value`, please pass a `value` prop to the Tab component.",
     );
 
   return (
@@ -163,7 +161,7 @@ export function TabsContent({
       value={value}
       forceMount
       className={cn(
-        'p-4 text-[15px] bg-fd-background rounded-xl outline-none prose-no-margin data-[state=inactive]:hidden [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
+        "p-4 text-[15px] bg-fd-background rounded-xl outline-none prose-no-margin data-[state=inactive]:hidden [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none",
         className,
       )}
       {...props}
@@ -198,5 +196,5 @@ function useCollectionIndex() {
  * only escape whitespaces in values in simple mode
  */
 function escapeValue(v: string): string {
-  return v.toLowerCase().replace(/\s/, '-');
+  return v.toLowerCase().replace(/\s/, "-");
 }

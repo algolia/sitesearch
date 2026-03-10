@@ -13,12 +13,8 @@
     "lucide-react",
     "marked"
   ],
-  "devDependencies": [
-    "tw-animate-css"
-  ],
-  "registryDependencies": [
-    "button"
-  ],
+  "devDependencies": ["tw-animate-css"],
+  "registryDependencies": ["button"],
   "files": [
     {
       "path": "src/registry/experiences/search-askai/components/search-ai.tsx",
@@ -65,8 +61,5 @@
       "30%,60%": "{\nbackground-position: calc(100% + var(--shiny-width)) 0;\n}"
     }
   },
-  "categories": [
-    "search",
-    "ai"
-  ]
+  "categories": ["search", "ai"]
 }
