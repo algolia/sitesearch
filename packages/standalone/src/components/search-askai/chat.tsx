@@ -1,6 +1,7 @@
 import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SearchHit } from "../types";
 import { postFeedback } from "./askai";
 import { isThreadDepthError, ThreadDepthErrorBanner } from "./error-utils";
 import {
@@ -51,7 +52,7 @@ export interface SearchIndexTool {
   };
   output: {
     query: string;
-    hits: Record<string, unknown>[];
+    hits: SearchHit[];
   };
 }
 
@@ -419,8 +420,9 @@ export const ChatWidget = memo(function ChatWidget({
                     onClick={async () => {
                       const parts = exchange.assistantMessage?.parts ?? [];
                       const textContent = parts
-                        .filter((part) => part.type === "text")
-                        .map((part) => part.text)
+                        .flatMap((part) =>
+                          part.type === "text" ? [part.text] : [],
+                        )
                         .join("")
                         .trim();
                       if (!textContent) return;

@@ -1,3 +1,4 @@
+import type { BaseHit, Hit } from "instantsearch.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface UseKeyboardNavigationReturn {
@@ -10,7 +11,7 @@ interface UseKeyboardNavigationReturn {
 }
 
 export function useKeyboardNavigation(
-  hits: Array<Record<string, unknown>>,
+  hits: Hit<BaseHit>[],
   query: string,
   openResultsInNewTab = true,
 ): UseKeyboardNavigationReturn {

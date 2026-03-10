@@ -8,6 +8,7 @@
 import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { liteClient } from "algoliasearch/lite";
+import type { BaseHit, Hit } from "instantsearch.js";
 import {
   ArrowUpIcon,
   BrainIcon,
@@ -81,8 +82,7 @@ export interface SearchIndexTool {
   };
   output: {
     query: string;
-    // biome-ignore lint/suspicious/noExplicitAny: too ambiguous
-    hits: any[];
+    hits: Hit<BaseHit>[];
   };
 }
 
@@ -895,8 +895,9 @@ const ChatWidget = memo(function ChatWidget({
                     onClick={async () => {
                       const parts = exchange.assistantMessage?.parts ?? [];
                       const textContent = parts
-                        .filter((part) => part.type === "text")
-                        .map((part) => part.text)
+                        .flatMap((part) =>
+                          part.type === "text" ? [part.text] : [],
+                        )
                         .join("")
                         .trim();
                       if (!textContent) return;

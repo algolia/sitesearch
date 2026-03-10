@@ -1,4 +1,5 @@
 import { liteClient as algoliasearch } from "algoliasearch/lite";
+import type { BaseHit, Hit } from "instantsearch.js";
 import type { ComponentProps, FC, RefObject } from "react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -56,9 +57,7 @@ export interface SearchWithAskAIConfig {
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
   /** Transform items before rendering (optional) - useful for proxying images or modifying hit data */
-  transformItems?: (
-    items: Record<string, unknown>[],
-  ) => Record<string, unknown>[];
+  transformItems?: (items: Hit<BaseHit>[]) => Hit<BaseHit>[];
   /** Route Ask AI requests through Agent Studio endpoints (optional, defaults to false). */
   agentStudio?: boolean;
 }
@@ -159,7 +158,7 @@ interface ResultsPanelProps {
   scrollOnSelectionChange?: boolean;
   sendEvent?: (
     eventType: "click",
-    hit: Record<string, unknown>,
+    hit: Hit<BaseHit>,
     eventName: string,
   ) => void;
   suggestedQuestions?: SuggestedQuestionHit[];
@@ -279,7 +278,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
       {/** biome-ignore lint/a11y/useSemanticElements: . */}
       <div ref={containerRef} className="ss-hits-container" role="listbox">
         <HitsList
-          hits={items as unknown[]}
+          hits={items}
           query={query}
           selectedIndex={selectedIndex}
           onAskAI={() => setShowChat(true)}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { SearchHit } from "../types";
 
 interface UseKeyboardNavigationReturn {
   selectedIndex: number;
@@ -10,7 +11,7 @@ interface UseKeyboardNavigationReturn {
 }
 
 export function useKeyboardNavigation(
-  hits: Array<Record<string, unknown>>,
+  hits: SearchHit[],
   query: string,
   openResultsInNewTab = true,
 ): UseKeyboardNavigationReturn {

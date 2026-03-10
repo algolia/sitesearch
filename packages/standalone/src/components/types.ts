@@ -1,3 +1,5 @@
+import type { BaseHit, Hit } from "instantsearch.js";
+
 export interface HitsAttributesMapping {
   /** Attribute path (supports dotted path) for the primary line of text */
   primaryText: string;
@@ -37,4 +39,4 @@ export function getByPath<T = unknown>(
   return current as T | undefined;
 }
 
-export type SearchHit = Record<string, unknown>;
+export type SearchHit = Hit<BaseHit>;

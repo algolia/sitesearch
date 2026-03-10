@@ -6,6 +6,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { liteClient as algoliasearch } from "algoliasearch/lite";
+import type { BaseHit, Hit } from "instantsearch.js";
 import { ArrowDown, ArrowUp, CornerDownLeft, SearchIcon } from "lucide-react";
 import type React from "react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -46,8 +47,9 @@ export interface SearchConfig {
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
   /** Transform items before rendering (optional) - useful for proxying images or modifying hit data */
-  transformItems?: (items: any[]) => any[];
+  transformItems?: (items: Hit<BaseHit>[]) => Hit<BaseHit>[];
 }
+
 // =========================================================================
 // Attribute Mapping
 // =========================================================================
@@ -275,13 +277,17 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 
 // HitsList Component
 interface HitsListProps {
-  hits: any[];
+  hits: Hit<BaseHit>[];
   query: string;
   selectedIndex: number;
   attributes: HitsAttributesMapping;
   onHoverIndex?: (index: number) => void;
   hoverEnabled?: boolean;
-  sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  sendEvent?: (
+    eventType: "click",
+    hit: Hit<BaseHit>,
+    eventName: string,
+  ) => void;
   openResultsInNewTab?: boolean;
 }
 
@@ -564,7 +570,11 @@ interface ResultsPanelProps {
   config: SearchConfig;
   onHoverIndex?: (index: number) => void;
   scrollOnSelectionChange?: boolean;
-  sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  sendEvent?: (
+    eventType: "click",
+    hit: Hit<BaseHit>,
+    eventName: string,
+  ) => void;
 }
 
 const ResultsPanel = memo(function ResultsPanel({
@@ -622,7 +632,7 @@ const ResultsPanel = memo(function ResultsPanel({
         role="listbox"
       >
         <HitsList
-          hits={items as unknown[]}
+          hits={items}
           query={query}
           selectedIndex={selectedIndex}
           attributes={config.attributes}

@@ -7,6 +7,7 @@
 
 import * as Popover from "@radix-ui/react-popover";
 import { liteClient as algoliasearch } from "algoliasearch/lite";
+import type { BaseHit, Hit } from "instantsearch.js";
 import { SearchIcon } from "lucide-react";
 import type React from "react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -77,14 +78,18 @@ function getByPath<T = unknown>(obj: unknown, path?: string): T | undefined {
 // ============================================================================
 
 interface HitsListProps {
-  hits: any[];
+  hits: Hit<BaseHit>[];
   query: string;
   selectedIndex: number;
   attributes?: HitsAttributesMapping;
   onItemClick?: () => void;
   onHoverIndex?: (index: number) => void;
   hoverEnabled?: boolean;
-  sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  sendEvent?: (
+    eventType: "click",
+    hit: Hit<BaseHit>,
+    eventName: string,
+  ) => void;
 }
 
 const HitsList = memo(function HitsList({
@@ -264,7 +269,11 @@ interface DropdownContentProps {
   onItemClick?: () => void;
   onHoverIndex?: (index: number) => void;
   scrollOnSelectionChange?: boolean;
-  sendEvent?: (eventType: "click", hit: any, eventName: string) => void;
+  sendEvent?: (
+    eventType: "click",
+    hit: Hit<BaseHit>,
+    eventName: string,
+  ) => void;
 }
 
 const DropdownContent = memo(function DropdownContent({
@@ -333,7 +342,7 @@ const DropdownContent = memo(function DropdownContent({
       role="listbox"
     >
       <HitsList
-        hits={items as unknown[]}
+        hits={items}
         query={query}
         selectedIndex={selectedIndex}
         attributes={config.attributes}

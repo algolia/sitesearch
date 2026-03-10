@@ -6,6 +6,7 @@
 import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { liteClient as algoliasearch } from "algoliasearch/lite";
+import type { BaseHit, Hit } from "instantsearch.js";
 import {
   ArrowLeftIcon,
   BrainIcon,
@@ -86,9 +87,7 @@ export interface SearchWithAskAIConfig {
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
   /** Transform items before rendering (optional) - useful for proxying images or modifying hit data */
-  transformItems?: (
-    items: Record<string, unknown>[],
-  ) => Record<string, unknown>[];
+  transformItems?: (items: Hit<BaseHit>[]) => Hit<BaseHit>[];
   /** Route Ask AI requests through Agent Studio endpoints (optional, defaults to false). */
   agentStudio?: boolean;
 }
@@ -177,8 +176,7 @@ export interface SearchIndexTool {
   };
   output: {
     query: string;
-    // biome-ignore lint/suspicious/noExplicitAny: too ambiguous
-    hits: any[];
+    hits: Hit<BaseHit>[];
   };
 }
 
@@ -964,8 +962,9 @@ const ChatWidget = memo(function ChatWidget({
                     onClick={async () => {
                       const parts = exchange.assistantMessage?.parts ?? [];
                       const textContent = parts
-                        .filter((part) => part.type === "text")
-                        .map((part) => part.text)
+                        .flatMap((part) =>
+                          part.type === "text" ? [part.text] : [],
+                        )
                         .join("")
                         .trim();
                       if (!textContent) return;
@@ -1053,7 +1052,7 @@ const HitsActions = memo(function HitsActions({
 });
 
 interface HitsListProps {
-  hits: Record<string, unknown>[];
+  hits: Hit<BaseHit>[];
   query: string;
   selectedIndex: number;
   onAskAI: () => void;
@@ -1062,7 +1061,7 @@ interface HitsListProps {
   hoverEnabled?: boolean;
   sendEvent?: (
     eventType: "click",
-    hit: Record<string, unknown>,
+    hit: Hit<BaseHit>,
     eventName: string,
   ) => void;
   openResultsInNewTab?: boolean;
@@ -1437,7 +1436,7 @@ interface ResultsPanelProps {
   scrollOnSelectionChange?: boolean;
   sendEvent?: (
     eventType: "click",
-    hit: Record<string, unknown>,
+    hit: Hit<BaseHit>,
     eventName: string,
   ) => void;
   suggestedQuestions?: SuggestedQuestionHit[];
@@ -1557,7 +1556,7 @@ const ResultsPanel = memo(function ResultsPanel({
         role="listbox"
       >
         <HitsList
-          hits={items as unknown[]}
+          hits={items}
           query={query}
           selectedIndex={selectedIndex}
           onAskAI={() => setShowChat(true)}

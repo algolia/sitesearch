@@ -1,4 +1,5 @@
 import { liteClient as algoliasearch } from "algoliasearch/lite";
+import type { BaseHit, Hit } from "instantsearch.js";
 import type { ComponentProps, FC, RefObject } from "react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -45,9 +46,7 @@ export interface SearchConfig {
   /** Open hit URLs in a new tab (optional, defaults to true) */
   openResultsInNewTab?: boolean;
   /** Transform items before rendering (optional) - useful for proxying images or modifying hit data */
-  transformItems?: (
-    items: Record<string, unknown>[],
-  ) => Record<string, unknown>[];
+  transformItems?: (items: Hit<BaseHit>[]) => Hit<BaseHit>[];
 }
 
 interface SearchBoxProps {
@@ -111,7 +110,7 @@ interface ResultsPanelProps {
   scrollOnSelectionChange?: boolean;
   sendEvent?: (
     eventType: "click",
-    hit: Record<string, unknown>,
+    hit: Hit<BaseHit>,
     eventName: string,
   ) => void;
   openResultsInNewTab?: boolean;
@@ -170,7 +169,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
       {/** biome-ignore lint/a11y/useSemanticElements: . */}
       <div ref={containerRef} className="ss-hits-container" role="listbox">
         <HitsList
-          hits={items as Record<string, unknown>[]}
+          hits={items}
           query={query}
           selectedIndex={selectedIndex}
           attributes={config.attributes}
