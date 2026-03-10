@@ -2,7 +2,9 @@ import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SearchHit } from "../types";
+
 import { postAgentStudioFeedback, postFeedback } from "./askai";
+
 import { isThreadDepthError, ThreadDepthErrorBanner } from "./error-utils";
 import {
   BrainIcon,
