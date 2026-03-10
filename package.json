@@ -8,7 +8,13 @@
     "build:docs": "bun --filter docs build",
     "bundle": "bun --filter @algolia/sitesearch build",
     "dev:vanilla": "bun --filter @algolia/sitesearch dev & bun --filter vanilla serve",
-    "build:vanilla": "bun --filter @algolia/sitesearch build"
+    "build:vanilla": "bun --filter @algolia/sitesearch build",
+    "prepare": "simple-git-hooks",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "fix": "biome check --write .",
+    "fix:staged": "biome check --write --staged --no-errors-on-unmatched && git update-index --again"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +25,11 @@
   ],
   "packageManager": "bun@1.3.0",
   "devDependencies": {
-    "@biomejs/biome": "2.0.0"
+    "@biomejs/biome": "2.0.0",
+    "simple-git-hooks": "^2.13.1"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "bun run fix:staged"
   },
   "engines": {
     "node": ">=22.0.0",
