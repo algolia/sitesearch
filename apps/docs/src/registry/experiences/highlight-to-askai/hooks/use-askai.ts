@@ -29,9 +29,12 @@ export function isThreadDepthError(error?: Error | null): boolean {
   return message.includes("ai-217") || message.includes("thread depth");
 }
 
+const agentStudioBaseUrl = (appId: string): string =>
+  `https://${appId}.algolia.net/agent-studio/1`;
+
 function getChatApiUrl(config: AskAIConfig): string {
   if (config.agentStudio) {
-    return `https://${config.applicationId}.algolia.net/agent-studio/1/agents/${config.assistantId}/completions?stream=true&compatibilityMode=ai-sdk-5`;
+    return `${agentStudioBaseUrl(config.applicationId)}/agents/${config.assistantId}/completions?stream=true&compatibilityMode=ai-sdk-5`;
   }
   return `${BASE_ASKAI_URL}/chat`;
 }
@@ -92,9 +95,6 @@ export function useAskai(config: AskAIConfig) {
     hasThreadDepthError,
   };
 }
-
-const agentStudioBaseUrl = (appId: string): string =>
-  `https://${appId}.algolia.net/agent-studio/1`;
 
 const BASE_ASKAI_URL = "https://askai.algolia.com";
 const TOKEN_KEY = "askai_token";
