@@ -2,7 +2,7 @@ import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SearchHit } from "../types";
-import { postFeedback } from "./askai";
+import { postAgentStudioFeedback, postFeedback } from "./askai";
 import { isThreadDepthError, ThreadDepthErrorBanner } from "./error-utils";
 import {
   BrainIcon,
@@ -37,8 +37,9 @@ interface ChatWidgetProps {
   onThumbsUp?: (userMessageId: string) => Promise<void> | void;
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
+  apiKey?: string;
   assistantId: string;
-  /** When true, feedback (thumbs) is not sent to the AskAI backend. */
+  /** When true, feedback is sent to Agent Studio instead of the AskAI backend. */
   agentStudio?: boolean;
   suggestedQuestions?: SuggestedQuestionHit[];
   onSuggestedQuestionClick?: (question: string) => void;
@@ -85,6 +86,7 @@ export const ChatWidget = memo(function ChatWidget({
   onThumbsUp,
   onThumbsDown,
   applicationId,
+  apiKey,
   assistantId,
   agentStudio,
   suggestedQuestions,
@@ -308,9 +310,7 @@ export const ChatWidget = memo(function ChatWidget({
                 </div>
 
                 <div className="ss-qa-actions">
-                  {exchange.assistantMessage &&
-                  !isGenerating &&
-                  !agentStudio ? (
+                  {exchange.assistantMessage && !isGenerating ? (
                     acknowledgedExchangeIds.has(exchange.id) ? (
                       <span className="ss-qa-feedback-ack ss-fade">
                         Thanks for your feedback!
@@ -336,6 +336,14 @@ export const ChatWidget = memo(function ChatWidget({
                               setSubmittingExchangeId(exchange.id);
                               if (onThumbsUp) {
                                 await onThumbsUp(exchange.userMessage.id);
+                              } else if (agentStudio) {
+                                await postAgentStudioFeedback({
+                                  agentId: assistantId,
+                                  vote: 1,
+                                  messageId: exchange.userMessage.id,
+                                  appId: applicationId,
+                                  apiKey: apiKey ?? "",
+                                });
                               } else {
                                 await postFeedback({
                                   assistantId,
@@ -373,6 +381,14 @@ export const ChatWidget = memo(function ChatWidget({
                               setSubmittingExchangeId(exchange.id);
                               if (onThumbsDown) {
                                 await onThumbsDown(exchange.userMessage.id);
+                              } else if (agentStudio) {
+                                await postAgentStudioFeedback({
+                                  agentId: assistantId,
+                                  vote: 0,
+                                  messageId: exchange.userMessage.id,
+                                  appId: applicationId,
+                                  apiKey: apiKey ?? "",
+                                });
                               } else {
                                 await postFeedback({
                                   assistantId,

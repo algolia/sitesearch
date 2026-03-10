@@ -45,6 +45,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   isThreadDepthError,
+  postAgentStudioFeedback,
   postFeedback,
   useAskai,
 } from "@/registry/experiences/search-askai/hooks/use-askai";
@@ -588,6 +589,7 @@ interface ChatWidgetProps {
   onThumbsUp?: (userMessageId: string) => Promise<void> | void;
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
+  apiKey?: string;
   assistantId: string;
   agentStudio?: boolean;
   suggestedQuestions?: SuggestedQuestionHit[];
@@ -603,6 +605,7 @@ const ChatWidget = memo(function ChatWidget({
   onThumbsUp,
   onThumbsDown,
   applicationId,
+  apiKey,
   assistantId,
   agentStudio,
   suggestedQuestions,
@@ -848,9 +851,7 @@ const ChatWidget = memo(function ChatWidget({
                 </div>
 
                 <div className="mt-4 flex items-center justify-end gap-2">
-                  {exchange.assistantMessage &&
-                  !isGenerating &&
-                  !agentStudio ? (
+                  {exchange.assistantMessage && !isGenerating ? (
                     acknowledgedExchangeIds.has(exchange.id) ? (
                       <span className="text-muted-foreground text-[0.85rem] animate-in fade-in slide-in-from-bottom-1">
                         Thanks for your feedback!
@@ -876,6 +877,14 @@ const ChatWidget = memo(function ChatWidget({
                               setSubmittingExchangeId(exchange.id);
                               if (onThumbsUp) {
                                 await onThumbsUp(exchange.userMessage.id);
+                              } else if (agentStudio) {
+                                await postAgentStudioFeedback({
+                                  agentId: assistantId,
+                                  vote: 1,
+                                  messageId: exchange.userMessage.id,
+                                  appId: applicationId,
+                                  apiKey: apiKey ?? "",
+                                });
                               } else {
                                 await postFeedback({
                                   assistantId,
@@ -913,6 +922,14 @@ const ChatWidget = memo(function ChatWidget({
                               setSubmittingExchangeId(exchange.id);
                               if (onThumbsDown) {
                                 await onThumbsDown(exchange.userMessage.id);
+                              } else if (agentStudio) {
+                                await postAgentStudioFeedback({
+                                  agentId: assistantId,
+                                  vote: 0,
+                                  messageId: exchange.userMessage.id,
+                                  appId: applicationId,
+                                  apiKey: apiKey ?? "",
+                                });
                               } else {
                                 await postFeedback({
                                   assistantId,
@@ -1539,6 +1556,7 @@ const ResultsPanel = memo(function ResultsPanel({
         error={error as Error | null}
         isGenerating={isGenerating}
         applicationId={config.applicationId}
+        apiKey={config.apiKey}
         assistantId={config.assistantId}
         agentStudio={config.agentStudio}
         suggestedQuestions={suggestedQuestions}

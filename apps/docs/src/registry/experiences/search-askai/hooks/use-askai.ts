@@ -153,6 +153,40 @@ export const getValidToken = async ({
   return inflight;
 };
 
+const agentStudioBaseUrl = (appId: string): string =>
+  `https://${appId}.algolia.net/agent-studio/1`;
+
+export const postAgentStudioFeedback = ({
+  agentId,
+  vote,
+  messageId,
+  appId,
+  apiKey,
+}: {
+  agentId: string;
+  vote: 0 | 1;
+  messageId: string;
+  appId: string;
+  apiKey: string;
+}): Promise<Response> => {
+  const headers = new Headers();
+  headers.set("x-algolia-application-id", appId);
+  headers.set("x-algolia-api-key", apiKey);
+  headers.set("content-type", "application/json");
+
+  const baseUrl = `${agentStudioBaseUrl(appId)}/feedback`;
+
+  return fetch(baseUrl, {
+    method: "POST",
+    body: JSON.stringify({
+      messageId,
+      agentId,
+      vote,
+    }),
+    headers,
+  });
+};
+
 export const postFeedback = async ({
   assistantId,
   thumbs,
