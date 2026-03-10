@@ -263,6 +263,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
         error={error as Error | null}
         isGenerating={isGenerating}
         applicationId={config.applicationId}
+        apiKey={config.apiKey}
         assistantId={config.assistantId}
         agentStudio={config.agentStudio}
         suggestedQuestions={suggestedQuestions}

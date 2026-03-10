@@ -6,6 +6,7 @@ import {
 import { useMemo } from "react";
 
 export interface AskAIConfig {
+  agentStudio?: boolean;
   applicationId: string;
   apiKey: string;
   indexName: string;
@@ -28,17 +29,31 @@ export function isThreadDepthError(error?: Error | null): boolean {
   return message.includes("ai-217") || message.includes("thread depth");
 }
 
+const agentStudioBaseUrl = (appId: string): string =>
+  `https://${appId}.algolia.net/agent-studio/1`;
+
+function getChatApiUrl(config: AskAIConfig): string {
+  if (config.agentStudio) {
+    return `${agentStudioBaseUrl(config.applicationId)}/agents/${config.assistantId}/completions?stream=true&compatibilityMode=ai-sdk-5`;
+  }
+  return `${BASE_ASKAI_URL}/chat`;
+}
+
 export function useAskai(config: AskAIConfig) {
   if (!config) {
     throw new Error("config is required for useAskai");
   }
 
-  const baseUrl = "https://askai.algolia.com";
-
   const transport = useMemo(() => {
     return new DefaultChatTransport({
-      api: `${baseUrl}/chat`,
+      api: getChatApiUrl(config),
       headers: async () => {
+        if (config.agentStudio) {
+          return {
+            "x-algolia-api-key": config.apiKey,
+            "x-algolia-application-id": config.applicationId,
+          } as Record<string, string>;
+        }
         const token = await getValidToken({ assistantId: config.assistantId });
         return {
           "x-algolia-api-key": config.apiKey,
@@ -55,6 +70,8 @@ export function useAskai(config: AskAIConfig) {
     config.applicationId,
     config.indexName,
     config.assistantId,
+    config.agentStudio,
+    config,
   ]);
 
   const chat = useChat({
@@ -157,6 +174,37 @@ export const postFeedback = async ({
       appId,
       messageId,
       thumbs,
+    }),
+    headers,
+  });
+};
+
+export const postAgentStudioFeedback = ({
+  agentId,
+  vote,
+  messageId,
+  appId,
+  apiKey,
+}: {
+  agentId: string;
+  vote: 0 | 1;
+  messageId: string;
+  appId: string;
+  apiKey: string;
+}): Promise<Response> => {
+  const headers = new Headers();
+  headers.set("x-algolia-application-id", appId);
+  headers.set("x-algolia-api-key", apiKey);
+  headers.set("content-type", "application/json");
+
+  const baseUrl = `${agentStudioBaseUrl(appId)}/feedback`;
+
+  return fetch(baseUrl, {
+    method: "POST",
+    body: JSON.stringify({
+      messageId,
+      agentId,
+      vote,
     }),
     headers,
   });

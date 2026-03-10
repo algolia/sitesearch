@@ -22,6 +22,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  postAgentStudioFeedback,
   postFeedback,
   useAskai,
 } from "@/registry/experiences/highlight-to-askai/hooks/use-askai";
@@ -35,6 +36,7 @@ type OnAskPayload = {
 };
 
 export type HighlightAskAIProps = {
+  agentStudio?: boolean;
   applicationId: string;
   apiKey: string;
   indexName: string;
@@ -142,6 +144,7 @@ const AlgoliaLogo = ({ size = 52 }: { size?: number | string }) => (
 );
 
 export function HighlightAskAI({
+  agentStudio = false,
   applicationId,
   apiKey,
   indexName,
@@ -170,7 +173,42 @@ export function HighlightAskAI({
       apiKey,
       indexName,
       assistantId,
+      agentStudio,
     });
+
+  const handleFeedback = async (vote: 0 | 1) => {
+    const messageToFeedback = (messages || []).find(
+      (m: unknown) =>
+        (m as { role?: string }).role === (agentStudio ? "assistant" : "user"),
+    ) as { id?: string } | undefined;
+
+    if (!messageToFeedback?.id) return;
+
+    setSubmittingFeedback(true);
+    try {
+      if (agentStudio) {
+        await postAgentStudioFeedback({
+          agentId: assistantId,
+          vote,
+          messageId: messageToFeedback.id,
+          appId: applicationId,
+          apiKey,
+        });
+      } else {
+        await postFeedback({
+          assistantId,
+          appId: applicationId,
+          messageId: messageToFeedback.id,
+          thumbs: vote,
+        });
+      }
+      setFeedbackGiven(true);
+    } catch {
+      // ignore errors
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
   const resetConversation = React.useCallback(() => {
     try {
       stop?.();
@@ -565,10 +603,6 @@ export function HighlightAskAI({
                   );
                   if (!hasAssistantResponse || isGenerating) return null;
 
-                  const userMessage = (messages || []).find(
-                    (m: unknown) => (m as { role?: string }).role === "user",
-                  ) as { id?: string } | undefined;
-
                   return (
                     <>
                       <div className="">
@@ -589,23 +623,7 @@ export function HighlightAskAI({
                                 aria-label="Like"
                                 className="border-none bg-transparent rounded-md px-2 py-1 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-accent disabled:text-foreground disabled:cursor-not-allowed"
                                 disabled={submittingFeedback}
-                                onClick={async () => {
-                                  if (!userMessage?.id) return;
-                                  try {
-                                    setSubmittingFeedback(true);
-                                    await postFeedback({
-                                      assistantId,
-                                      appId: applicationId,
-                                      messageId: userMessage.id,
-                                      thumbs: 1,
-                                    });
-                                    setFeedbackGiven(true);
-                                  } catch {
-                                    // ignore errors
-                                  } finally {
-                                    setSubmittingFeedback(false);
-                                  }
-                                }}
+                                onClick={() => handleFeedback(1)}
                               >
                                 <ThumbsUp size={14} />
                               </button>
@@ -615,23 +633,7 @@ export function HighlightAskAI({
                                 aria-label="Dislike"
                                 className="border-none bg-transparent rounded-md px-2 py-1 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-accent disabled:text-foreground disabled:cursor-not-allowed"
                                 disabled={submittingFeedback}
-                                onClick={async () => {
-                                  if (!userMessage?.id) return;
-                                  try {
-                                    setSubmittingFeedback(true);
-                                    await postFeedback({
-                                      assistantId,
-                                      appId: applicationId,
-                                      messageId: userMessage.id,
-                                      thumbs: 0,
-                                    });
-                                    setFeedbackGiven(true);
-                                  } catch {
-                                    // ignore errors
-                                  } finally {
-                                    setSubmittingFeedback(false);
-                                  }
-                                }}
+                                onClick={() => handleFeedback(0)}
                               >
                                 <ThumbsDown size={14} />
                               </button>

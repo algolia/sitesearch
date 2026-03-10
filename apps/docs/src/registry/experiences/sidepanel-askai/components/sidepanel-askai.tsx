@@ -41,9 +41,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   isThreadDepthError,
+  postAgentStudioFeedback,
   postFeedback,
   useAskai,
 } from "@/registry/experiences/sidepanel-askai/hooks/use-askai";
+
 import {
   type SuggestedQuestionHit,
   useSuggestedQuestions,
@@ -543,6 +545,7 @@ interface ChatWidgetProps {
   onThumbsUp?: (userMessageId: string) => Promise<void> | void;
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
+  apiKey?: string;
   assistantId: string;
   agentStudio?: boolean;
   suggestedQuestions: SuggestedQuestionHit[];
@@ -558,6 +561,7 @@ const ChatWidget = memo(function ChatWidget({
   onThumbsUp,
   onThumbsDown,
   applicationId,
+  apiKey,
   assistantId,
   agentStudio,
   suggestedQuestions,
@@ -573,6 +577,44 @@ const ChatWidget = memo(function ChatWidget({
   const [submittingExchangeId, setSubmittingExchangeId] = useState<
     string | null
   >(null);
+
+  const handleFeedback = async (exchange: Exchange, vote: 0 | 1) => {
+    if (!exchange.assistantMessage) return;
+    const customHandler = vote === 1 ? onThumbsUp : onThumbsDown;
+    try {
+      setSubmittingExchangeId(exchange.id);
+      if (customHandler) {
+        await customHandler(exchange.userMessage.id);
+      } else if (agentStudio) {
+        if (apiKey) {
+          await postAgentStudioFeedback({
+            agentId: assistantId,
+            vote,
+            messageId: exchange.assistantMessage.id,
+            appId: applicationId,
+            apiKey,
+          });
+        }
+      } else {
+        await postFeedback({
+          assistantId,
+          appId: applicationId,
+          messageId: exchange.userMessage.id,
+          thumbs: vote,
+        });
+      }
+      setAcknowledgedExchangeIds((prev) => {
+        const next = new Set(prev);
+        next.add(exchange.id);
+        return next;
+      });
+    } catch {
+      // ignore errors
+    } finally {
+      setSubmittingExchangeId(null);
+    }
+  };
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Group messages into exchanges (user + assistant pairs)
@@ -784,93 +826,44 @@ const ChatWidget = memo(function ChatWidget({
 
               {exchange.assistantMessage && !isGenerating ? (
                 <div className="mt-4 flex items-center justify-start gap-2">
-                  {!agentStudio &&
-                    (acknowledgedExchangeIds.has(exchange.id) ? (
-                      <span className="text-muted-foreground text-[0.85rem] animate-in fade-in slide-in-from-bottom-1">
-                        Thanks for your feedback!
-                      </span>
-                    ) : submittingExchangeId === exchange.id ? (
-                      <span className="text-muted-foreground text-[0.85rem] shimmer-text">
-                        Submitting...
-                      </span>
-                    ) : (
-                      <div className="inline-flex items-center gap-2">
-                        <button
-                          type="button"
-                          title="Like"
-                          aria-label="Like"
-                          className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
-                          disabled={
-                            !exchange.assistantMessage ||
-                            submittingExchangeId === exchange.id
-                          }
-                          onClick={async () => {
-                            if (!exchange.assistantMessage) return;
-                            try {
-                              setSubmittingExchangeId(exchange.id);
-                              if (onThumbsUp) {
-                                await onThumbsUp(exchange.userMessage.id);
-                              } else {
-                                await postFeedback({
-                                  assistantId,
-                                  appId: applicationId,
-                                  messageId: exchange.userMessage.id,
-                                  thumbs: 1,
-                                });
-                              }
-                              setAcknowledgedExchangeIds((prev) => {
-                                const next = new Set(prev);
-                                next.add(exchange.id);
-                                return next;
-                              });
-                            } catch {
-                              // ignore errors
-                            } finally {
-                              setSubmittingExchangeId(null);
-                            }
-                          }}
-                        >
-                          <ThumbsUp size={18} />
-                        </button>
-                        <button
-                          type="button"
-                          title="Dislike"
-                          aria-label="Dislike"
-                          className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
-                          disabled={
-                            !exchange.assistantMessage ||
-                            submittingExchangeId === exchange.id
-                          }
-                          onClick={async () => {
-                            if (!exchange.assistantMessage) return;
-                            try {
-                              setSubmittingExchangeId(exchange.id);
-                              if (onThumbsDown) {
-                                await onThumbsDown(exchange.userMessage.id);
-                              } else {
-                                await postFeedback({
-                                  assistantId,
-                                  appId: applicationId,
-                                  messageId: exchange.userMessage.id,
-                                  thumbs: 0,
-                                });
-                              }
-                              setAcknowledgedExchangeIds((prev) => {
-                                const next = new Set(prev);
-                                next.add(exchange.id);
-                                return next;
-                              });
-                            } catch {
-                              // ignore errors
-                            } finally {
-                              setSubmittingExchangeId(null);
-                            }
-                          }}
-                        >
-                          <ThumbsDown size={18} />
-                        </button>
-                      </div>
-                    ))}
+                  {acknowledgedExchangeIds.has(exchange.id) ? (
+                    <span className="text-muted-foreground text-[0.85rem] animate-in fade-in slide-in-from-bottom-1">
+                      Thanks for your feedback!
+                    </span>
+                  ) : submittingExchangeId === exchange.id ? (
+                    <span className="text-muted-foreground text-[0.85rem] shimmer-text">
+                      Submitting...
+                    </span>
+                  ) : (
+                    <div className="inline-flex items-center gap-2">
+                      <button
+                        type="button"
+                        title="Like"
+                        aria-label="Like"
+                        className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
+                        disabled={
+                          !exchange.assistantMessage ||
+                          submittingExchangeId === exchange.id
+                        }
+                        onClick={() => handleFeedback(exchange, 1)}
+                      >
+                        <ThumbsUp size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        title="Dislike"
+                        aria-label="Dislike"
+                        className="border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed"
+                        disabled={
+                          !exchange.assistantMessage ||
+                          submittingExchangeId === exchange.id
+                        }
+                        onClick={() => handleFeedback(exchange, 0)}
+                      >
+                        <ThumbsDown size={18} />
+                      </button>
+                    </div>
+                  )}
                   <button
                     type="button"
                     className={`border-none bg-transparent rounded-md px-2.5 py-1.5 text-muted-foreground cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 hover:bg-blue-50 dark:hover:bg-slate-900 disabled:text-foreground disabled:cursor-not-allowed ${
@@ -1173,6 +1166,7 @@ const Sidepanel = memo(function Sidepanel({
           error={error}
           isGenerating={isGenerating}
           applicationId={config.applicationId}
+          apiKey={config.apiKey}
           assistantId={config.assistantId}
           agentStudio={config.agentStudio}
           suggestedQuestions={suggestedQuestions}

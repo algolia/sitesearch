@@ -45,9 +45,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   isThreadDepthError,
+  postAgentStudioFeedback,
   postFeedback,
   useAskai,
 } from "@/registry/experiences/search-askai/hooks/use-askai";
+
 import { useKeyboardNavigation } from "@/registry/experiences/search-askai/hooks/use-keyboard-navigation";
 import { useSearchState } from "@/registry/experiences/search-askai/hooks/use-search-state";
 import {
@@ -588,6 +590,7 @@ interface ChatWidgetProps {
   onThumbsUp?: (userMessageId: string) => Promise<void> | void;
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
+  apiKey?: string;
   assistantId: string;
   agentStudio?: boolean;
   suggestedQuestions?: SuggestedQuestionHit[];
@@ -603,6 +606,7 @@ const ChatWidget = memo(function ChatWidget({
   onThumbsUp,
   onThumbsDown,
   applicationId,
+  apiKey,
   assistantId,
   agentStudio,
   suggestedQuestions,
@@ -618,6 +622,43 @@ const ChatWidget = memo(function ChatWidget({
   const [submittingExchangeId, setSubmittingExchangeId] = useState<
     string | null
   >(null);
+
+  const handleFeedback = async (exchange: Exchange, vote: 0 | 1) => {
+    if (!exchange.assistantMessage) return;
+    const customHandler = vote === 1 ? onThumbsUp : onThumbsDown;
+    try {
+      setSubmittingExchangeId(exchange.id);
+      if (customHandler) {
+        await customHandler(exchange.userMessage.id);
+      } else if (agentStudio) {
+        if (apiKey) {
+          await postAgentStudioFeedback({
+            agentId: assistantId,
+            vote,
+            messageId: exchange.assistantMessage.id,
+            appId: applicationId,
+            apiKey,
+          });
+        }
+      } else {
+        await postFeedback({
+          assistantId,
+          appId: applicationId,
+          messageId: exchange.userMessage.id,
+          thumbs: vote,
+        });
+      }
+      setAcknowledgedExchangeIds((prev) => {
+        const next = new Set(prev);
+        next.add(exchange.id);
+        return next;
+      });
+    } catch {
+      // ignore errors
+    } finally {
+      setSubmittingExchangeId(null);
+    }
+  };
 
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
@@ -848,9 +889,7 @@ const ChatWidget = memo(function ChatWidget({
                 </div>
 
                 <div className="mt-4 flex items-center justify-end gap-2">
-                  {exchange.assistantMessage &&
-                  !isGenerating &&
-                  !agentStudio ? (
+                  {exchange.assistantMessage && !isGenerating ? (
                     acknowledgedExchangeIds.has(exchange.id) ? (
                       <span className="text-muted-foreground text-[0.85rem] animate-in fade-in slide-in-from-bottom-1">
                         Thanks for your feedback!
@@ -870,31 +909,7 @@ const ChatWidget = memo(function ChatWidget({
                             !exchange.assistantMessage ||
                             submittingExchangeId === exchange.id
                           }
-                          onClick={async () => {
-                            if (!exchange.assistantMessage) return;
-                            try {
-                              setSubmittingExchangeId(exchange.id);
-                              if (onThumbsUp) {
-                                await onThumbsUp(exchange.userMessage.id);
-                              } else {
-                                await postFeedback({
-                                  assistantId,
-                                  appId: applicationId,
-                                  messageId: exchange.userMessage.id,
-                                  thumbs: 1,
-                                });
-                              }
-                              setAcknowledgedExchangeIds((prev) => {
-                                const next = new Set(prev);
-                                next.add(exchange.id);
-                                return next;
-                              });
-                            } catch {
-                              // ignore errors
-                            } finally {
-                              setSubmittingExchangeId(null);
-                            }
-                          }}
+                          onClick={() => handleFeedback(exchange, 1)}
                         >
                           <ThumbsUp size={18} />
                         </button>
@@ -907,31 +922,7 @@ const ChatWidget = memo(function ChatWidget({
                             !exchange.assistantMessage ||
                             submittingExchangeId === exchange.id
                           }
-                          onClick={async () => {
-                            if (!exchange.assistantMessage) return;
-                            try {
-                              setSubmittingExchangeId(exchange.id);
-                              if (onThumbsDown) {
-                                await onThumbsDown(exchange.userMessage.id);
-                              } else {
-                                await postFeedback({
-                                  assistantId,
-                                  appId: applicationId,
-                                  messageId: exchange.userMessage.id,
-                                  thumbs: 0,
-                                });
-                              }
-                              setAcknowledgedExchangeIds((prev) => {
-                                const next = new Set(prev);
-                                next.add(exchange.id);
-                                return next;
-                              });
-                            } catch {
-                              // ignore errors
-                            } finally {
-                              setSubmittingExchangeId(null);
-                            }
-                          }}
+                          onClick={() => handleFeedback(exchange, 0)}
                         >
                           <ThumbsDown size={18} />
                         </button>
@@ -1539,6 +1530,7 @@ const ResultsPanel = memo(function ResultsPanel({
         error={error as Error | null}
         isGenerating={isGenerating}
         applicationId={config.applicationId}
+        apiKey={config.apiKey}
         assistantId={config.assistantId}
         agentStudio={config.agentStudio}
         suggestedQuestions={suggestedQuestions}

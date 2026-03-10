@@ -2,7 +2,9 @@ import type { UIMessage } from "@ai-sdk/react";
 import type { UIDataTypes, UIMessagePart } from "ai";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SearchHit } from "../types";
-import { postFeedback } from "./askai";
+
+import { postAgentStudioFeedback, postFeedback } from "./askai";
+
 import { isThreadDepthError, ThreadDepthErrorBanner } from "./error-utils";
 import {
   BrainIcon,
@@ -37,8 +39,9 @@ interface ChatWidgetProps {
   onThumbsUp?: (userMessageId: string) => Promise<void> | void;
   onThumbsDown?: (userMessageId: string) => Promise<void> | void;
   applicationId: string;
+  apiKey?: string;
   assistantId: string;
-  /** When true, feedback (thumbs) is not sent to the AskAI backend. */
+  /** When true, feedback is sent to Agent Studio instead of the AskAI backend. */
   agentStudio?: boolean;
   suggestedQuestions?: SuggestedQuestionHit[];
   onSuggestedQuestionClick?: (question: string) => void;
@@ -85,6 +88,7 @@ export const ChatWidget = memo(function ChatWidget({
   onThumbsUp,
   onThumbsDown,
   applicationId,
+  apiKey,
   assistantId,
   agentStudio,
   suggestedQuestions,
@@ -101,6 +105,43 @@ export const ChatWidget = memo(function ChatWidget({
   const [submittingExchangeId, setSubmittingExchangeId] = useState<
     string | null
   >(null);
+
+  const handleFeedback = async (exchange: Exchange, vote: 0 | 1) => {
+    if (!exchange.assistantMessage) return;
+    const customHandler = vote === 1 ? onThumbsUp : onThumbsDown;
+    try {
+      setSubmittingExchangeId(exchange.id);
+      if (customHandler) {
+        await customHandler(exchange.userMessage.id);
+      } else if (agentStudio) {
+        if (apiKey) {
+          await postAgentStudioFeedback({
+            agentId: assistantId,
+            vote,
+            messageId: exchange.assistantMessage.id,
+            appId: applicationId,
+            apiKey,
+          });
+        }
+      } else {
+        await postFeedback({
+          assistantId,
+          appId: applicationId,
+          messageId: exchange.userMessage.id,
+          thumbs: vote,
+        });
+      }
+      setAcknowledgedExchangeIds((prev) => {
+        const next = new Set(prev);
+        next.add(exchange.id);
+        return next;
+      });
+    } catch {
+      // ignore errors
+    } finally {
+      setSubmittingExchangeId(null);
+    }
+  };
 
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
@@ -308,9 +349,7 @@ export const ChatWidget = memo(function ChatWidget({
                 </div>
 
                 <div className="ss-qa-actions">
-                  {exchange.assistantMessage &&
-                  !isGenerating &&
-                  !agentStudio ? (
+                  {exchange.assistantMessage && !isGenerating ? (
                     acknowledgedExchangeIds.has(exchange.id) ? (
                       <span className="ss-qa-feedback-ack ss-fade">
                         Thanks for your feedback!
@@ -330,31 +369,7 @@ export const ChatWidget = memo(function ChatWidget({
                             !exchange.assistantMessage ||
                             submittingExchangeId === exchange.id
                           }
-                          onClick={async () => {
-                            if (!exchange.assistantMessage) return;
-                            try {
-                              setSubmittingExchangeId(exchange.id);
-                              if (onThumbsUp) {
-                                await onThumbsUp(exchange.userMessage.id);
-                              } else {
-                                await postFeedback({
-                                  assistantId,
-                                  appId: applicationId,
-                                  messageId: exchange.userMessage.id,
-                                  thumbs: 1,
-                                });
-                              }
-                              setAcknowledgedExchangeIds((prev) => {
-                                const next = new Set(prev);
-                                next.add(exchange.id);
-                                return next;
-                              });
-                            } catch {
-                              // ignore errors
-                            } finally {
-                              setSubmittingExchangeId(null);
-                            }
-                          }}
+                          onClick={() => handleFeedback(exchange, 1)}
                         >
                           <LikeIcon size={18} />
                         </button>
@@ -367,31 +382,7 @@ export const ChatWidget = memo(function ChatWidget({
                             !exchange.assistantMessage ||
                             submittingExchangeId === exchange.id
                           }
-                          onClick={async () => {
-                            if (!exchange.assistantMessage) return;
-                            try {
-                              setSubmittingExchangeId(exchange.id);
-                              if (onThumbsDown) {
-                                await onThumbsDown(exchange.userMessage.id);
-                              } else {
-                                await postFeedback({
-                                  assistantId,
-                                  appId: applicationId,
-                                  messageId: exchange.userMessage.id,
-                                  thumbs: 0,
-                                });
-                              }
-                              setAcknowledgedExchangeIds((prev) => {
-                                const next = new Set(prev);
-                                next.add(exchange.id);
-                                return next;
-                              });
-                            } catch {
-                              // ignore errors
-                            } finally {
-                              setSubmittingExchangeId(null);
-                            }
-                          }}
+                          onClick={() => handleFeedback(exchange, 0)}
                         >
                           <DislikeIcon size={18} />
                         </button>

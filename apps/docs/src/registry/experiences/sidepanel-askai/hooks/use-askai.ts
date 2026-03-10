@@ -31,10 +31,12 @@ export function isThreadDepthError(error?: Error | null): boolean {
 
 const BASE_ASKAI_URL = "https://askai.algolia.com";
 
+const agentStudioBaseUrl = (appId: string): string =>
+  `https://${appId}.algolia.net/agent-studio/1`;
+
 function getChatApiUrl(config: AskAIConfig): string {
   if (config.agentStudio) {
-    const base = `https://${config.applicationId}.algolia.net/agent-studio`;
-    return `${base}/1/agents/${config.assistantId}/completions?stream=true&compatibilityMode=ai-sdk-5`;
+    return `${agentStudioBaseUrl(config.applicationId)}/agents/${config.assistantId}/completions?stream=true&compatibilityMode=ai-sdk-5`;
   }
   return `${BASE_ASKAI_URL}/chat`;
 }
@@ -147,6 +149,37 @@ export const getValidToken = async ({
   }
 
   return inflight;
+};
+
+export const postAgentStudioFeedback = ({
+  agentId,
+  vote,
+  messageId,
+  appId,
+  apiKey,
+}: {
+  agentId: string;
+  vote: 0 | 1;
+  messageId: string;
+  appId: string;
+  apiKey: string;
+}): Promise<Response> => {
+  const headers = new Headers();
+  headers.set("x-algolia-application-id", appId);
+  headers.set("x-algolia-api-key", apiKey);
+  headers.set("content-type", "application/json");
+
+  const baseUrl = `${agentStudioBaseUrl(appId)}/feedback`;
+
+  return fetch(baseUrl, {
+    method: "POST",
+    body: JSON.stringify({
+      messageId,
+      agentId,
+      vote,
+    }),
+    headers,
+  });
 };
 
 export const postFeedback = async ({
