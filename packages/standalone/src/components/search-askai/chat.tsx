@@ -5,7 +5,11 @@ import type { SearchHit } from "../types";
 
 import { postAgentStudioFeedback, postFeedback } from "./askai";
 
-import { isThreadDepthError, ThreadDepthErrorBanner } from "./error-utils";
+import {
+  filterMessagesForThreadDepthError,
+  isThreadDepthError,
+  ThreadDepthErrorBanner,
+} from "./error-utils";
 import {
   BrainIcon,
   CheckIcon,
@@ -44,9 +48,10 @@ interface ChatWidgetProps {
   /** When true, feedback is sent to Agent Studio instead of the AskAI backend. */
   agentStudio?: boolean;
   suggestedQuestions?: SuggestedQuestionHit[];
+  threadDepthError?: boolean;
+  showThreadDepthError?: boolean;
   onSuggestedQuestionClick?: (question: string) => void;
   onNewChat?: () => void;
-  hasThreadDepthError?: boolean;
 }
 
 export interface SearchIndexTool {
@@ -94,7 +99,8 @@ export const ChatWidget = memo(function ChatWidget({
   suggestedQuestions,
   onSuggestedQuestionClick,
   onNewChat,
-  hasThreadDepthError,
+  threadDepthError = false,
+  showThreadDepthError = false,
 }: ChatWidgetProps) {
   const { copyText } = useClipboard();
   const [copiedExchangeId, setCopiedExchangeId] = useState<string | null>(null);
@@ -143,29 +149,23 @@ export const ChatWidget = memo(function ChatWidget({
     }
   };
 
+  const displayMessages = useMemo(
+    () => filterMessagesForThreadDepthError(messages, threadDepthError),
+    [messages, threadDepthError],
+  );
+
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
     const grouped: Exchange[] = [];
-    let skipLastUserMessage = false;
 
-    // If there's a thread depth error, don't show the last user message
-    if (hasThreadDepthError && messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === "user") {
-        skipLastUserMessage = true;
-      }
-    }
-
-    for (let i = 0; i < messages.length; i++) {
-      // Skip the last user message if it caused a thread depth error
-      if (skipLastUserMessage && i === messages.length - 1) {
+    for (let i = 0; i < displayMessages.length; i++) {
+      const current = displayMessages.slice(i, i + 1)[0];
+      if (!current) {
         continue;
       }
-
-      const current = messages[i];
       if (current.role === "user") {
         const userMessage = current as Message;
-        const nextMessage = messages[i + 1];
+        const nextMessage = displayMessages.slice(i + 1, i + 2)[0];
         if (nextMessage?.role === "assistant") {
           grouped.push({
             id: userMessage.id,
@@ -184,7 +184,7 @@ export const ChatWidget = memo(function ChatWidget({
       }
     }
     return grouped;
-  }, [messages, hasThreadDepthError]);
+  }, [displayMessages]);
 
   // Cleanup any pending reset timers on unmount
   useEffect(() => {
@@ -226,14 +226,14 @@ export const ChatWidget = memo(function ChatWidget({
           </div>
         ) : null}
         {/* thread depth error banner */}
-        {hasThreadDepthError && onNewChat && (
+        {showThreadDepthError ? (
           <ThreadDepthErrorBanner onNewChat={onNewChat} />
-        )}
+        ) : null}
         <p className="ss-hint">
           Answers are generated using AI and may make mistakes.
         </p>
-        {/* other errors - never show AI-217 errors here */}
-        {error && !hasThreadDepthError && !isThreadDepthError(error) && (
+        {/* other errors - never show AI-217 in the generic banner */}
+        {error && !isThreadDepthError(error) && (
           <div className="ss-error-banner">{error.message}</div>
         )}
 

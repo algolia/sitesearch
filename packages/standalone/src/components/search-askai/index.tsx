@@ -163,7 +163,8 @@ interface ResultsPanelProps {
   ) => void;
   suggestedQuestions?: SuggestedQuestionHit[];
   onNewChat?: () => void;
-  hasThreadDepthError?: boolean;
+  threadDepthError?: boolean;
+  showThreadDepthError?: boolean;
   openResultsInNewTab?: boolean;
 }
 
@@ -184,7 +185,8 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   sendEvent,
   suggestedQuestions,
   onNewChat,
-  hasThreadDepthError,
+  threadDepthError,
+  showThreadDepthError,
   openResultsInNewTab = true,
 }) {
   const { items } = useHits(
@@ -269,7 +271,8 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
         suggestedQuestions={suggestedQuestions}
         onSuggestedQuestionClick={handleSuggestedQuestionClick}
         onNewChat={onNewChat}
-        hasThreadDepthError={hasThreadDepthError}
+        threadDepthError={threadDepthError}
+        showThreadDepthError={showThreadDepthError}
       />
     );
   }
@@ -327,7 +330,8 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
     error,
     isGenerating,
     sendMessage,
-    hasThreadDepthError,
+    threadDepthError,
+    showThreadDepthError,
   } = useAskai({
     applicationId: config.applicationId,
     apiKey: config.apiKey,
@@ -408,7 +412,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
           refine={refine}
           showChat={showChat}
           isGenerating={isGenerating}
-          isThreadDepthError={hasThreadDepthError}
+          isThreadDepthError={showThreadDepthError}
           setShowChat={setShowChat}
           onClose={onClose}
           onArrowDown={moveDown}
@@ -445,7 +449,8 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             sendEvent={sendEvent}
             suggestedQuestions={suggestedQuestions}
             onNewChat={handleNewChat}
-            hasThreadDepthError={hasThreadDepthError}
+            threadDepthError={threadDepthError}
+            showThreadDepthError={showThreadDepthError}
             openResultsInNewTab={config.openResultsInNewTab}
           />
         )}

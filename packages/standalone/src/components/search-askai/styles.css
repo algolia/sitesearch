@@ -413,6 +413,68 @@
   border-radius: 0.5rem;
 }
 
+/* Thread depth errors: explicit colors so dark mode stays readable */
+.ssask-exp .ss-thread-depth-error-banner {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #78350f;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+}
+
+.ssask-exp.dark .ss-thread-depth-error-banner {
+  color: #fef9c3;
+  background: rgba(250, 204, 21, 0.12);
+  border-color: rgba(250, 204, 21, 0.45);
+}
+
+.ssask-exp .ss-thread-depth-error-link,
+.ssask-exp .ss-thread-depth-error-cta {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: inherit;
+  font-family: inherit;
+  line-height: inherit;
+  font-weight: 600;
+  color: var(--search-primary-color);
+  background: transparent;
+  vertical-align: baseline;
+}
+
+.ssask-exp .ss-thread-depth-error-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline;
+}
+
+.ssask-exp .ss-thread-depth-error-cta {
+  display: inline;
+}
+
+.ssask-exp .ss-thread-depth-error-link:hover {
+  opacity: 0.92;
+}
+
+.ssask-exp .ss-thread-depth-error-link:focus-visible {
+  outline: 2px solid var(--search-primary-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Ensure CTA stays visible on dark banner (higher contrast than body text) */
+.ssask-exp.dark .ss-thread-depth-error-banner .ss-thread-depth-error-link,
+.ssask-exp.dark .ss-thread-depth-error-banner .ss-thread-depth-error-cta {
+  color: #a5b4fc;
+}
+
 .ssask-exp .ss-qa-list {
   display: flex;
   flex-direction: column;

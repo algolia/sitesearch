@@ -180,7 +180,17 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
           <button
             type="button"
             className="ss-search-new-chat-button"
-            disabled={props.isGenerating}
+            disabled={props.isGenerating && !props.isThreadDepthError}
+            title={
+              props.isThreadDepthError
+                ? "Start a new conversation"
+                : "New conversation"
+            }
+            aria-label={
+              props.isThreadDepthError
+                ? "Start a new conversation"
+                : "New conversation"
+            }
             onClick={() => {
               setChatInput("");
               props.onNewChat?.();

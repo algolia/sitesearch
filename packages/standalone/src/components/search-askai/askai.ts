@@ -12,8 +12,6 @@ export interface AskAIConfig {
   indexName: string;
   assistantId: string;
   agentStudio?: boolean;
-  /** Demo mode: Simulate thread depth error after N exchanges (for testing only) */
-  _demoThreadDepthLimit?: number;
 }
 
 const BASE_ASKAI_URL = "https://askai.algolia.com";
@@ -75,20 +73,22 @@ export function useAskai(config: AskAIConfig) {
   const isGenerating =
     chat.status === "submitted" || chat.status === "streaming";
 
-  // Check if there's a thread depth error (AI-217)
-  // Only show error if there are messages (conversation is active)
-  const hasThreadDepthError = useMemo(() => {
-    const isError =
-      chat.status === "error" && isThreadDepthError(chat.error as Error | null);
-    const hasMessages = chat.messages.length > 0;
-    // Clear error if conversation was reset (no messages)
-    return isError && hasMessages;
-  }, [chat.status, chat.error, chat.messages.length]);
+  const threadDepthError = useMemo(
+    () => chat.status === "error" && isThreadDepthError(chat.error),
+    [chat.status, chat.error],
+  );
+
+  /** Banner, input lock, etc. — only after at least one assistant reply (real thread). */
+  const showThreadDepthError = useMemo(
+    () => threadDepthError && chat.messages.some((m) => m.role === "assistant"),
+    [threadDepthError, chat.messages],
+  );
 
   return {
     ...chat,
     isGenerating,
-    hasThreadDepthError,
+    threadDepthError,
+    showThreadDepthError,
   };
 }
 
