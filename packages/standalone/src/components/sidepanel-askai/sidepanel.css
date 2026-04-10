@@ -1,0 +1,250 @@
+/* Sidepanel shell (ChatWidget styles come from search-askai/styles.css via .ssask-exp) */
+
+.ss-sidepanel-root {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Inline trigger: needs a full-width positioning context or the button hugs a collapsed box */
+.ss-sidepanel-root--inline {
+  min-height: 88px;
+  width: 100%;
+}
+
+.ss-sidepanel-trigger {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 2147483640;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--search-border-color, #d6d6e7);
+  border-radius: var(--search-border-radius, 0.5rem);
+  background: var(--search-neutral-color, #fff);
+  color: var(--search-text-color, #23263b);
+  font-size: var(--search-button-font-size, 0.9rem);
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: var(--search-button-transition, all 0.2s ease);
+}
+
+.ss-sidepanel-trigger:hover {
+  background: var(--search-hover-color, #dde3f9);
+  transform: translateY(-1px);
+}
+
+.ss-sidepanel-trigger svg {
+  flex-shrink: 0;
+}
+
+/* Inline trigger: override fixed positioning (must follow base .ss-sidepanel-trigger for specificity order) */
+.ss-sidepanel-root--inline .ss-sidepanel-trigger {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.ss-sidepanel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483641;
+  margin: 0;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.ss-sidepanel-panel {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 2147483642;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100vw - 2rem));
+  max-width: 100%;
+  max-height: calc(100vh - 2rem);
+  border-radius: var(--search-modal-border-radius, 0.75rem);
+  overflow: hidden;
+  background: var(--search-background-color, #f5f5fa);
+  box-shadow:
+    var(--search-modal-shadow, 0 25px 50px -12px rgba(0, 0, 0, 0.25)),
+    0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+.ss-sidepanel-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.ss-sidepanel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--search-border-color, #d6d6e7);
+  background: var(--search-neutral-color, #fff);
+  flex-shrink: 0;
+}
+
+.ss-sidepanel-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.ss-sidepanel-title-sparkle {
+  flex-shrink: 0;
+  display: block;
+}
+
+.ss-sidepanel-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--search-text-color, #23263b);
+}
+
+.ss-sidepanel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ss-sidepanel-body {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* Match panel theme (avoids see-through gaps resolving to document-level vars) */
+  background: var(--search-background-color);
+}
+
+/*
+ * Search modal caps chat at 50vh — sidepanel is full-height; fill the body and remove the cap
+ * so we do not get a large empty band (often light) under the welcome state.
+ */
+.ssask-exp .ss-sidepanel-body .ss-chat-root {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  max-height: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Footer stack: rule above composer separates chat scroll from input (matches classic layout). */
+.ss-sidepanel-compose-stack {
+  flex-shrink: 0;
+  border-top: 1px solid var(--search-border-color, #d6d6e7);
+  background: var(--search-background-color);
+}
+
+.ss-sidepanel-thread-depth-banner {
+  padding: 0.5rem 1rem 0.25rem;
+}
+
+.ss-sidepanel-footer {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem 1rem;
+  border-top: none;
+  background: var(--search-background-color);
+}
+
+.ss-sidepanel-ai-notice {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-top: 0.5rem;
+}
+
+.ss-sidepanel-ai-notice-text {
+  margin: 0;
+  max-width: none;
+  width: 100%;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--search-subtle-text-color, #64748b);
+}
+
+.ss-sidepanel-powered-by {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.ss-sidepanel-powered-by-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--search-subtle-text-color, #64748b);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.ss-sidepanel-powered-by-link:hover {
+  color: var(--search-primary-color, #003dff);
+}
+
+.ss-sidepanel-panel.ssask-exp.dark .ss-sidepanel-ai-notice-text,
+.ss-sidepanel-panel.ssask-exp.dark .ss-sidepanel-powered-by-link {
+  color: var(--search-secondary-color, #9aa1b2);
+}
+
+.ss-sidepanel-powered-by-label {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .ss-sidepanel-powered-by-label {
+    display: none;
+  }
+}
+
+.ss-sidepanel-footer search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.ss-sidepanel-footer .ss-searchbox-form {
+  width: 100%;
+}
+
+/* Match search-askai composer: bordered field uses footer padding, not extra outer margin. */
+.ss-sidepanel-footer .ss-searchbox-form.ss-searchbox-form--chat {
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  /* Slightly tighter than modal composer so the field sits higher in the footer stack. */
+  padding: 0.35rem 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .ss-sidepanel-panel {
+    top: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    width: min(420px, calc(100vw - 1.5rem));
+    max-height: calc(100vh - 1.5rem);
+  }
+}

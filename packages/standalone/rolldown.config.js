@@ -52,6 +52,23 @@ export default defineConfig([
     ...common,
   },
   {
+    input: "src/vanilla/sidepanel-askai.tsx",
+    output: {
+      dir: "dist",
+      entryFileNames: "sidepanel-askai.min.js",
+      format: "umd",
+      name: "SiteSearchSidepanelAskAI",
+      sourcemap: true,
+      minify: true,
+    },
+    plugins: [
+      postcss({
+        extract: "sidepanel-askai.min.css",
+      }),
+    ],
+    ...common,
+  },
+  {
     input: "src/index.ts",
     output: { dir: "dist", format: "es" },
     plugins: [dts()],

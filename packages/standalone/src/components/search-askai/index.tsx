@@ -326,10 +326,10 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
   // Lift chat state here to thread isGenerating to the SearchInput
   const {
     messages,
-    setMessages,
     error,
     isGenerating,
     sendMessage,
+    startNewConversation,
     threadDepthError,
     showThreadDepthError,
   } = useAskai({
@@ -389,14 +389,24 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
   const showResultsPanel = (!noResults && !!query) || showChat;
 
   const handleNewChat = useCallback(() => {
-    // Clear messages to start a fresh conversation
-    setMessages([]);
+    startNewConversation();
     setShowChat(true);
     refine("");
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [setMessages, setShowChat, refine]);
+  }, [startNewConversation, setShowChat, refine]);
+
+  /** Leaving chat while thread-depth failed: reset thread so Ask AI works again without closing the modal. */
+  const handleSetShowChat = useCallback(
+    (v: boolean) => {
+      if (!v && threadDepthError) {
+        startNewConversation();
+      }
+      setShowChat(v);
+    },
+    [setShowChat, threadDepthError, startNewConversation],
+  );
 
   return (
     <>
@@ -413,7 +423,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
           showChat={showChat}
           isGenerating={isGenerating}
           isThreadDepthError={showThreadDepthError}
-          setShowChat={setShowChat}
+          setShowChat={handleSetShowChat}
           onClose={onClose}
           onArrowDown={moveDown}
           onArrowUp={moveUp}
@@ -433,9 +443,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
           <ResultsPanel
             showChat={showChat}
             inputRef={inputRef}
-            setShowChat={(v) => {
-              setShowChat(v);
-            }}
+            setShowChat={handleSetShowChat}
             query={query}
             selectedIndex={selectedIndex}
             refine={refine}

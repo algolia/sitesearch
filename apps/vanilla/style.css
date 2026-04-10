@@ -102,6 +102,43 @@ body {
   color: #0f172a;
 }
 
+.card-note {
+  font-size: 13px;
+  color: #475569;
+  margin: -4px 0 12px;
+  line-height: 1.5;
+}
+
+/* Sidepanel demo: avoid flex centering shrinking the mount; fill width so inline trigger aligns to dashed area */
+.demo-container-sidepanel {
+  position: relative;
+  display: block;
+  min-height: 132px;
+  padding: 1rem;
+}
+
+.demo-container-sidepanel > #sidepanelAskAi {
+  display: block;
+  width: 100%;
+  min-height: 104px;
+  position: relative;
+}
+
+.card-note code {
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-family:
+    IBM Plex Mono,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+  font-size: 12px;
+}
+
 .card h3 {
   font-size: 18px;
   font-weight: 600;

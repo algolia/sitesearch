@@ -58,103 +58,117 @@ export const CopyIcon = ({ size = 24, color = "currentColor" }: IconProps) => (
   </svg>
 );
 
-export const SparklesIcon = ({ size = 24 }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M8 1.5a.5.5 0 0 1 .475.344L9.75 5.719a.833.833 0 0 0 .53.531l3.876 1.275a.5.5 0 0 1 0 .95L10.281 9.75a.833.833 0 0 0-.531.53l-1.275 3.876a.5.5 0 0 1-.95 0L6.25 10.281a.833.833 0 0 0-.53-.531L1.843 8.475a.5.5 0 0 1 0-.95L5.719 6.25a.833.833 0 0 0 .531-.53l1.275-3.876A.5.5 0 0 1 8 1.5Zm-.8 4.532A1.833 1.833 0 0 1 6.032 7.2L3.6 8l2.432.8A1.833 1.833 0 0 1 7.2 9.968L8 12.4l.8-2.432A1.833 1.833 0 0 1 9.968 8.8L12.4 8l-2.432-.8A1.833 1.833 0 0 1 8.8 6.032L8 3.6l-.8 2.432Z"
-      fill="url(#8aa5f4b5___a)"
-    ></path>
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M3.333 1.5a.5.5 0 0 1 .5.5v2.667a.5.5 0 1 1-1 0V2a.5.5 0 0 1 .5-.5Z"
-      fill="url(#8aa5f4b5___b)"
-    ></path>
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M12.667 10.833a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-1 0v-2.667a.5.5 0 0 1 .5-.5Z"
-      fill="url(#8aa5f4b5___c)"
-    ></path>
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M1.5 3.333a.5.5 0 0 1 .5-.5h2.667a.5.5 0 0 1 0 1H2a.5.5 0 0 1-.5-.5Z"
-      fill="url(#8aa5f4b5___d)"
-    ></path>
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M10.833 12.667a.5.5 0 0 1 .5-.5H14a.5.5 0 1 1 0 1h-2.667a.5.5 0 0 1-.5-.5Z"
-      fill="url(#8aa5f4b5___e)"
-    ></path>
-    <defs>
-      <linearGradient
-        id="8aa5f4b5___a"
-        x1="15.03"
-        y1="8"
-        x2="2.03"
-        y2="8"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop offset="0.15" stopColor="#8E00FC"></stop>
-        <stop offset="1" stopColor="#003DFF"></stop>
-      </linearGradient>
-      <linearGradient
-        id="8aa5f4b5___b"
-        x1="15.03"
-        y1="8"
-        x2="2.03"
-        y2="8"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop offset="0.15" stopColor="#8E00FC"></stop>
-        <stop offset="1" stopColor="#003DFF"></stop>
-      </linearGradient>
-      <linearGradient
-        id="8aa5f4b5___c"
-        x1="15.03"
-        y1="8"
-        x2="2.03"
-        y2="8"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop offset="0.15" stopColor="#8E00FC"></stop>
-        <stop offset="1" stopColor="#003DFF"></stop>
-      </linearGradient>
-      <linearGradient
-        id="8aa5f4b5___d"
-        x1="15.03"
-        y1="8"
-        x2="2.03"
-        y2="8"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop offset="0.15" stopColor="#8E00FC"></stop>
-        <stop offset="1" stopColor="#003DFF"></stop>
-      </linearGradient>
-      <linearGradient
-        id="8aa5f4b5___e"
-        x1="15.03"
-        y1="8"
-        x2="2.03"
-        y2="8"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop offset="0.15" stopColor="#8E00FC"></stop>
-        <stop offset="1" stopColor="#003DFF"></stop>
-      </linearGradient>
-    </defs>
-  </svg>
-);
+type SparklesIconProps = IconProps & {
+  /** Append to gradient ids when multiple sparkles SVGs share one document (avoids id clashes). */
+  gradientIdSuffix?: string;
+};
+
+export const SparklesIcon = ({
+  size = 24,
+  className,
+  gradientIdSuffix = "",
+}: SparklesIconProps) => {
+  const g = (base: string) => `${base}${gradientIdSuffix}`;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8 1.5a.5.5 0 0 1 .475.344L9.75 5.719a.833.833 0 0 0 .53.531l3.876 1.275a.5.5 0 0 1 0 .95L10.281 9.75a.833.833 0 0 0-.531.53l-1.275 3.876a.5.5 0 0 1-.95 0L6.25 10.281a.833.833 0 0 0-.53-.531L1.843 8.475a.5.5 0 0 1 0-.95L5.719 6.25a.833.833 0 0 0 .531-.53l1.275-3.876A.5.5 0 0 1 8 1.5Zm-.8 4.532A1.833 1.833 0 0 1 6.032 7.2L3.6 8l2.432.8A1.833 1.833 0 0 1 7.2 9.968L8 12.4l.8-2.432A1.833 1.833 0 0 1 9.968 8.8L12.4 8l-2.432-.8A1.833 1.833 0 0 1 8.8 6.032L8 3.6l-.8 2.432Z"
+        fill={`url(#${g("8aa5f4b5___a")})`}
+      ></path>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M3.333 1.5a.5.5 0 0 1 .5.5v2.667a.5.5 0 1 1-1 0V2a.5.5 0 0 1 .5-.5Z"
+        fill={`url(#${g("8aa5f4b5___b")})`}
+      ></path>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12.667 10.833a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-1 0v-2.667a.5.5 0 0 1 .5-.5Z"
+        fill={`url(#${g("8aa5f4b5___c")})`}
+      ></path>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M1.5 3.333a.5.5 0 0 1 .5-.5h2.667a.5.5 0 0 1 0 1H2a.5.5 0 0 1-.5-.5Z"
+        fill={`url(#${g("8aa5f4b5___d")})`}
+      ></path>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M10.833 12.667a.5.5 0 0 1 .5-.5H14a.5.5 0 1 1 0 1h-2.667a.5.5 0 0 1-.5-.5Z"
+        fill={`url(#${g("8aa5f4b5___e")})`}
+      ></path>
+      <defs>
+        <linearGradient
+          id={g("8aa5f4b5___a")}
+          x1="15.03"
+          y1="8"
+          x2="2.03"
+          y2="8"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.15" stopColor="#8E00FC"></stop>
+          <stop offset="1" stopColor="#003DFF"></stop>
+        </linearGradient>
+        <linearGradient
+          id={g("8aa5f4b5___b")}
+          x1="15.03"
+          y1="8"
+          x2="2.03"
+          y2="8"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.15" stopColor="#8E00FC"></stop>
+          <stop offset="1" stopColor="#003DFF"></stop>
+        </linearGradient>
+        <linearGradient
+          id={g("8aa5f4b5___c")}
+          x1="15.03"
+          y1="8"
+          x2="2.03"
+          y2="8"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.15" stopColor="#8E00FC"></stop>
+          <stop offset="1" stopColor="#003DFF"></stop>
+        </linearGradient>
+        <linearGradient
+          id={g("8aa5f4b5___d")}
+          x1="15.03"
+          y1="8"
+          x2="2.03"
+          y2="8"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.15" stopColor="#8E00FC"></stop>
+          <stop offset="1" stopColor="#003DFF"></stop>
+        </linearGradient>
+        <linearGradient
+          id={g("8aa5f4b5___e")}
+          x1="15.03"
+          y1="8"
+          x2="2.03"
+          y2="8"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.15" stopColor="#8E00FC"></stop>
+          <stop offset="1" stopColor="#003DFF"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
 
 export const SearchIcon = ({
   size = 24,
@@ -328,5 +342,25 @@ export const SquarePenIcon = ({
   >
     <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
     <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" />
+  </svg>
+);
+
+export const ChatSubmitIcon = ({
+  size = 22,
+  color = "currentColor",
+}: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2.25"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m5 12 7-7 7 7" />
+    <path d="M12 19V5" />
   </svg>
 );

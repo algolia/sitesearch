@@ -1,9 +1,10 @@
 import { useChat } from "@ai-sdk/react";
 import {
   DefaultChatTransport,
+  generateId,
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
-import { useMemo } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 export interface AskAIConfig {
   applicationId: string;
@@ -46,6 +47,8 @@ export function useAskai(config: AskAIConfig) {
     throw new Error("config is required for useAskai");
   }
 
+  const [chatId, setChatId] = useState(() => generateId());
+
   const transport = useMemo(() => {
     return new DefaultChatTransport({
       api: getChatApiUrl(config),
@@ -77,9 +80,19 @@ export function useAskai(config: AskAIConfig) {
   ]);
 
   const chat = useChat({
+    id: chatId,
     transport,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   });
+
+  const chatRef = useRef(chat);
+  chatRef.current = chat;
+
+  const startNewConversation = useCallback(() => {
+    chatRef.current.stop();
+    chatRef.current.clearError();
+    setChatId(generateId());
+  }, []);
 
   const isGenerating =
     chat.status === "submitted" || chat.status === "streaming";
@@ -93,6 +106,7 @@ export function useAskai(config: AskAIConfig) {
 
   return {
     ...chat,
+    startNewConversation,
     isGenerating,
     hasThreadDepthError,
   };
