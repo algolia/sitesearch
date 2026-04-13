@@ -472,6 +472,16 @@
   border: 1px solid #fcd34d;
 }
 
+.ssask-exp .ss-thread-depth-error-detail {
+  margin: 0 0 0.65rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+.ssask-exp .ss-thread-depth-error-main {
+  margin: 0;
+}
+
 .ssask-exp.dark .ss-thread-depth-error-banner {
   color: #fef9c3;
   background: rgba(250, 204, 21, 0.12);

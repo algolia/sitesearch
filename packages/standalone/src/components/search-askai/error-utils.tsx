@@ -50,26 +50,22 @@ export function isThreadDepthError(error?: unknown): boolean {
   return messageLooksLikeThreadDepth(errorMessage(error));
 }
 
-type MessageWithRole = { role: string };
-
 /**
- * When thread depth is exceeded, the last user turn has no assistant reply — omit it so the UI
- * only shows successful exchanges (same behavior as DocSearch modal / sidepanel).
+ * Human-readable thread-depth text from the API (plain `Error.message` or JSON `{"message":"…"}`).
  */
-export function filterMessagesForThreadDepthError<T extends MessageWithRole>(
-  messages: T[],
-  threadDepthError: boolean,
-): T[] {
-  if (!threadDepthError || messages.length === 0) {
-    return messages;
+export function threadDepthErrorDetail(error?: unknown): string | undefined {
+  if (!isThreadDepthError(error)) return undefined;
+  const raw = errorMessage(error).trim();
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw) as { message?: string };
+    if (typeof parsed.message === "string" && parsed.message.trim()) {
+      return parsed.message.trim();
+    }
+  } catch {
+    // `message` is not JSON — use as-is below
   }
-
-  const last = messages[messages.length - 1];
-  if (last.role === "user") {
-    return messages.slice(0, -1);
-  }
-
-  return messages;
+  return raw;
 }
 
 /**
@@ -77,6 +73,7 @@ export function filterMessagesForThreadDepthError<T extends MessageWithRole>(
  */
 export interface ThreadDepthErrorBannerProps {
   onNewChat?: () => void;
+  detailMessage?: string;
 }
 
 /**
@@ -85,22 +82,28 @@ export interface ThreadDepthErrorBannerProps {
  */
 export const ThreadDepthErrorBanner = ({
   onNewChat,
+  detailMessage,
 }: ThreadDepthErrorBannerProps) => (
   <div className="ss-thread-depth-error-banner">
-    This conversation is now closed to keep responses accurate.{" "}
-    {onNewChat ? (
-      <button
-        type="button"
-        className="ss-thread-depth-error-link"
-        onClick={onNewChat}
-      >
-        Start a new conversation
-      </button>
-    ) : (
-      <span className="ss-thread-depth-error-cta">
-        Start a new conversation
-      </span>
-    )}{" "}
-    to continue.
+    {detailMessage ? (
+      <p className="ss-thread-depth-error-detail">{detailMessage}</p>
+    ) : null}
+    <p className="ss-thread-depth-error-main">
+      This conversation is now closed to keep responses accurate.{" "}
+      {onNewChat ? (
+        <button
+          type="button"
+          className="ss-thread-depth-error-link"
+          onClick={onNewChat}
+        >
+          Start a new conversation
+        </button>
+      ) : (
+        <span className="ss-thread-depth-error-cta">
+          Start a new conversation
+        </span>
+      )}{" "}
+      to continue.
+    </p>
   </div>
 );

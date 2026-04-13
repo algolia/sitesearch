@@ -43,6 +43,7 @@ import {
   isThreadDepthError,
   postAgentStudioFeedback,
   postFeedback,
+  threadDepthErrorDetail,
   useAskai,
 } from "@/registry/experiences/sidepanel-askai/hooks/use-askai";
 
@@ -517,19 +518,28 @@ const RelatedSources = memo(function RelatedSources({
 
 interface ThreadDepthErrorBannerProps {
   onNewChat: () => void;
+  detailMessage?: string;
 }
 
-const ThreadDepthErrorBanner = ({ onNewChat }: ThreadDepthErrorBannerProps) => (
+const ThreadDepthErrorBanner = ({
+  onNewChat,
+  detailMessage,
+}: ThreadDepthErrorBannerProps) => (
   <div className="text-gray-900 text-sm leading-normal">
-    This conversation is now closed to keep responses accurate.{" "}
-    <button
-      type="button"
-      className="text-blue-600 underline font-normal cursor-pointer bg-transparent border-none p-0 hover:text-blue-800 focus:outline-2 focus:outline-blue-600 focus:outline-offset-2 focus:rounded-sm"
-      onClick={onNewChat}
-    >
-      Start a new conversation
-    </button>{" "}
-    to continue.
+    {detailMessage ? (
+      <p className="m-0 mb-2 font-semibold text-foreground">{detailMessage}</p>
+    ) : null}
+    <p className="m-0">
+      This conversation is now closed to keep responses accurate.{" "}
+      <button
+        type="button"
+        className="text-blue-600 underline font-normal cursor-pointer bg-transparent border-none p-0 hover:text-blue-800 focus:outline-2 focus:outline-blue-600 focus:outline-offset-2 focus:rounded-sm"
+        onClick={onNewChat}
+      >
+        Start a new conversation
+      </button>{" "}
+      to continue.
+    </p>
   </div>
 );
 
@@ -693,7 +703,10 @@ const ChatWidget = memo(function ChatWidget({
         {error && (
           <div className="border border-red-300 bg-red-100 text-red-900 px-4 py-3 rounded-lg">
             {isThreadDepthError(error) && onNewChat ? (
-              <ThreadDepthErrorBanner onNewChat={onNewChat} />
+              <ThreadDepthErrorBanner
+                onNewChat={onNewChat}
+                detailMessage={threadDepthErrorDetail(error)}
+              />
             ) : (
               error.message
             )}

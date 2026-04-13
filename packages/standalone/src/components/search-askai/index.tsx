@@ -163,7 +163,6 @@ interface ResultsPanelProps {
   ) => void;
   suggestedQuestions?: SuggestedQuestionHit[];
   onNewChat?: () => void;
-  threadDepthError?: boolean;
   showThreadDepthError?: boolean;
   openResultsInNewTab?: boolean;
 }
@@ -185,7 +184,6 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   sendEvent,
   suggestedQuestions,
   onNewChat,
-  threadDepthError,
   showThreadDepthError,
   openResultsInNewTab = true,
 }) {
@@ -271,7 +269,6 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
         suggestedQuestions={suggestedQuestions}
         onSuggestedQuestionClick={handleSuggestedQuestionClick}
         onNewChat={onNewChat}
-        threadDepthError={threadDepthError}
         showThreadDepthError={showThreadDepthError}
       />
     );
@@ -457,7 +454,6 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             sendEvent={sendEvent}
             suggestedQuestions={suggestedQuestions}
             onNewChat={handleNewChat}
-            threadDepthError={threadDepthError}
             showThreadDepthError={showThreadDepthError}
             openResultsInNewTab={config.openResultsInNewTab}
           />

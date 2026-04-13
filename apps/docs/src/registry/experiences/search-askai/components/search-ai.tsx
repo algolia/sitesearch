@@ -47,6 +47,7 @@ import {
   isThreadDepthError,
   postAgentStudioFeedback,
   postFeedback,
+  threadDepthErrorDetail,
   useAskai,
 } from "@/registry/experiences/search-askai/hooks/use-askai";
 
@@ -562,19 +563,28 @@ const MemoizedMarkdown = memo(function MemoizedMarkdown({
 
 interface ThreadDepthErrorBannerProps {
   onNewChat: () => void;
+  detailMessage?: string;
 }
 
-const ThreadDepthErrorBanner = ({ onNewChat }: ThreadDepthErrorBannerProps) => (
+const ThreadDepthErrorBanner = ({
+  onNewChat,
+  detailMessage,
+}: ThreadDepthErrorBannerProps) => (
   <div className="text-gray-900 text-sm leading-normal">
-    This conversation is now closed to keep responses accurate.{" "}
-    <button
-      type="button"
-      className="text-blue-600 underline font-normal cursor-pointer bg-transparent border-none p-0 hover:text-blue-800 focus:outline-2 focus:outline-blue-600 focus:outline-offset-2 focus:rounded-sm"
-      onClick={onNewChat}
-    >
-      Start a new conversation
-    </button>{" "}
-    to continue.
+    {detailMessage ? (
+      <p className="m-0 mb-2 font-semibold text-foreground">{detailMessage}</p>
+    ) : null}
+    <p className="m-0">
+      This conversation is now closed to keep responses accurate.{" "}
+      <button
+        type="button"
+        className="text-blue-600 underline font-normal cursor-pointer bg-transparent border-none p-0 hover:text-blue-800 focus:outline-2 focus:outline-blue-600 focus:outline-offset-2 focus:rounded-sm"
+        onClick={onNewChat}
+      >
+        Start a new conversation
+      </button>{" "}
+      to continue.
+    </p>
   </div>
 );
 
@@ -663,22 +673,8 @@ const ChatWidget = memo(function ChatWidget({
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
     const grouped: Exchange[] = [];
-    let skipLastUserMessage = false;
-
-    // If there's a thread depth error, don't show the last user message
-    if (isThreadDepthError(error) && messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === "user") {
-        skipLastUserMessage = true;
-      }
-    }
 
     for (let i = 0; i < messages.length; i++) {
-      // Skip the last user message if it caused a thread depth error
-      if (skipLastUserMessage && i === messages.length - 1) {
-        continue;
-      }
-
       const current = messages[i];
       if (current.role === "user") {
         const userMessage = current as Message;
@@ -701,7 +697,7 @@ const ChatWidget = memo(function ChatWidget({
       }
     }
     return grouped;
-  }, [messages, error]);
+  }, [messages]);
 
   // Cleanup any pending reset timers on unmount
   useEffect(() => {
@@ -758,7 +754,10 @@ const ChatWidget = memo(function ChatWidget({
         {error && (
           <div className="border border-red-300 bg-red-100 text-red-900 px-4 py-3 rounded-lg">
             {isThreadDepthError(error) && onNewChat ? (
-              <ThreadDepthErrorBanner onNewChat={onNewChat} />
+              <ThreadDepthErrorBanner
+                onNewChat={onNewChat}
+                detailMessage={threadDepthErrorDetail(error)}
+              />
             ) : (
               error.message
             )}

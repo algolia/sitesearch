@@ -31,7 +31,55 @@ export function isThreadDepthError(error?: Error | null): boolean {
 
   // Check message content for AI-217 or thread depth references
   const message = error.message?.toLowerCase() || "";
-  return message.includes("ai-217") || message.includes("thread depth");
+  if (message.includes("ai-217") || message.includes("thread depth")) {
+    return true;
+  }
+  try {
+    const parsed = JSON.parse(error.message) as {
+      code?: string;
+      message?: string;
+    };
+    if (
+      typeof parsed.code === "string" &&
+      parsed.code.toUpperCase() === "AI-217"
+    ) {
+      return true;
+    }
+    const nested = (parsed.message ?? "").toLowerCase();
+    return nested.includes("ai-217") || nested.includes("thread depth");
+  } catch {
+    return false;
+  }
+}
+
+function threadDepthRawMessage(error: unknown): string {
+  if (!error) return "";
+  if (error instanceof Error) return (error.message ?? "").trim();
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message.trim();
+  }
+  return "";
+}
+
+/** Plain or JSON `{"message":"…"}` body from the API for thread-depth errors. */
+export function threadDepthErrorDetail(error?: unknown): string | undefined {
+  if (!isThreadDepthError(error as Error | null)) return undefined;
+  const raw = threadDepthRawMessage(error);
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw) as { message?: string };
+    if (typeof parsed.message === "string" && parsed.message.trim()) {
+      return parsed.message.trim();
+    }
+  } catch {
+    // not JSON
+  }
+  return raw;
 }
 
 const BASE_ASKAI_URL = "https://askai.algolia.com";

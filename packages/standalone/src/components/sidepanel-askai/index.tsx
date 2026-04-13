@@ -4,7 +4,10 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useAskai } from "../search-askai/askai";
 import { ChatWidget, type Message } from "../search-askai/chat";
-import { ThreadDepthErrorBanner } from "../search-askai/error-utils";
+import {
+  ThreadDepthErrorBanner,
+  threadDepthErrorDetail,
+} from "../search-askai/error-utils";
 import {
   AlgoliaLogo,
   ChatSubmitIcon,
@@ -61,7 +64,6 @@ const SidepanelInner: FC<SidepanelInnerProps> = memo(function SidepanelInner({
     isGenerating,
     sendMessage,
     startNewConversation,
-    threadDepthError,
     showThreadDepthError,
   } = useAskai({
     applicationId: config.applicationId,
@@ -181,7 +183,6 @@ const SidepanelInner: FC<SidepanelInnerProps> = memo(function SidepanelInner({
           suggestedQuestions={suggestedQuestions}
           onSuggestedQuestionClick={handleSuggestedQuestionClick}
           onNewChat={handleNewChat}
-          threadDepthError={threadDepthError}
           showThreadDepthError={showThreadDepthError}
           threadDepthBannerInChat={false}
           showAiDisclaimer={false}
@@ -192,7 +193,10 @@ const SidepanelInner: FC<SidepanelInnerProps> = memo(function SidepanelInner({
       <div className="ss-sidepanel-compose-stack">
         {showThreadDepthError ? (
           <div className="ss-sidepanel-thread-depth-banner">
-            <ThreadDepthErrorBanner onNewChat={handleNewChat} />
+            <ThreadDepthErrorBanner
+              onNewChat={handleNewChat}
+              detailMessage={threadDepthErrorDetail(error)}
+            />
           </div>
         ) : null}
         <footer className="ss-sidepanel-footer">

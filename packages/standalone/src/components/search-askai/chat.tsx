@@ -14,9 +14,9 @@ import type { SearchHit } from "../types";
 import { postAgentStudioFeedback, postFeedback } from "./askai";
 
 import {
-  filterMessagesForThreadDepthError,
   isThreadDepthError,
   ThreadDepthErrorBanner,
+  threadDepthErrorDetail,
 } from "./error-utils";
 import {
   BrainIcon,
@@ -55,7 +55,6 @@ interface ChatWidgetProps {
   assistantId: string;
   agentStudio?: boolean;
   suggestedQuestions?: SuggestedQuestionHit[];
-  threadDepthError?: boolean;
   showThreadDepthError?: boolean;
   threadDepthBannerInChat?: boolean;
   /** When false, omit the AI disclaimer from the chat scroll area (e.g. show it in a sidepanel footer). */
@@ -114,7 +113,6 @@ export const ChatWidget = memo(function ChatWidget({
   suggestedQuestions,
   onSuggestedQuestionClick,
   onNewChat,
-  threadDepthError = false,
   showThreadDepthError = false,
   threadDepthBannerInChat = true,
   showAiDisclaimer = true,
@@ -170,23 +168,18 @@ export const ChatWidget = memo(function ChatWidget({
     }
   };
 
-  const displayMessages = useMemo(
-    () => filterMessagesForThreadDepthError(messages, threadDepthError),
-    [messages, threadDepthError],
-  );
-
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
     const grouped: Exchange[] = [];
 
-    for (let i = 0; i < displayMessages.length; i++) {
-      const current = displayMessages.at(i);
+    for (let i = 0; i < messages.length; i++) {
+      const current = messages.at(i);
       if (!current) {
         continue;
       }
       if (current.role === "user") {
         const userMessage = current as Message;
-        const nextMessage = displayMessages.at(i + 1);
+        const nextMessage = messages.at(i + 1);
         if (nextMessage?.role === "assistant") {
           grouped.push({
             id: userMessage.id,
@@ -205,7 +198,7 @@ export const ChatWidget = memo(function ChatWidget({
       }
     }
     return grouped;
-  }, [displayMessages]);
+  }, [messages]);
 
   const orderedExchanges = useMemo(
     () => (newestExchangeFirst ? [...exchanges].reverse() : exchanges),
@@ -222,7 +215,7 @@ export const ChatWidget = memo(function ChatWidget({
   }, [newestExchangeFirst]);
 
   // Scroll after DOM updates when transcript or generation state changes (not only when exchange count changes).
-  // biome-ignore lint/correctness/useExhaustiveDependencies: displayMessages / isGenerating intentionally trigger stick-to-bottom
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages / isGenerating intentionally trigger stick-to-bottom
   useLayoutEffect(() => {
     if (newestExchangeFirst) return;
     const root = chatScrollRef.current;
@@ -233,7 +226,7 @@ export const ChatWidget = memo(function ChatWidget({
     updateStickToBottomFromScroll();
   }, [
     newestExchangeFirst,
-    displayMessages,
+    messages,
     isGenerating,
     orderedExchanges.length,
     updateStickToBottomFromScroll,
@@ -283,7 +276,10 @@ export const ChatWidget = memo(function ChatWidget({
           </div>
         ) : null}
         {threadDepthBannerInChat && showThreadDepthError ? (
-          <ThreadDepthErrorBanner onNewChat={onNewChat} />
+          <ThreadDepthErrorBanner
+            onNewChat={onNewChat}
+            detailMessage={threadDepthErrorDetail(error)}
+          />
         ) : null}
         {showAiDisclaimer ? (
           <p className="ss-hint">
