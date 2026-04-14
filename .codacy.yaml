@@ -1,0 +1,5 @@
+---
+# Dev-only script: builds paths from import.meta.url + fixed layout; Semgrep/Codacy
+# flags non-literal fs paths as false positives.
+exclude_paths:
+  - "apps/vanilla/scripts/link-sitesearch.mjs"

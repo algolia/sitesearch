@@ -85,15 +85,22 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
     : props.isGenerating
       ? "Answering..."
       : props.showChat
-        ? "Ask AI anything about Algolia"
+        ? "Ask AI anything"
         : props.placeholder;
 
   const currentValue = props.showChat ? chatInput : query || "";
   const isInputDisabled = props.isGenerating || props.isThreadDepthError;
 
+  const formClassName = [
+    props.className,
+    props.showChat ? "ss-searchbox-form--chat" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <search
-      className={props.className}
+      className={formClassName}
       onSubmit={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -146,7 +153,6 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
             e.preventDefault();
             const valueAtEnter = props.showChat ? chatInput : query || "";
             if (props.onEnter?.(valueAtEnter)) {
-              // If handled by parent (e.g., send in chat), clear the input
               if (props.showChat) {
                 setChatInput("");
               } else {
@@ -156,7 +162,6 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
             }
             const trimmed = valueAtEnter.trim();
             if (trimmed) {
-              // Open chat; parent will send the query
               props.setShowChat(true);
             }
           }
@@ -180,7 +185,17 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
           <button
             type="button"
             className="ss-search-new-chat-button"
-            disabled={props.isGenerating}
+            disabled={props.isGenerating && !props.isThreadDepthError}
+            title={
+              props.isThreadDepthError
+                ? "Start a new conversation"
+                : "New conversation"
+            }
+            aria-label={
+              props.isThreadDepthError
+                ? "Start a new conversation"
+                : "New conversation"
+            }
             onClick={() => {
               setChatInput("");
               props.onNewChat?.();

@@ -17,7 +17,7 @@ import {
   Link2Icon,
   Maximize2,
   Minimize2,
-  SparklesIcon,
+  Sparkles,
   SquarePen,
   ThumbsDown,
   ThumbsUp,
@@ -43,6 +43,7 @@ import {
   isThreadDepthError,
   postAgentStudioFeedback,
   postFeedback,
+  threadDepthErrorDetail,
   useAskai,
 } from "@/registry/experiences/sidepanel-askai/hooks/use-askai";
 
@@ -517,19 +518,28 @@ const RelatedSources = memo(function RelatedSources({
 
 interface ThreadDepthErrorBannerProps {
   onNewChat: () => void;
+  detailMessage?: string;
 }
 
-const ThreadDepthErrorBanner = ({ onNewChat }: ThreadDepthErrorBannerProps) => (
+const ThreadDepthErrorBanner = ({
+  onNewChat,
+  detailMessage,
+}: ThreadDepthErrorBannerProps) => (
   <div className="text-gray-900 text-sm leading-normal">
-    This conversation is now closed to keep responses accurate.{" "}
-    <button
-      type="button"
-      className="text-blue-600 underline font-normal cursor-pointer bg-transparent border-none p-0 hover:text-blue-800 focus:outline-2 focus:outline-blue-600 focus:outline-offset-2 focus:rounded-sm"
-      onClick={onNewChat}
-    >
-      Start a new conversation
-    </button>{" "}
-    to continue.
+    {detailMessage ? (
+      <p className="m-0 mb-2 font-semibold text-foreground">{detailMessage}</p>
+    ) : null}
+    <p className="m-0">
+      This conversation is now closed to keep responses accurate.{" "}
+      <button
+        type="button"
+        className="text-blue-600 underline font-normal cursor-pointer bg-transparent border-none p-0 hover:text-blue-800 focus:outline-2 focus:outline-blue-600 focus:outline-offset-2 focus:rounded-sm"
+        onClick={onNewChat}
+      >
+        Start a new conversation
+      </button>{" "}
+      to continue.
+    </p>
   </div>
 );
 
@@ -693,7 +703,10 @@ const ChatWidget = memo(function ChatWidget({
         {error && (
           <div className="border border-red-300 bg-red-100 text-red-900 px-4 py-3 rounded-lg">
             {isThreadDepthError(error) && onNewChat ? (
-              <ThreadDepthErrorBanner onNewChat={onNewChat} />
+              <ThreadDepthErrorBanner
+                onNewChat={onNewChat}
+                detailMessage={threadDepthErrorDetail(error)}
+              />
             ) : (
               error.message
             )}
@@ -1119,8 +1132,12 @@ const Sidepanel = memo(function Sidepanel({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-          <div className="flex items-center gap-2">
-            <SparklesIcon size={20} className="text-blue-600" />
+          <div className="flex items-center gap-2 min-w-0">
+            <Sparkles
+              className="h-[18px] w-[18px] shrink-0 text-blue-600 dark:text-blue-500"
+              strokeWidth={2}
+              aria-hidden
+            />
             <h2 className="text-sm font-semibold text-foreground">Ask AI</h2>
           </div>
           <div className="flex items-center gap-2">
@@ -1174,11 +1191,14 @@ const Sidepanel = memo(function Sidepanel({
           onNewChat={onOpenNewConversation}
         />
 
-        {/* Input Bar */}
-        <div className="border-t border-border p-4">
+        {/* Input Bar — match search-askai composer (primary border + rule above footer). */}
+        <div className="border-t border-border px-4 pb-4 pt-2">
           <form
             onSubmit={handleSubmit}
-            className="flex border-border border rounded-md gap-2 p-2 focus-within:ring-1 focus-within:ring-blue-600 focus-within:border-transparent transition-all"
+            className={cn(
+              "flex items-center gap-2 rounded-lg border border-blue-600 py-1.5 pl-2 pr-1.5 transition-all dark:border-blue-500",
+              "focus-within:ring-1 focus-within:ring-blue-600 focus-within:ring-offset-0 dark:focus-within:ring-blue-500",
+            )}
           >
             <textarea
               ref={inputRef}
@@ -1197,19 +1217,22 @@ const Sidepanel = memo(function Sidepanel({
               rows={1}
               placeholder={config.placeholder || "Ask AI anything"}
               disabled={isGenerating}
-              className="flex-1 pt-1 border-none outline-none bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed resize-none overflow-y-hidden"
+              className="flex-1 border-none bg-background py-0.5 leading-tight text-foreground outline-none placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none overflow-y-hidden"
             />
             <Button
-              size="icon-sm"
               type="submit"
-              className="self-end"
+              variant="secondary"
+              size="icon"
+              className="h-10 w-10 shrink-0 text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               disabled={!inputValue.trim() || isGenerating}
+              title="Send message"
+              aria-label="Send message"
             >
-              <ArrowUpIcon size={18} />
+              <ArrowUpIcon size={22} strokeWidth={2.25} />
             </Button>
           </form>
-          <div className="mt-2 flex items-center justify-center text-xs text-muted-foreground">
-            <p className="m-0 text-center">
+          <div className="mt-2 flex items-start justify-start text-xs text-muted-foreground">
+            <p className="m-0 w-full text-left">
               Answers are generated with AI which can make mistakes.
             </p>
           </div>
@@ -1245,13 +1268,14 @@ export default function SidepanelExperience(config: SidepanelAskAIConfig) {
     return client;
   }, [config.applicationId, config.apiKey]);
 
-  const { messages, setMessages, error, isGenerating, sendMessage } = useAskai({
-    applicationId: config.applicationId,
-    apiKey: config.apiKey,
-    indexName: config.indexName,
-    assistantId: config.assistantId,
-    agentStudio: config.agentStudio,
-  });
+  const { messages, startNewConversation, error, isGenerating, sendMessage } =
+    useAskai({
+      applicationId: config.applicationId,
+      apiKey: config.apiKey,
+      indexName: config.indexName,
+      assistantId: config.assistantId,
+      agentStudio: config.agentStudio,
+    });
 
   const suggestedQuestions = useSuggestedQuestions({
     searchClient,
@@ -1278,7 +1302,7 @@ export default function SidepanelExperience(config: SidepanelAskAIConfig) {
   const openSidepanel = () => setIsOpen(true);
   const closeSidepanel = () => setIsOpen(false);
   const openNewConversation = () => {
-    setMessages?.([]);
+    startNewConversation();
     setIsOpen(true);
   };
   const buttonProps = {

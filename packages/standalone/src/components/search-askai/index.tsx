@@ -163,7 +163,7 @@ interface ResultsPanelProps {
   ) => void;
   suggestedQuestions?: SuggestedQuestionHit[];
   onNewChat?: () => void;
-  hasThreadDepthError?: boolean;
+  showThreadDepthError?: boolean;
   openResultsInNewTab?: boolean;
 }
 
@@ -184,7 +184,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   sendEvent,
   suggestedQuestions,
   onNewChat,
-  hasThreadDepthError,
+  showThreadDepthError,
   openResultsInNewTab = true,
 }) {
   const { items } = useHits(
@@ -269,7 +269,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
         suggestedQuestions={suggestedQuestions}
         onSuggestedQuestionClick={handleSuggestedQuestionClick}
         onNewChat={onNewChat}
-        hasThreadDepthError={hasThreadDepthError}
+        showThreadDepthError={showThreadDepthError}
       />
     );
   }
@@ -323,11 +323,12 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
   // Lift chat state here to thread isGenerating to the SearchInput
   const {
     messages,
-    setMessages,
     error,
     isGenerating,
     sendMessage,
-    hasThreadDepthError,
+    startNewConversation,
+    threadDepthError,
+    showThreadDepthError,
   } = useAskai({
     applicationId: config.applicationId,
     apiKey: config.apiKey,
@@ -385,14 +386,24 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
   const showResultsPanel = (!noResults && !!query) || showChat;
 
   const handleNewChat = useCallback(() => {
-    // Clear messages to start a fresh conversation
-    setMessages([]);
+    startNewConversation();
     setShowChat(true);
     refine("");
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [setMessages, setShowChat, refine]);
+  }, [startNewConversation, setShowChat, refine]);
+
+  /** Leaving chat while thread-depth failed: reset thread so Ask AI works again without closing the modal. */
+  const handleSetShowChat = useCallback(
+    (v: boolean) => {
+      if (!v && threadDepthError) {
+        startNewConversation();
+      }
+      setShowChat(v);
+    },
+    [setShowChat, threadDepthError, startNewConversation],
+  );
 
   return (
     <>
@@ -408,8 +419,8 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
           refine={refine}
           showChat={showChat}
           isGenerating={isGenerating}
-          isThreadDepthError={hasThreadDepthError}
-          setShowChat={setShowChat}
+          isThreadDepthError={showThreadDepthError}
+          setShowChat={handleSetShowChat}
           onClose={onClose}
           onArrowDown={moveDown}
           onArrowUp={moveUp}
@@ -429,9 +440,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
           <ResultsPanel
             showChat={showChat}
             inputRef={inputRef}
-            setShowChat={(v) => {
-              setShowChat(v);
-            }}
+            setShowChat={handleSetShowChat}
             query={query}
             selectedIndex={selectedIndex}
             refine={refine}
@@ -445,7 +454,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             sendEvent={sendEvent}
             suggestedQuestions={suggestedQuestions}
             onNewChat={handleNewChat}
-            hasThreadDepthError={hasThreadDepthError}
+            showThreadDepthError={showThreadDepthError}
             openResultsInNewTab={config.openResultsInNewTab}
           />
         )}

@@ -47,6 +47,7 @@ import {
   isThreadDepthError,
   postAgentStudioFeedback,
   postFeedback,
+  threadDepthErrorDetail,
   useAskai,
 } from "@/registry/experiences/search-askai/hooks/use-askai";
 
@@ -562,19 +563,28 @@ const MemoizedMarkdown = memo(function MemoizedMarkdown({
 
 interface ThreadDepthErrorBannerProps {
   onNewChat: () => void;
+  detailMessage?: string;
 }
 
-const ThreadDepthErrorBanner = ({ onNewChat }: ThreadDepthErrorBannerProps) => (
+const ThreadDepthErrorBanner = ({
+  onNewChat,
+  detailMessage,
+}: ThreadDepthErrorBannerProps) => (
   <div className="text-gray-900 text-sm leading-normal">
-    This conversation is now closed to keep responses accurate.{" "}
-    <button
-      type="button"
-      className="text-blue-600 underline font-normal cursor-pointer bg-transparent border-none p-0 hover:text-blue-800 focus:outline-2 focus:outline-blue-600 focus:outline-offset-2 focus:rounded-sm"
-      onClick={onNewChat}
-    >
-      Start a new conversation
-    </button>{" "}
-    to continue.
+    {detailMessage ? (
+      <p className="m-0 mb-2 font-semibold text-foreground">{detailMessage}</p>
+    ) : null}
+    <p className="m-0">
+      This conversation is now closed to keep responses accurate.{" "}
+      <button
+        type="button"
+        className="text-blue-600 underline font-normal cursor-pointer bg-transparent border-none p-0 hover:text-blue-800 focus:outline-2 focus:outline-blue-600 focus:outline-offset-2 focus:rounded-sm"
+        onClick={onNewChat}
+      >
+        Start a new conversation
+      </button>{" "}
+      to continue.
+    </p>
   </div>
 );
 
@@ -663,22 +673,8 @@ const ChatWidget = memo(function ChatWidget({
   // Group messages into exchanges (user + assistant pairs)
   const exchanges = useMemo(() => {
     const grouped: Exchange[] = [];
-    let skipLastUserMessage = false;
-
-    // If there's a thread depth error, don't show the last user message
-    if (isThreadDepthError(error) && messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === "user") {
-        skipLastUserMessage = true;
-      }
-    }
 
     for (let i = 0; i < messages.length; i++) {
-      // Skip the last user message if it caused a thread depth error
-      if (skipLastUserMessage && i === messages.length - 1) {
-        continue;
-      }
-
       const current = messages[i];
       if (current.role === "user") {
         const userMessage = current as Message;
@@ -701,7 +697,7 @@ const ChatWidget = memo(function ChatWidget({
       }
     }
     return grouped;
-  }, [messages, error]);
+  }, [messages]);
 
   // Cleanup any pending reset timers on unmount
   useEffect(() => {
@@ -745,20 +741,23 @@ const ChatWidget = memo(function ChatWidget({
                 </div>
               ) : null}
             </div>
-            <p className="text-sm m-0 text-muted-foreground">
-              Answers are generated using AI and may make mistakes.
+            <p className="text-sm m-0 text-left text-muted-foreground self-stretch">
+              Answers are generated with AI which can make mistakes.
             </p>
           </>
         ) : (
-          <p className="text-sm m-0 text-muted-foreground">
-            Answers are generated using AI and may make mistakes.
+          <p className="text-sm m-0 text-left text-muted-foreground self-stretch">
+            Answers are generated with AI which can make mistakes.
           </p>
         )}
         {/* errors */}
         {error && (
           <div className="border border-red-300 bg-red-100 text-red-900 px-4 py-3 rounded-lg">
             {isThreadDepthError(error) && onNewChat ? (
-              <ThreadDepthErrorBanner onNewChat={onNewChat} />
+              <ThreadDepthErrorBanner
+                onNewChat={onNewChat}
+                detailMessage={threadDepthErrorDetail(error)}
+              />
             ) : (
               error.message
             )}
@@ -1251,14 +1250,19 @@ const SearchInput = memo(function SearchInput(props: SearchInputProps) {
   const placeholder = props.isGenerating
     ? "Answering..."
     : props.showChat
-      ? "Ask AI anything about Algolia"
+      ? "Ask AI anything"
       : props.placeholder;
 
   const currentValue = props.showChat ? chatInput : query || "";
 
   return (
     <search
-      className="flex flex-row items-center bg-background border-b border-border rounded-t-lg p-2"
+      className={cn(
+        "flex flex-row items-center bg-background",
+        props.showChat
+          ? "mx-4 mt-3 mb-2 gap-1.5 rounded-lg border border-blue-600 py-1.5 pl-2 pr-1.5 dark:border-blue-500"
+          : "border-b border-border rounded-t-lg p-2",
+      )}
       onSubmit={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -1279,7 +1283,10 @@ const SearchInput = memo(function SearchInput(props: SearchInputProps) {
       />
       <input
         ref={props.inputRef}
-        className="peer w-full outline-none bg-transparent border-none text-foreground text-xl font-light placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+        className={cn(
+          "peer w-full border-none bg-transparent font-light text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+          props.showChat ? "py-0.5 text-xl leading-snug" : "text-xl",
+        )}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"
@@ -1705,14 +1712,21 @@ function SearchModal({ onClose, config }: SearchModalProps) {
   const [threadDepthErrorAtMessageCount, setThreadDepthErrorAtMessageCount] =
     useState<number | null>(null);
 
-  const { messages, setMessages, error, isGenerating, sendMessage, status } =
-    useAskai({
-      applicationId: config.applicationId,
-      apiKey: config.apiKey,
-      indexName: config.indexName,
-      assistantId: config.assistantId,
-      agentStudio: config.agentStudio,
-    });
+  const {
+    messages,
+    error,
+    isGenerating,
+    sendMessage,
+    startNewConversation,
+    status,
+    hasThreadDepthError,
+  } = useAskai({
+    applicationId: config.applicationId,
+    apiKey: config.apiKey,
+    indexName: config.indexName,
+    assistantId: config.assistantId,
+    agentStudio: config.agentStudio,
+  });
 
   // Monitor for thread depth errors (AI-217)
   useEffect(() => {
@@ -1782,15 +1796,25 @@ function SearchModal({ onClose, config }: SearchModalProps) {
   const showResultsPanel = (!noResults && !!query) || showChat;
 
   const handleNewChat = useCallback(() => {
-    // Clear messages to start a fresh conversation
-    setMessages([]);
+    startNewConversation();
     setThreadDepthErrorAtMessageCount(null);
     setShowChat(true);
     refine("");
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [setMessages, setShowChat, refine]);
+  }, [startNewConversation, setShowChat, refine]);
+
+  const handleSetShowChat = useCallback(
+    (v: boolean) => {
+      if (!v && hasThreadDepthError) {
+        startNewConversation();
+        setThreadDepthErrorAtMessageCount(null);
+      }
+      setShowChat(v);
+    },
+    [setShowChat, hasThreadDepthError, startNewConversation],
+  );
 
   return (
     <>
@@ -1805,7 +1829,7 @@ function SearchModal({ onClose, config }: SearchModalProps) {
           refine={refine}
           showChat={showChat}
           isGenerating={isGenerating}
-          setShowChat={setShowChat}
+          setShowChat={handleSetShowChat}
           onClose={onClose}
           onArrowDown={moveDown}
           onArrowUp={moveUp}
@@ -1824,9 +1848,7 @@ function SearchModal({ onClose, config }: SearchModalProps) {
           <ResultsPanel
             showChat={showChat}
             inputRef={inputRef}
-            setShowChat={(v) => {
-              setShowChat(v);
-            }}
+            setShowChat={handleSetShowChat}
             query={query}
             selectedIndex={selectedIndex}
             refine={refine}

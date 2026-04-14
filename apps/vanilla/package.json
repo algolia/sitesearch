@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "link-sitesearch": "node scripts/link-sitesearch.mjs",
+    "postinstall": "node scripts/link-sitesearch.mjs",
+    "preserve": "node scripts/link-sitesearch.mjs",
     "serve": "bunx vite serve . --open"
   },
   "dependencies": {

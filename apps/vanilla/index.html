@@ -6,6 +6,7 @@
   <title>Algolia SiteSearch Vanilla Demo</title>
   <link rel="stylesheet" href="./node_modules/@algolia/sitesearch/dist/search.min.css" />
   <link rel="stylesheet" href="./node_modules/@algolia/sitesearch/dist/search-askai.min.css" />
+  <link rel="stylesheet" href="./node_modules/@algolia/sitesearch/dist/sidepanel-askai.min.css" />
   <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -29,6 +30,21 @@
               <div id="searchAskAi"></div>
             </div>
           </div>
+          <div class="card">
+            <h2>Search + Ask AI (Agent Studio)</h2>
+            <div class="demo-container">
+              <div id="searchAskAiAgentStudio"></div>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Sidepanel Ask AI (Agent Studio)</h2>
+            <p class="card-note">
+              Floating chat panel via <code>SiteSearchSidepanelAskAI</code> — same credentials as the Agent Studio card; <code>triggerPosition: &quot;inline&quot;</code> keeps the button inside this card.
+            </p>
+            <div class="demo-container demo-container-sidepanel">
+              <div id="sidepanelAskAi"></div>
+            </div>
+          </div>
         </div>
 
         <div class="right-col">
@@ -38,7 +54,11 @@
               <ol class="doc-steps">
                 <li>
                   <h3>Iterate on the components</h3>
-                  <p>Edit in <code>packages/standalone/src/components/search/*</code></p>
+                  <p>Edit in <code>packages/standalone/src/components/search/*</code>, <code>search-askai/*</code>, and <code>sidepanel-askai/*</code></p>
+                </li>
+                <li>
+                  <h3>Ask AI vs Agent Studio</h3>
+                  <p>The middle card uses default Ask AI. The third and fourth cards use <code>agentStudio: true</code> (Agent Studio API). The fourth card loads <code>sidepanel-askai.min.js</code> — use <code>triggerPosition: &quot;fixed&quot;</code> for a viewport-fixed button in production.</p>
                 </li>
                 <li>
                   <h3>View your changes here</h3>
@@ -95,7 +115,7 @@
       const aaApiKey = "94b6afdc316917b6e6cdf2763fa561df";
       const aaIndexName = "algolia_podcast_sample_dataset";
 
-      // Search + Ask AI experience
+      // Search + Ask AI experience (default Ask AI endpoints)
       if (window.SiteSearchAskAI) {
         window.SiteSearchAskAI.init({
           container: "#searchAskAi",
@@ -111,6 +131,41 @@
             url: "url",
             image: "imageUrl",
           },
+        });
+
+        // Search with Agent Studio completions
+        window.SiteSearchAskAI.init({
+          container: "#searchAskAiAgentStudio",
+          applicationId: "PMZUYBQDAK",
+          apiKey: "40aa23271f25347826db43222329fdfa",
+          assistantId: "ccdec697-e3fe-465b-a1c3-657e7bf18aef",
+          suggestedQuestionsEnabled: true,
+          indexName: "algolia_movie_sample_dataset",
+          agentStudio: true,
+          attributes: {
+            primaryText: "title",
+            secondaryText: "description",
+            tertiaryText: "itunesAuthor",
+            url: "url",
+            image: "imageUrl",
+          },
+        });
+      }
+    </script>
+
+    <script src="./node_modules/@algolia/sitesearch/dist/sidepanel-askai.min.js"></script>
+    <script>
+      if (window.SiteSearchSidepanelAskAI) {
+        window.SiteSearchSidepanelAskAI.init({
+          container: "#sidepanelAskAi",
+          applicationId: "PMZUYBQDAK",
+          apiKey: "40aa23271f25347826db43222329fdfa",
+          assistantId: "ccdec697-e3fe-465b-a1c3-657e7bf18aef",
+          indexName: "algolia_movie_sample_dataset",
+          agentStudio: true,
+          suggestedQuestionsEnabled: true,
+          triggerPosition: "inline",
+          buttonText: "Ask AI",
         });
       }
     </script>
