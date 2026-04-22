@@ -5,8 +5,12 @@ import { createPortal } from "react-dom";
 import { useAskai } from "../search-askai/askai";
 import { ChatWidget, type Message } from "../search-askai/chat";
 import {
+  isRequestBlockedForDomainAskAiError,
+  isThreadDepthError,
+  promptBlockingBannerMessage,
+  shouldHideAskAiShellChatInput,
+  showAskAiBlockingBannerNewConversationLink,
   ThreadDepthErrorBanner,
-  threadDepthErrorDetail,
 } from "../search-askai/error-utils";
 import {
   AlgoliaLogo,
@@ -64,7 +68,7 @@ const SidepanelInner: FC<SidepanelInnerProps> = memo(function SidepanelInner({
     isGenerating,
     sendMessage,
     startNewConversation,
-    showThreadDepthError,
+    showPromptBlockingError,
   } = useAskai({
     applicationId: config.applicationId,
     apiKey: config.apiKey,
@@ -101,18 +105,32 @@ const SidepanelInner: FC<SidepanelInnerProps> = memo(function SidepanelInner({
     requestAnimationFrame(() => inputRef.current?.focus());
   }, [startNewConversation]);
 
-  const placeholder = showThreadDepthError
-    ? "Conversation limit reached"
-    : isGenerating
-      ? "Answering..."
-      : (config.placeholder ?? "Ask AI anything");
+  /** Agent Studio: hide compose for thread depth, token output, domain-blocked-style blocks, etc. */
+  const hideSidepanelCompose = useMemo(
+    () =>
+      showPromptBlockingError &&
+      (shouldHideAskAiShellChatInput(error, Boolean(config.agentStudio)) ||
+        (Boolean(config.agentStudio) && isThreadDepthError(error))),
+    [showPromptBlockingError, error, config.agentStudio],
+  );
+
+  const domainBlocked = isRequestBlockedForDomainAskAiError(error);
+
+  const placeholder =
+    showPromptBlockingError && domainBlocked
+      ? ""
+      : showPromptBlockingError && !domainBlocked
+        ? "Conversation limit reached"
+        : isGenerating
+          ? "Answering..."
+          : (config.placeholder ?? "Ask AI anything");
 
   const submit = useCallback(() => {
     const trimmed = input.trim();
-    if (!trimmed || isGenerating || showThreadDepthError) return;
+    if (!trimmed || isGenerating || showPromptBlockingError) return;
     sendMessage({ text: trimmed });
     setInput("");
-  }, [input, isGenerating, showThreadDepthError, sendMessage]);
+  }, [input, isGenerating, showPromptBlockingError, sendMessage]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -144,14 +162,14 @@ const SidepanelInner: FC<SidepanelInnerProps> = memo(function SidepanelInner({
           <button
             type="button"
             className="ss-search-new-chat-button"
-            disabled={isGenerating && !showThreadDepthError}
+            disabled={isGenerating && !showPromptBlockingError}
             title={
-              showThreadDepthError
+              showPromptBlockingError
                 ? "Start a new conversation"
                 : "New conversation"
             }
             aria-label={
-              showThreadDepthError
+              showPromptBlockingError
                 ? "Start a new conversation"
                 : "New conversation"
             }
@@ -183,7 +201,7 @@ const SidepanelInner: FC<SidepanelInnerProps> = memo(function SidepanelInner({
           suggestedQuestions={suggestedQuestions}
           onSuggestedQuestionClick={handleSuggestedQuestionClick}
           onNewChat={handleNewChat}
-          showThreadDepthError={showThreadDepthError}
+          showPromptBlockingError={showPromptBlockingError}
           threadDepthBannerInChat={false}
           showAiDisclaimer={false}
           newestExchangeFirst={false}
@@ -191,51 +209,62 @@ const SidepanelInner: FC<SidepanelInnerProps> = memo(function SidepanelInner({
       </div>
 
       <div className="ss-sidepanel-compose-stack">
-        {showThreadDepthError ? (
+        {showPromptBlockingError ? (
           <div className="ss-sidepanel-thread-depth-banner">
             <ThreadDepthErrorBanner
               onNewChat={handleNewChat}
-              detailMessage={threadDepthErrorDetail(error)}
+              detailMessage={promptBlockingBannerMessage(
+                error,
+                config.agentStudio,
+              )}
+              showNewConversationLink={showAskAiBlockingBannerNewConversationLink(
+                error,
+                Boolean(config.agentStudio),
+              )}
             />
           </div>
         ) : null}
         <footer className="ss-sidepanel-footer">
-          <search
-            className="ss-searchbox-form ss-searchbox-form--chat ss-sidepanel-compose-form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              submit();
-            }}
-          >
-            <input
-              ref={inputRef}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck={false}
-              maxLength={512}
-              type="search"
-              placeholder={placeholder}
-              value={input}
-              disabled={isGenerating || showThreadDepthError}
-              onChange={(e) => setInput(e.currentTarget.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  submit();
-                }
+          {!hideSidepanelCompose ? (
+            <search
+              className="ss-searchbox-form ss-searchbox-form--chat ss-sidepanel-compose-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                submit();
               }}
-            />
-            <button
-              type="submit"
-              className="ss-search-submit-chat-button"
-              disabled={isGenerating || showThreadDepthError || !input.trim()}
-              title="Send message"
-              aria-label="Send message"
             >
-              <ChatSubmitIcon size={22} />
-            </button>
-          </search>
+              <input
+                ref={inputRef}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                maxLength={512}
+                type="search"
+                placeholder={placeholder}
+                value={input}
+                disabled={isGenerating || showPromptBlockingError}
+                onChange={(e) => setInput(e.currentTarget.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    submit();
+                  }
+                }}
+              />
+              <button
+                type="submit"
+                className="ss-search-submit-chat-button"
+                disabled={
+                  isGenerating || showPromptBlockingError || !input.trim()
+                }
+                title="Send message"
+                aria-label="Send message"
+              >
+                <ChatSubmitIcon size={22} />
+              </button>
+            </search>
+          ) : null}
           <div className="ss-sidepanel-ai-notice">
             <p className="ss-sidepanel-ai-notice-text">
               Answers are generated with AI which can make mistakes.

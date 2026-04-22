@@ -14,9 +14,10 @@ import type { SearchHit } from "../types";
 import { postAgentStudioFeedback, postFeedback } from "./askai";
 
 import {
-  isThreadDepthError,
+  isAskAiPromptBlockingError,
+  promptBlockingBannerMessage,
+  showAskAiBlockingBannerNewConversationLink,
   ThreadDepthErrorBanner,
-  threadDepthErrorDetail,
 } from "./error-utils";
 import {
   BrainIcon,
@@ -55,14 +56,9 @@ interface ChatWidgetProps {
   assistantId: string;
   agentStudio?: boolean;
   suggestedQuestions?: SuggestedQuestionHit[];
-  showThreadDepthError?: boolean;
+  showPromptBlockingError?: boolean;
   threadDepthBannerInChat?: boolean;
-  /** When false, omit the AI disclaimer from the chat scroll area (e.g. show it in a sidepanel footer). */
   showAiDisclaimer?: boolean;
-  /**
-   * When true (default), newest Q&A appears at the top (search-modal style).
-   * When false, chronological order: older turns at the top, latest at the bottom (typical chat / sidepanel).
-   */
   newestExchangeFirst?: boolean;
   onSuggestedQuestionClick?: (question: string) => void;
   onNewChat?: () => void;
@@ -113,7 +109,7 @@ export const ChatWidget = memo(function ChatWidget({
   suggestedQuestions,
   onSuggestedQuestionClick,
   onNewChat,
-  showThreadDepthError = false,
+  showPromptBlockingError = false,
   threadDepthBannerInChat = true,
   showAiDisclaimer = true,
   newestExchangeFirst = true,
@@ -275,10 +271,14 @@ export const ChatWidget = memo(function ChatWidget({
             ) : null}
           </div>
         ) : null}
-        {threadDepthBannerInChat && showThreadDepthError ? (
+        {threadDepthBannerInChat && showPromptBlockingError ? (
           <ThreadDepthErrorBanner
             onNewChat={onNewChat}
-            detailMessage={threadDepthErrorDetail(error)}
+            detailMessage={promptBlockingBannerMessage(error, agentStudio)}
+            showNewConversationLink={showAskAiBlockingBannerNewConversationLink(
+              error,
+              agentStudio,
+            )}
           />
         ) : null}
         {showAiDisclaimer ? (
@@ -287,7 +287,7 @@ export const ChatWidget = memo(function ChatWidget({
           </p>
         ) : null}
         {/* other errors - never show AI-217 in the generic banner */}
-        {error && !isThreadDepthError(error) && (
+        {error && !isAskAiPromptBlockingError(error, Boolean(agentStudio)) && (
           <div className="ss-error-banner">{error.message}</div>
         )}
 

@@ -11,6 +11,7 @@ import {
 } from "react-instantsearch";
 import { useAskai } from "./askai";
 import { ChatWidget, type Message } from "./chat";
+import { shouldHideAskAiShellChatInput } from "./error-utils";
 import { HitsList } from "./hits-list";
 import { AlgoliaLogo, SearchIcon } from "./icons";
 import { SearchInput } from "./search-input";
@@ -68,7 +69,9 @@ interface SearchBoxProps {
   placeholder?: string;
   showChat: boolean;
   isGenerating?: boolean;
-  isThreadDepthError?: boolean;
+  isPromptBlockingError?: boolean;
+  hideChatInput?: boolean;
+  error?: unknown;
   inputRef: RefObject<HTMLInputElement | null>;
   refine: (query: string) => void;
   setShowChat: (show: boolean) => void;
@@ -86,7 +89,9 @@ const SearchBox: FC<SearchBoxProps> = memo(function SearchBox(props) {
       placeholder={props.placeholder}
       showChat={props.showChat}
       isGenerating={props.isGenerating}
-      isThreadDepthError={props.isThreadDepthError}
+      isPromptBlockingError={props.isPromptBlockingError}
+      hideChatInput={props.hideChatInput}
+      error={props.error}
       inputRef={props.inputRef}
       setShowChat={props.setShowChat}
       onClose={props.onClose || (() => {})}
@@ -163,7 +168,7 @@ interface ResultsPanelProps {
   ) => void;
   suggestedQuestions?: SuggestedQuestionHit[];
   onNewChat?: () => void;
-  showThreadDepthError?: boolean;
+  showPromptBlockingError?: boolean;
   openResultsInNewTab?: boolean;
 }
 
@@ -184,7 +189,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
   sendEvent,
   suggestedQuestions,
   onNewChat,
-  showThreadDepthError,
+  showPromptBlockingError,
   openResultsInNewTab = true,
 }) {
   const { items } = useHits(
@@ -269,7 +274,7 @@ const ResultsPanel: FC<ResultsPanelProps> = memo(function ResultsPanel({
         suggestedQuestions={suggestedQuestions}
         onSuggestedQuestionClick={handleSuggestedQuestionClick}
         onNewChat={onNewChat}
-        showThreadDepthError={showThreadDepthError}
+        showPromptBlockingError={showPromptBlockingError}
       />
     );
   }
@@ -327,8 +332,8 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
     isGenerating,
     sendMessage,
     startNewConversation,
-    threadDepthError,
-    showThreadDepthError,
+    promptBlockingError,
+    showPromptBlockingError,
   } = useAskai({
     applicationId: config.applicationId,
     apiKey: config.apiKey,
@@ -349,6 +354,15 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
     suggestedQuestionsEnabled: config.suggestedQuestionsEnabled ?? false,
     isOpen: showChat,
   });
+
+  /** Agent Studio: hide chat field for token output, domain-blocked-style blocks, etc. */
+  const hideModalChatInput = useMemo(
+    () =>
+      showChat &&
+      showPromptBlockingError &&
+      shouldHideAskAiShellChatInput(error, Boolean(config.agentStudio)),
+    [showChat, showPromptBlockingError, error, config.agentStudio],
+  );
 
   const noResults = results.results?.nbHits === 0;
   const {
@@ -394,15 +408,15 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
     }
   }, [startNewConversation, setShowChat, refine]);
 
-  /** Leaving chat while thread-depth failed: reset thread so Ask AI works again without closing the modal. */
+  /** Leaving chat while prompts are blocked: reset thread so Ask AI works again without closing the modal. */
   const handleSetShowChat = useCallback(
     (v: boolean) => {
-      if (!v && threadDepthError) {
+      if (!v && promptBlockingError) {
         startNewConversation();
       }
       setShowChat(v);
     },
-    [setShowChat, threadDepthError, startNewConversation],
+    [setShowChat, promptBlockingError, startNewConversation],
   );
 
   return (
@@ -419,7 +433,9 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
           refine={refine}
           showChat={showChat}
           isGenerating={isGenerating}
-          isThreadDepthError={showThreadDepthError}
+          isPromptBlockingError={showPromptBlockingError}
+          hideChatInput={hideModalChatInput}
+          error={error}
           setShowChat={handleSetShowChat}
           onClose={onClose}
           onArrowDown={moveDown}
@@ -454,7 +470,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
             sendEvent={sendEvent}
             suggestedQuestions={suggestedQuestions}
             onNewChat={handleNewChat}
-            showThreadDepthError={showThreadDepthError}
+            showPromptBlockingError={showPromptBlockingError}
             openResultsInNewTab={config.openResultsInNewTab}
           />
         )}
