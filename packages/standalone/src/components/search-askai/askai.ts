@@ -5,7 +5,7 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { isThreadDepthError } from "./error-utils";
+import { isAskAiPromptBlockingError, isThreadDepthError } from "./error-utils";
 
 export interface AskAIConfig {
   applicationId: string;
@@ -86,23 +86,35 @@ export function useAskai(config: AskAIConfig) {
   const isGenerating =
     chat.status === "submitted" || chat.status === "streaming";
 
-  const threadDepthError = useMemo(
-    () => chat.status === "error" && isThreadDepthError(chat.error),
-    [chat.status, chat.error],
+  const agentStudioEnabled = Boolean(config.agentStudio);
+
+  /** Agent Studio cost controls (tokens, steps, rate limit, domain). */
+  const promptBlockingError = useMemo(
+    () =>
+      chat.status === "error" &&
+      isAskAiPromptBlockingError(chat.error, agentStudioEnabled),
+    [chat.status, chat.error, agentStudioEnabled],
   );
 
-  /** Banner, input lock, etc. — only after at least one assistant reply (real thread). */
-  const showThreadDepthError = useMemo(
-    () => threadDepthError && chat.messages.some((m) => m.role === "assistant"),
-    [threadDepthError, chat.messages],
+  /**
+   * Banner and input lock: thread depth only after at least one assistant reply;
+   * other blocks (e.g. rate limit on first turn) show immediately.
+   */
+  const showPromptBlockingError = useMemo(
+    () =>
+      promptBlockingError &&
+      (isThreadDepthError(chat.error)
+        ? chat.messages.some((m) => m.role === "assistant")
+        : true),
+    [promptBlockingError, chat.error, chat.messages],
   );
 
   return {
     ...chat,
     startNewConversation,
     isGenerating,
-    threadDepthError,
-    showThreadDepthError,
+    promptBlockingError,
+    showPromptBlockingError,
   };
 }
 

@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import { memo, useEffect, useState } from "react";
 import { useInstantSearch, useSearchBox } from "react-instantsearch";
+import { isRequestBlockedForDomainAskAiError } from "./error-utils";
 import { ArrowLeftIcon, CloseIcon, SearchIcon, SquarePenIcon } from "./icons";
 
 export interface SearchInputProps {
@@ -8,7 +9,11 @@ export interface SearchInputProps {
   className?: string;
   showChat: boolean;
   isGenerating?: boolean;
-  isThreadDepthError?: boolean;
+  isPromptBlockingError?: boolean;
+  /** When in chat mode, omit the text field (e.g. Agent Studio token output limit in the modal). */
+  hideChatInput?: boolean;
+  /** Chat error from `useChat` (used to avoid “Conversation limit reached” for domain-blocked errors). */
+  error?: unknown;
   inputRef: RefObject<HTMLInputElement | null>;
   onClose: () => void;
   setShowChat: (show: boolean) => void;
@@ -75,25 +80,32 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
     }
   }, [props.showChat]);
 
+  const domainBlocked = isRequestBlockedForDomainAskAiError(props.error);
+
   // Placeholder logic:
-  // - if thread depth error, show "Conversation limit reached"
+  // - if prompt is blocked (not domain-blocked), show "Conversation limit reached"
   // - else if generating, show "Answering..."
   // - else if showChat, show AI prompt placeholder
   // - else show provided placeholder
-  const placeholder = props.isThreadDepthError
-    ? "Conversation limit reached"
-    : props.isGenerating
-      ? "Answering..."
-      : props.showChat
-        ? "Ask AI anything"
-        : props.placeholder;
+  const placeholder =
+    props.isPromptBlockingError && domainBlocked
+      ? ""
+      : props.isPromptBlockingError && !domainBlocked
+        ? "Conversation limit reached"
+        : props.isGenerating
+          ? "Answering..."
+          : props.showChat
+            ? "Ask AI anything"
+            : props.placeholder;
 
+  const hideChatInput = Boolean(props.showChat && props.hideChatInput);
   const currentValue = props.showChat ? chatInput : query || "";
-  const isInputDisabled = props.isGenerating || props.isThreadDepthError;
+  const isInputDisabled = props.isGenerating || props.isPromptBlockingError;
 
   const formClassName = [
     props.className,
     props.showChat ? "ss-searchbox-form--chat" : "",
+    hideChatInput ? "ss-searchbox-form--chat-no-input" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -119,54 +131,58 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
         showChat={props.showChat}
         setShowChat={props.setShowChat}
       />
-      <input
-        ref={props.inputRef}
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        placeholder={placeholder}
-        spellCheck={false}
-        maxLength={512}
-        type="search"
-        value={currentValue}
-        disabled={isInputDisabled}
-        onChange={(event) => {
-          setQuery(event.currentTarget.value);
-        }}
-        onKeyDown={(e) => {
-          if (isInputDisabled) {
-            // while answering or thread depth error, block interactions
-            e.preventDefault();
-            return;
-          }
-          if (e.key === "ArrowDown") {
-            e.preventDefault();
-            props.onArrowDown?.();
-            return;
-          }
-          if (e.key === "ArrowUp") {
-            e.preventDefault();
-            props.onArrowUp?.();
-            return;
-          }
-          if (e.key === "Enter") {
-            e.preventDefault();
-            const valueAtEnter = props.showChat ? chatInput : query || "";
-            if (props.onEnter?.(valueAtEnter)) {
-              if (props.showChat) {
-                setChatInput("");
-              } else {
-                setQuery("");
-              }
+      {!hideChatInput ? (
+        <input
+          ref={props.inputRef}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          placeholder={placeholder}
+          spellCheck={false}
+          maxLength={512}
+          type="search"
+          value={currentValue}
+          disabled={isInputDisabled}
+          onChange={(event) => {
+            setQuery(event.currentTarget.value);
+          }}
+          onKeyDown={(e) => {
+            if (isInputDisabled) {
+              // while answering or thread depth error, block interactions
+              e.preventDefault();
               return;
             }
-            const trimmed = valueAtEnter.trim();
-            if (trimmed) {
-              props.setShowChat(true);
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              props.onArrowDown?.();
+              return;
             }
-          }
-        }}
-      />
+            if (e.key === "ArrowUp") {
+              e.preventDefault();
+              props.onArrowUp?.();
+              return;
+            }
+            if (e.key === "Enter") {
+              e.preventDefault();
+              const valueAtEnter = props.showChat ? chatInput : query || "";
+              if (props.onEnter?.(valueAtEnter)) {
+                if (props.showChat) {
+                  setChatInput("");
+                } else {
+                  setQuery("");
+                }
+                return;
+              }
+              const trimmed = valueAtEnter.trim();
+              if (trimmed) {
+                props.setShowChat(true);
+              }
+            }
+          }}
+        />
+      ) : props.isPromptBlockingError && !domainBlocked ? (
+        <p className="ss-search-chat-blocking-placeholder">{placeholder}</p>
+      ) : null}
       <div className="ss-search-action-buttons-container">
         <button
           type="reset"
@@ -185,14 +201,14 @@ export const SearchInput = memo(function SearchInput(props: SearchInputProps) {
           <button
             type="button"
             className="ss-search-new-chat-button"
-            disabled={props.isGenerating && !props.isThreadDepthError}
+            disabled={props.isGenerating && !props.isPromptBlockingError}
             title={
-              props.isThreadDepthError
+              props.isPromptBlockingError
                 ? "Start a new conversation"
                 : "New conversation"
             }
             aria-label={
-              props.isThreadDepthError
+              props.isPromptBlockingError
                 ? "Start a new conversation"
                 : "New conversation"
             }
