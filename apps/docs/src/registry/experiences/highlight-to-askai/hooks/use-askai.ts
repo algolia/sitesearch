@@ -26,7 +26,7 @@ export function isThreadDepthError(error?: Error | null): boolean {
 
   // Check message content for AI-217 or thread depth references
   const message = error.message?.toLowerCase() || "";
-  return message.includes("ai-217") || message.includes("thread depth");
+  return message.includes("ai-217") || message.includes("conversation depth");
 }
 
 const agentStudioBaseUrl = (appId: string): string =>

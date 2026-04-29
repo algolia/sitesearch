@@ -77,7 +77,7 @@ function extractAiErrorCodeFromMessage(message: string): string | undefined {
 function threadDepthFromPlainText(message: string): boolean {
   if (!message) return false;
   if (message.toUpperCase().includes("AI-217")) return true;
-  return /thread\s+depth/i.test(message);
+  return /conversation\s+depth/i.test(message);
 }
 
 function messageLooksLikeThreadDepth(message: string): boolean {
