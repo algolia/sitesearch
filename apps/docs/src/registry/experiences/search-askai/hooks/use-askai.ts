@@ -31,7 +31,7 @@ export function isThreadDepthError(error?: Error | null): boolean {
 
   // Check message content for AI-217 or thread depth references
   const message = error.message?.toLowerCase() || "";
-  if (message.includes("ai-217") || message.includes("thread depth")) {
+  if (message.includes("ai-217") || message.includes("conversation depth")) {
     return true;
   }
   try {
@@ -46,7 +46,7 @@ export function isThreadDepthError(error?: Error | null): boolean {
       return true;
     }
     const nested = (parsed.message ?? "").toLowerCase();
-    return nested.includes("ai-217") || nested.includes("thread depth");
+    return nested.includes("ai-217") || nested.includes("conversation depth");
   } catch {
     return false;
   }
