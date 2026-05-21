@@ -6,9 +6,31 @@ interface MemoizedMarkdownProps {
   className?: string;
 }
 
+/** Replace unpaired UTF-16 surrogates (common in crawled index text). */
+function replaceUnpairedSurrogates(value: string): string {
+  return value.replace(
+    /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g,
+    "\uFFFD",
+  );
+}
+
+function toMarkdownString(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return replaceUnpairedSurrogates(value);
+}
+
+function safeEncodeURIComponent(value: string): string {
+  const sanitized = replaceUnpairedSurrogates(value);
+  try {
+    return encodeURIComponent(sanitized);
+  } catch {
+    return "";
+  }
+}
+
 // Escape HTML special characters for safe insertion
 function escapeHtml(html: string): string {
-  return html
+  return toMarkdownString(html)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -23,7 +45,7 @@ const renderer = new marked.Renderer();
 renderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
   const languageClass = lang ? `language-${lang}` : "";
   const safeCode = escaped ? text : escapeHtml(text);
-  const encodedCode = encodeURIComponent(text);
+  const encodedCode = safeEncodeURIComponent(text);
 
   const copyIconSvg = `
     <svg class="ss-markdown-copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -65,15 +87,16 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const html = useMemo(() => {
+    const source = toMarkdownString(children);
     try {
-      return marked(children, {
+      return marked(source, {
         renderer,
         breaks: true,
         gfm: true,
       });
     } catch (error) {
       console.error("Error parsing markdown:", error);
-      return escapeHtml(children);
+      return escapeHtml(source);
     }
   }, [children]);
 

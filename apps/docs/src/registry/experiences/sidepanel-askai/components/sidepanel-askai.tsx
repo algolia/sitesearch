@@ -155,7 +155,7 @@ function extractLinksFromMessage(message: Message | null): ExtractedLink[] {
       return;
     }
 
-    if (part.text.length === 0) {
+    if (typeof part.text !== "string" || part.text.length === 0) {
       return;
     }
 
@@ -796,7 +796,10 @@ const ChatWidget = memo(function ChatWidget({
                                     <mark className="bg-transparent text-muted-foreground underline decoration-1 underline-offset-4">
                                       &quot;{part.output?.query}&quot;
                                     </mark>{" "}
-                                    found {part.output?.hits.length || "no"}{" "}
+                                    found{" "}
+                                    {Array.isArray(part.output?.hits)
+                                      ? part.output.hits.length
+                                      : "no"}{" "}
                                     results
                                   </span>
                                 </p>

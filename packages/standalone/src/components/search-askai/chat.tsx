@@ -304,7 +304,9 @@ export const ChatWidget = memo(function ChatWidget({
                   {exchange.userMessage.parts.map((part, index) =>
                     part.type === "text" ? (
                       // biome-ignore lint/suspicious/noArrayIndexKey: better
-                      <span key={index}>{part.text}</span>
+                      <span key={index}>
+                        {typeof part.text === "string" ? part.text : ""}
+                      </span>
                     ) : null,
                   )}
                 </div>
@@ -320,10 +322,12 @@ export const ChatWidget = memo(function ChatWidget({
                           return <p key={`${index}`}>{part}</p>;
                         }
                         if (part.type === "text") {
+                          const text =
+                            typeof part.text === "string" ? part.text : "";
                           return (
                             // biome-ignore lint/suspicious/noArrayIndexKey: better
                             <MemoizedMarkdown key={`${index}`}>
-                              {part.text}
+                              {text}
                             </MemoizedMarkdown>
                           );
                         } else if (
@@ -371,7 +375,10 @@ export const ChatWidget = memo(function ChatWidget({
                                 <span>
                                   Searched for{" "}
                                   <mark>&quot;{part.output?.query}&quot;</mark>{" "}
-                                  found {part.output?.hits.length || "no"}{" "}
+                                  found{" "}
+                                  {Array.isArray(part.output?.hits)
+                                    ? part.output.hits.length
+                                    : "no"}{" "}
                                   results
                                 </span>
                               </p>
@@ -459,7 +466,9 @@ export const ChatWidget = memo(function ChatWidget({
                     const parts = exchange.assistantMessage?.parts ?? [];
                     const textContent = parts
                       .flatMap((part) =>
-                        part.type === "text" ? [part.text] : [],
+                        part.type === "text" && typeof part.text === "string"
+                          ? [part.text]
+                          : [],
                       )
                       .join("")
                       .trim();
