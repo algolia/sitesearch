@@ -107,6 +107,15 @@ function sanitizeUrl(url: string | null | undefined): string {
 /* eslint-disable xss/no-mixed-html -- marked renderer: interpolations escaped/sanitized */
 const markdownRenderer = new marked.Renderer();
 
+markdownRenderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
+  const safeLang = /^[a-zA-Z0-9_-]+$/.test(lang) ? lang : "";
+  const languageClass = safeLang ? "language-" + safeLang : "";
+  const safeCode = escaped ? text : escapeHtml(text);
+  return (
+    "<pre><code class=\"" + languageClass + "\">" + safeCode + "</code></pre>"
+  );
+};
+
 markdownRenderer.link = ({ href, title, text }: Tokens.Link): string => {
   const safeHref = escapeHtml(sanitizeUrl(href));
   const textEscaped = escapeHtml(text);
