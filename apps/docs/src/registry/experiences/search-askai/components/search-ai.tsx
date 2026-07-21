@@ -657,8 +657,8 @@ const MemoizedMarkdown = memo(function MemoizedMarkdown({
         [&_hr]:border-none [&_hr]:border-t [&_hr]:border-border [&_hr]:my-6
         [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_img]:my-2
         ${className}`.trim()}
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML escaped via marked renderer (html/link/image)
       // eslint-disable-next-line xss/no-mixed-html -- sanitized marked output
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML escaped via marked renderer (html/link/image)
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

@@ -63,8 +63,8 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
     <div
       ref={containerRef}
       className={`ss-markdown-content ${className}`.trim()}
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized via parseMarkdownToSafeHtml
       // eslint-disable-next-line xss/no-mixed-html -- sanitized via parseMarkdownToSafeHtml
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized via parseMarkdownToSafeHtml
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
