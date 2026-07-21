@@ -140,6 +140,74 @@ function escapeHtml(html: string): string {
     .replace(/'/g, "&#39;");
 }
 
+function decodeUrlForSchemeCheck(value: string): string {
+  let current = value;
+  for (let i = 0; i < 3; i += 1) {
+    try {
+      const decoded = decodeURIComponent(current);
+      if (decoded === current) {
+        break;
+      }
+      current = decoded;
+    } catch {
+      break;
+    }
+  }
+  return current;
+}
+
+function stripControlsAndWhitespace(value: string): string {
+  let result = "";
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i);
+    if (code > 0x20 && code !== 0x7f) {
+      result += value[i];
+    }
+  }
+  return result;
+}
+
+function sanitizeUrl(url: string | null | undefined): string {
+  if (!url) {
+    return "";
+  }
+
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  const normalized = stripControlsAndWhitespace(
+    decodeUrlForSchemeCheck(trimmed),
+  );
+  if (!normalized) {
+    return "";
+  }
+
+  if (normalized.startsWith("//")) {
+    return "";
+  }
+
+  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalized)) {
+    return trimmed;
+  }
+
+  try {
+    const parsed = new URL(normalized);
+    if (
+      parsed.protocol === "http:" ||
+      parsed.protocol === "https:" ||
+      parsed.protocol === "mailto:"
+    ) {
+      return normalized;
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
 function extractLinksFromMessage(message: Message | null): ExtractedLink[] {
   const links: ExtractedLink[] = [];
 
@@ -182,10 +250,10 @@ function extractLinksFromMessage(message: Message | null): ExtractedLink[] {
     // Parses the title and url from the found links
     for (const match of markdownMatches) {
       const title = match[1].trim();
-      const url = match[2];
+      const url = sanitizeUrl(match[2]);
 
       // Skip image URLs
-      if (imageUrls.has(url)) {
+      if (!url || imageUrls.has(url) || imageUrls.has(match[2])) {
         continue;
       }
 
@@ -200,10 +268,10 @@ function extractLinksFromMessage(message: Message | null): ExtractedLink[] {
 
     for (const match of plainUrls) {
       // Strip any extra punctuation
-      const cleanUrl = match[0].replace(/[.,;:!?]+$/, "");
+      const cleanUrl = sanitizeUrl(match[0].replace(/[.,;:!?]+$/, ""));
 
       // Skip image URLs
-      if (imageUrls.has(cleanUrl)) {
+      if (!cleanUrl || imageUrls.has(cleanUrl)) {
         continue;
       }
 
@@ -224,7 +292,8 @@ function extractLinksFromMessage(message: Message | null): ExtractedLink[] {
 const markdownRenderer = new marked.Renderer();
 
 markdownRenderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
-  const languageClass = lang ? `language-${lang}` : "";
+  const safeLang = /^[a-zA-Z0-9_-]+$/.test(lang) ? lang : "";
+  const languageClass = safeLang ? `language-${safeLang}` : "";
   const safeCode = escaped ? text : escapeHtml(text);
   const encodedCode = encodeURIComponent(text);
 
@@ -253,12 +322,29 @@ markdownRenderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
 };
 
 markdownRenderer.link = ({ href, title, text }: Tokens.Link): string => {
-  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
-  const hrefAttr = href ? escapeHtml(href) : "";
-  const textContent = text || "";
+  const safeHref = escapeHtml(sanitizeUrl(href));
+  const textEscaped = escapeHtml(text);
 
-  return `<a href="${hrefAttr}" target="_blank" rel="noopener noreferrer"${titleAttr}>${textContent}</a>`;
+  if (!safeHref) {
+    return textEscaped;
+  }
+
+  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+  return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer"${titleAttr}>${textEscaped}</a>`;
 };
+
+markdownRenderer.image = ({ href, title, text }: Tokens.Image): string => {
+  const safeHref = escapeHtml(sanitizeUrl(href));
+  if (!safeHref) {
+    return escapeHtml(text);
+  }
+
+  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+  return `<img src="${safeHref}" alt="${escapeHtml(text)}"${titleAttr} />`;
+};
+
+markdownRenderer.html = ({ text }: Tokens.HTML | Tokens.Tag): string =>
+  escapeHtml(text);
 
 // ============================================================================
 // Icon Components

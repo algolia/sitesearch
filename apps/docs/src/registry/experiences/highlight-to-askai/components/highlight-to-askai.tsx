@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/security/noDangerouslySetInnerHtml: markdown rendering, sanitized by marked */
+/** biome-ignore-all lint/security/noDangerouslySetInnerHtml: markdown rendering sanitized via parseMarkdownToSafeHtml */
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: parts are stable during render */
 "use client";
 
@@ -17,7 +17,7 @@ import {
   ThumbsDown,
   ThumbsUp,
 } from "lucide-react";
-import { marked } from "marked";
+import { marked, type Tokens } from "marked";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,115 @@ import {
   postFeedback,
   useAskai,
 } from "@/registry/experiences/highlight-to-askai/hooks/use-askai";
+
+function escapeHtml(html: string): string {
+  return html
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function decodeUrlForSchemeCheck(value: string): string {
+  let current = value;
+  for (let i = 0; i < 3; i += 1) {
+    try {
+      const decoded = decodeURIComponent(current);
+      if (decoded === current) {
+        break;
+      }
+      current = decoded;
+    } catch {
+      break;
+    }
+  }
+  return current;
+}
+
+function stripControlsAndWhitespace(value: string): string {
+  let result = "";
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i);
+    if (code > 0x20 && code !== 0x7f) {
+      result += value[i];
+    }
+  }
+  return result;
+}
+
+function sanitizeUrl(url: string | null | undefined): string {
+  if (!url) {
+    return "";
+  }
+
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  const normalized = stripControlsAndWhitespace(
+    decodeUrlForSchemeCheck(trimmed),
+  );
+  if (!normalized) {
+    return "";
+  }
+
+  if (normalized.startsWith("//")) {
+    return "";
+  }
+
+  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalized)) {
+    return trimmed;
+  }
+
+  try {
+    const parsed = new URL(normalized);
+    if (
+      parsed.protocol === "http:" ||
+      parsed.protocol === "https:" ||
+      parsed.protocol === "mailto:"
+    ) {
+      return normalized;
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
+const markdownRenderer = new marked.Renderer();
+
+markdownRenderer.link = ({ href, title, text }: Tokens.Link): string => {
+  const safeHref = escapeHtml(sanitizeUrl(href));
+  const textEscaped = escapeHtml(text);
+  if (!safeHref) {
+    return textEscaped;
+  }
+  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+  return `<a href="${safeHref}"${titleAttr} target="_blank" rel="noopener noreferrer">${textEscaped}</a>`;
+};
+
+markdownRenderer.image = ({ href, title, text }: Tokens.Image): string => {
+  const safeHref = escapeHtml(sanitizeUrl(href));
+  if (!safeHref) {
+    return escapeHtml(text);
+  }
+  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+  return `<img src="${safeHref}" alt="${escapeHtml(text)}"${titleAttr} />`;
+};
+
+markdownRenderer.html = ({ text }: Tokens.HTML | Tokens.Tag): string =>
+  escapeHtml(text);
+
+function parseMarkdownToSafeHtml(content: string): string {
+  return marked.parse(content, {
+    gfm: true,
+    breaks: true,
+    renderer: markdownRenderer,
+  }) as string;
+}
 
 type OnAskPayload = {
   text: string;
@@ -510,13 +619,15 @@ export function HighlightAskAI({
                             return <p key={index}>{part}</p>;
                           }
                           if (part.type === "text") {
-                            const html = marked.parse(part.text || "");
+                            const html = parseMarkdownToSafeHtml(
+                              part.text || "",
+                            );
                             return (
                               <div
                                 key={index}
                                 className="prose dark:prose-invert text-sm max-w-none"
                                 dangerouslySetInnerHTML={{
-                                  __html: html as string,
+                                  __html: html,
                                 }}
                               />
                             );
