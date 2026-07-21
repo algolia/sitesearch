@@ -112,7 +112,7 @@ markdownRenderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
   const languageClass = safeLang ? "language-" + safeLang : "";
   const safeCode = escaped ? text : escapeHtml(text);
   return (
-    "<pre><code class=\"" + languageClass + "\">" + safeCode + "</code></pre>"
+    '<pre><code class="' + languageClass + '">' + safeCode + "</code></pre>"
   );
 };
 
