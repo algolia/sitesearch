@@ -3,3 +3,7 @@
 # flags non-literal fs paths as false positives.
 exclude_paths:
   - "apps/vanilla/scripts/link-sitesearch.mjs"
+  # XSS unit tests intentionally contain PoC HTML / javascript: payloads.
+  - "**/__tests__/**"
+  - "**/*.test.ts"
+  - "**/*.test.tsx"

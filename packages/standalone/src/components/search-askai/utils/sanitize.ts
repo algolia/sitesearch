@@ -25,11 +25,13 @@ function decodeUrlForSchemeCheck(value: string): string {
 }
 
 function stripControlsAndWhitespace(value: string): string {
+  // Strip ASCII controls + whitespace so scheme checks cannot be bypassed via
+  // `java\tscript:` / `java script:` style obfuscation.
   let result = "";
   for (let i = 0; i < value.length; i += 1) {
     const code = value.charCodeAt(i);
     if (code > 0x20 && code !== 0x7f) {
-      result += value[i];
+      result += value.charAt(i);
     }
   }
   return result;

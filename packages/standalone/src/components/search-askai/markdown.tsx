@@ -12,6 +12,8 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
 }: MemoizedMarkdownProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // HTML is produced by parseMarkdownToSafeHtml (escapes raw HTML, sanitizes URLs).
+  // nosemgrep: javascript.lang.security.audit.xss-via-html
   const html = useMemo(() => parseMarkdownToSafeHtml(children), [children]);
 
   // Handle copy button clicks
@@ -61,6 +63,7 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
     <div
       ref={containerRef}
       className={`ss-markdown-content ${className}`.trim()}
+      // nosemgrep: javascript.react.security.audit.react-dangerouslysetinnerhtml
       // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized via parseMarkdownToSafeHtml
       dangerouslySetInnerHTML={{ __html: html }}
     />

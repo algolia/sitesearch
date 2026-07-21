@@ -3,7 +3,7 @@ import { parseMarkdownToSafeHtml } from "../markdown";
 
 describe("parseMarkdownToSafeHtml", () => {
   it("escapes raw HTML so event handlers cannot run", () => {
-    const html = parseMarkdownToSafeHtml('<img src=x onerror=alert(1)>');
+    const html = parseMarkdownToSafeHtml("<img src=x onerror=alert(1)>");
     expect(html).not.toMatch(/<img\b/i);
     expect(html).toContain("&lt;img");
     expect(html).toBe("&lt;img src=x onerror=alert(1)&gt;");
