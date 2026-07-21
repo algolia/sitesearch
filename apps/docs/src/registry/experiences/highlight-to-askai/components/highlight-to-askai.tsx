@@ -104,6 +104,7 @@ function sanitizeUrl(url: string | null | undefined): string {
   return "";
 }
 
+/* eslint-disable xss/no-mixed-html -- marked renderer: interpolations escaped/sanitized */
 const markdownRenderer = new marked.Renderer();
 
 markdownRenderer.link = ({ href, title, text }: Tokens.Link): string => {
@@ -145,6 +146,7 @@ markdownRenderer.image = ({ href, title, text }: Tokens.Image): string => {
 
 markdownRenderer.html = ({ text }: Tokens.HTML | Tokens.Tag): string =>
   escapeHtml(text);
+/* eslint-enable xss/no-mixed-html */
 
 function parseMarkdownToSafeHtml(content: string): string {
   return marked.parse(content, {
@@ -638,15 +640,17 @@ export function HighlightAskAI({
                           }
                           if (part.type === "text") {
                             // HTML is produced by parseMarkdownToSafeHtml (escapes raw HTML, sanitizes URLs).
+                            // eslint-disable-next-line xss/no-mixed-html -- sanitized via parseMarkdownToSafeHtml
                             const html = parseMarkdownToSafeHtml(
                               part.text || "",
-                            ); // nosemgrep
+                            );
                             return (
                               <div
                                 key={index}
                                 className="prose dark:prose-invert text-sm max-w-none"
+                                // eslint-disable-next-line xss/no-mixed-html -- sanitized via parseMarkdownToSafeHtml
                                 dangerouslySetInnerHTML={{
-                                  __html: html, // nosemgrep
+                                  __html: html,
                                 }}
                               />
                             );

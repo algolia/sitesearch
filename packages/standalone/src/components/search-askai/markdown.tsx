@@ -13,7 +13,8 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // HTML is produced by parseMarkdownToSafeHtml (escapes raw HTML, sanitizes URLs).
-  const html = useMemo(() => parseMarkdownToSafeHtml(children), [children]); // nosemgrep
+  // eslint-disable-next-line xss/no-mixed-html -- sanitized via parseMarkdownToSafeHtml
+  const html = useMemo(() => parseMarkdownToSafeHtml(children), [children]);
 
   // Handle copy button clicks
   // biome-ignore lint/correctness/useExhaustiveDependencies: expected
@@ -63,7 +64,8 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
       ref={containerRef}
       className={`ss-markdown-content ${className}`.trim()}
       // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized via parseMarkdownToSafeHtml
-      dangerouslySetInnerHTML={{ __html: html }} // nosemgrep
+      // eslint-disable-next-line xss/no-mixed-html -- sanitized via parseMarkdownToSafeHtml
+      dangerouslySetInnerHTML={{ __html: html }}
     />
   );
 });

@@ -289,6 +289,7 @@ function extractLinksFromMessage(message: Message | null): ExtractedLink[] {
 // Markdown Renderer
 // ============================================================================
 
+/* eslint-disable xss/no-mixed-html -- marked renderer: interpolations escaped/sanitized */
 const markdownRenderer = new marked.Renderer();
 
 markdownRenderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
@@ -363,6 +364,7 @@ markdownRenderer.image = ({ href, title, text }: Tokens.Image): string => {
 
 markdownRenderer.html = ({ text }: Tokens.HTML | Tokens.Tag): string =>
   escapeHtml(text);
+/* eslint-enable xss/no-mixed-html */
 
 // ============================================================================
 // Icon Components
@@ -569,7 +571,8 @@ const MemoizedMarkdown = memo(function MemoizedMarkdown({
         [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_img]:my-2
         ${className}`.trim()}
       // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML escaped via marked renderer (html/link/image)
-      dangerouslySetInnerHTML={{ __html: html }} // nosemgrep
+      // eslint-disable-next-line xss/no-mixed-html -- sanitized marked output
+      dangerouslySetInnerHTML={{ __html: html }}
     />
   );
 });
