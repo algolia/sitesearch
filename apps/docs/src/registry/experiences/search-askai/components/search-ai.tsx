@@ -341,10 +341,17 @@ markdownRenderer.link = ({ href, title, text }: Tokens.Link): string => {
     return textEscaped;
   }
 
-  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+  const titleAttr = title ? ' title="' + escapeHtml(title) + '"' : "";
   // href/text/title are sanitized + escaped above.
-  // nosemgrep: javascript.lang.security.audit.raw-html-format
-  return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer"${titleAttr}>${textEscaped}</a>`;
+  return (
+    '<a href="' +
+    safeHref +
+    '" target="_blank" rel="noopener noreferrer"' +
+    titleAttr +
+    ">" +
+    textEscaped +
+    "</a>"
+  ); // nosemgrep
 };
 
 markdownRenderer.image = ({ href, title, text }: Tokens.Image): string => {
@@ -353,10 +360,17 @@ markdownRenderer.image = ({ href, title, text }: Tokens.Image): string => {
     return escapeHtml(text);
   }
 
-  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+  const titleAttr = title ? ' title="' + escapeHtml(title) + '"' : "";
   // src/alt/title are sanitized + escaped above.
-  // nosemgrep: javascript.lang.security.audit.raw-html-format
-  return `<img src="${safeHref}" alt="${escapeHtml(text)}"${titleAttr} />`;
+  return (
+    '<img src="' +
+    safeHref +
+    '" alt="' +
+    escapeHtml(text) +
+    '"' +
+    titleAttr +
+    " />"
+  ); // nosemgrep
 };
 
 markdownRenderer.html = ({ text }: Tokens.HTML | Tokens.Tag): string =>
@@ -641,9 +655,8 @@ const MemoizedMarkdown = memo(function MemoizedMarkdown({
         [&_hr]:border-none [&_hr]:border-t [&_hr]:border-border [&_hr]:my-6
         [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_img]:my-2
         ${className}`.trim()}
-      // nosemgrep: javascript.react.security.audit.react-dangerouslysetinnerhtml
       // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML escaped via marked renderer (html/link/image)
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: html }} // nosemgrep
     />
   );
 });

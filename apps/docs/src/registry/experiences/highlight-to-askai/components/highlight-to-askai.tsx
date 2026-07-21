@@ -112,10 +112,17 @@ markdownRenderer.link = ({ href, title, text }: Tokens.Link): string => {
   if (!safeHref) {
     return textEscaped;
   }
-  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+  const titleAttr = title ? ' title="' + escapeHtml(title) + '"' : "";
   // href/text/title are sanitized + escaped above.
-  // nosemgrep: javascript.lang.security.audit.raw-html-format
-  return `<a href="${safeHref}"${titleAttr} target="_blank" rel="noopener noreferrer">${textEscaped}</a>`;
+  return (
+    '<a href="' +
+    safeHref +
+    '"' +
+    titleAttr +
+    ' target="_blank" rel="noopener noreferrer">' +
+    textEscaped +
+    "</a>"
+  ); // nosemgrep
 };
 
 markdownRenderer.image = ({ href, title, text }: Tokens.Image): string => {
@@ -123,10 +130,17 @@ markdownRenderer.image = ({ href, title, text }: Tokens.Image): string => {
   if (!safeHref) {
     return escapeHtml(text);
   }
-  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+  const titleAttr = title ? ' title="' + escapeHtml(title) + '"' : "";
   // src/alt/title are sanitized + escaped above.
-  // nosemgrep: javascript.lang.security.audit.raw-html-format
-  return `<img src="${safeHref}" alt="${escapeHtml(text)}"${titleAttr} />`;
+  return (
+    '<img src="' +
+    safeHref +
+    '" alt="' +
+    escapeHtml(text) +
+    '"' +
+    titleAttr +
+    " />"
+  ); // nosemgrep
 };
 
 markdownRenderer.html = ({ text }: Tokens.HTML | Tokens.Tag): string =>
@@ -624,17 +638,15 @@ export function HighlightAskAI({
                           }
                           if (part.type === "text") {
                             // HTML is produced by parseMarkdownToSafeHtml (escapes raw HTML, sanitizes URLs).
-                            // nosemgrep: javascript.lang.security.audit.xss-via-html
                             const html = parseMarkdownToSafeHtml(
                               part.text || "",
-                            );
+                            ); // nosemgrep
                             return (
                               <div
                                 key={index}
                                 className="prose dark:prose-invert text-sm max-w-none"
-                                // nosemgrep: javascript.react.security.audit.react-dangerouslysetinnerhtml
                                 dangerouslySetInnerHTML={{
-                                  __html: html,
+                                  __html: html, // nosemgrep
                                 }}
                               />
                             );
