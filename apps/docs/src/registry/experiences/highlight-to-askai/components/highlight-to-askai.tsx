@@ -639,7 +639,6 @@ export function HighlightAskAI({
                             return <p key={index}>{part}</p>;
                           }
                           if (part.type === "text") {
-                            // HTML is produced by parseMarkdownToSafeHtml (escapes raw HTML, sanitizes URLs).
                             // eslint-disable-next-line xss/no-mixed-html -- sanitized via parseMarkdownToSafeHtml
                             const html = parseMarkdownToSafeHtml(
                               part.text || "",
@@ -648,9 +647,8 @@ export function HighlightAskAI({
                               <div
                                 key={index}
                                 className="prose dark:prose-invert text-sm max-w-none"
-                                // eslint-disable-next-line xss/no-mixed-html -- sanitized via parseMarkdownToSafeHtml
                                 dangerouslySetInnerHTML={{
-                                  __html: html,
+                                  __html: html as string,
                                 }}
                               />
                             );
