@@ -46,6 +46,18 @@ describe("sanitizeUrl", () => {
     expect(sanitizeUrl(`java\u0000script${":"}alert(1)`)).toBe("");
   });
 
+  it("blocks protocol-relative and backslash-obfuscated hosts", () => {
+    expect(sanitizeUrl("//evil.example/path")).toBe("");
+    expect(sanitizeUrl("/\\evil.example/path")).toBe("");
+    expect(sanitizeUrl("\\\\evil.example/path")).toBe("");
+  });
+
+  it("preserves percent-encoding in allowed http(s) URLs", () => {
+    expect(
+      sanitizeUrl("https://docs.example.com/api%20reference?tag=foo%26bar"),
+    ).toBe("https://docs.example.com/api%20reference?tag=foo%26bar");
+  });
+
   it("blocks percent-encoded schemes", () => {
     expect(sanitizeUrl("%6Aavascript:alert(1)")).toBe("");
     expect(sanitizeUrl("%6aavascript:alert(1)")).toBe("");

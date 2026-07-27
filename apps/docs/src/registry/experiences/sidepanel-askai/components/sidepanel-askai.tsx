@@ -177,13 +177,16 @@ function sanitizeUrl(url: string | null | undefined): string {
     return "";
   }
 
+  // Decode / strip controls for scheme checks only — return the original trimmed
+  // URL when safe so percent-encoding in the path/query is preserved.
   const normalized = stripControlsAndWhitespace(
     decodeUrlForSchemeCheck(trimmed),
-  );
+  ).replace(/\\/g, "/");
   if (!normalized) {
     return "";
   }
 
+  // Protocol-relative and backslash-obfuscated hosts (e.g. /\evil.com → //evil.com).
   if (normalized.startsWith("//")) {
     return "";
   }
@@ -199,7 +202,7 @@ function sanitizeUrl(url: string | null | undefined): string {
       parsed.protocol === "https:" ||
       parsed.protocol === "mailto:"
     ) {
-      return normalized;
+      return trimmed;
     }
   } catch {
     return "";
