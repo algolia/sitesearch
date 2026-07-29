@@ -229,14 +229,87 @@ function escapeHtml(html: string): string {
     .replace(/'/g, "&#39;");
 }
 
+function decodeUrlForSchemeCheck(value: string): string {
+  let current = value;
+  for (let i = 0; i < 3; i += 1) {
+    try {
+      const decoded = decodeURIComponent(current);
+      if (decoded === current) {
+        break;
+      }
+      current = decoded;
+    } catch {
+      break;
+    }
+  }
+  return current;
+}
+
+function stripControlsAndWhitespace(value: string): string {
+  let result = "";
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i);
+    if (code > 0x20 && code !== 0x7f) {
+      result += value.charAt(i);
+    }
+  }
+  return result;
+}
+
+function sanitizeUrl(url: string | null | undefined): string {
+  if (!url) {
+    return "";
+  }
+
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  // Decode / strip controls for scheme checks only — return the original trimmed
+  // URL when safe so percent-encoding in the path/query is preserved.
+  const normalized = stripControlsAndWhitespace(
+    decodeUrlForSchemeCheck(trimmed),
+  ).replace(/\\/g, "/");
+  if (!normalized) {
+    return "";
+  }
+
+  // Protocol-relative and backslash-obfuscated hosts (e.g. /\evil.com → //evil.com).
+  if (normalized.startsWith("//")) {
+    return "";
+  }
+
+  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalized)) {
+    return trimmed;
+  }
+
+  try {
+    const parsed = new URL(normalized);
+    if (
+      parsed.protocol === "http:" ||
+      parsed.protocol === "https:" ||
+      parsed.protocol === "mailto:"
+    ) {
+      return trimmed;
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
 // ============================================================================
 // Markdown Renderer
 // ============================================================================
 
+/* eslint-disable xss/no-mixed-html -- marked renderer: interpolations escaped/sanitized */
 const markdownRenderer = new marked.Renderer();
 
 markdownRenderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
-  const languageClass = lang ? `language-${lang}` : "";
+  const safeLang = /^[a-zA-Z0-9_-]+$/.test(lang) ? lang : "";
+  const languageClass = safeLang ? `language-${safeLang}` : "";
   const safeCode = escaped ? text : escapeHtml(text);
   const encodedCode = encodeURIComponent(text);
 
@@ -265,12 +338,48 @@ markdownRenderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
 };
 
 markdownRenderer.link = ({ href, title, text }: Tokens.Link): string => {
-  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
-  const hrefAttr = href ? escapeHtml(href) : "";
-  const textContent = text || "";
+  const safeHref = escapeHtml(sanitizeUrl(href));
+  const textEscaped = escapeHtml(text);
 
-  return `<a href="${hrefAttr}" target="_blank" rel="noopener noreferrer"${titleAttr}>${textContent}</a>`;
+  if (!safeHref) {
+    return textEscaped;
+  }
+
+  const titleAttr = title ? ' title="' + escapeHtml(title) + '"' : "";
+  // href/text/title are sanitized + escaped above.
+  return (
+    '<a href="' +
+    safeHref +
+    '" target="_blank" rel="noopener noreferrer"' +
+    titleAttr +
+    ">" +
+    textEscaped +
+    "</a>"
+  ); // nosemgrep
 };
+
+markdownRenderer.image = ({ href, title, text }: Tokens.Image): string => {
+  const safeHref = escapeHtml(sanitizeUrl(href));
+  if (!safeHref) {
+    return escapeHtml(text);
+  }
+
+  const titleAttr = title ? ' title="' + escapeHtml(title) + '"' : "";
+  // src/alt/title are sanitized + escaped above.
+  return (
+    '<img src="' +
+    safeHref +
+    '" alt="' +
+    escapeHtml(text) +
+    '"' +
+    titleAttr +
+    " />"
+  ); // nosemgrep
+};
+
+markdownRenderer.html = ({ text }: Tokens.HTML | Tokens.Tag): string =>
+  escapeHtml(text);
+/* eslint-enable xss/no-mixed-html */
 
 // ============================================================================
 // Icon Components
@@ -551,7 +660,8 @@ const MemoizedMarkdown = memo(function MemoizedMarkdown({
         [&_hr]:border-none [&_hr]:border-t [&_hr]:border-border [&_hr]:my-6
         [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_img]:my-2
         ${className}`.trim()}
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: its alright :)
+      // eslint-disable-next-line xss/no-mixed-html -- sanitized marked output
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML escaped via marked renderer (html/link/image)
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/security/noDangerouslySetInnerHtml: markdown rendering, sanitized by marked */
+/** biome-ignore-all lint/security/noDangerouslySetInnerHtml: markdown rendering sanitized via parseMarkdownToSafeHtml */
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: parts are stable during render */
 "use client";
 
@@ -17,7 +17,7 @@ import {
   ThumbsDown,
   ThumbsUp,
 } from "lucide-react";
-import { marked } from "marked";
+import { marked, type Tokens } from "marked";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,147 @@ import {
   postFeedback,
   useAskai,
 } from "@/registry/experiences/highlight-to-askai/hooks/use-askai";
+
+function escapeHtml(html: string): string {
+  return html
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function decodeUrlForSchemeCheck(value: string): string {
+  let current = value;
+  for (let i = 0; i < 3; i += 1) {
+    try {
+      const decoded = decodeURIComponent(current);
+      if (decoded === current) {
+        break;
+      }
+      current = decoded;
+    } catch {
+      break;
+    }
+  }
+  return current;
+}
+
+function stripControlsAndWhitespace(value: string): string {
+  let result = "";
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i);
+    if (code > 0x20 && code !== 0x7f) {
+      result += value.charAt(i);
+    }
+  }
+  return result;
+}
+
+function sanitizeUrl(url: string | null | undefined): string {
+  if (!url) {
+    return "";
+  }
+
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  // Decode / strip controls for scheme checks only — return the original trimmed
+  // URL when safe so percent-encoding in the path/query is preserved.
+  const normalized = stripControlsAndWhitespace(
+    decodeUrlForSchemeCheck(trimmed),
+  ).replace(/\\/g, "/");
+  if (!normalized) {
+    return "";
+  }
+
+  // Protocol-relative and backslash-obfuscated hosts (e.g. /\evil.com → //evil.com).
+  if (normalized.startsWith("//")) {
+    return "";
+  }
+
+  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalized)) {
+    return trimmed;
+  }
+
+  try {
+    const parsed = new URL(normalized);
+    if (
+      parsed.protocol === "http:" ||
+      parsed.protocol === "https:" ||
+      parsed.protocol === "mailto:"
+    ) {
+      return trimmed;
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
+/* eslint-disable xss/no-mixed-html -- marked renderer: interpolations escaped/sanitized */
+const markdownRenderer = new marked.Renderer();
+
+markdownRenderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
+  const safeLang = /^[a-zA-Z0-9_-]+$/.test(lang) ? lang : "";
+  const languageClass = safeLang ? "language-" + safeLang : "";
+  const safeCode = escaped ? text : escapeHtml(text);
+  return (
+    '<pre><code class="' + languageClass + '">' + safeCode + "</code></pre>"
+  );
+};
+
+markdownRenderer.link = ({ href, title, text }: Tokens.Link): string => {
+  const safeHref = escapeHtml(sanitizeUrl(href));
+  const textEscaped = escapeHtml(text);
+  if (!safeHref) {
+    return textEscaped;
+  }
+  const titleAttr = title ? ' title="' + escapeHtml(title) + '"' : "";
+  // href/text/title are sanitized + escaped above.
+  return (
+    '<a href="' +
+    safeHref +
+    '"' +
+    titleAttr +
+    ' target="_blank" rel="noopener noreferrer">' +
+    textEscaped +
+    "</a>"
+  ); // nosemgrep
+};
+
+markdownRenderer.image = ({ href, title, text }: Tokens.Image): string => {
+  const safeHref = escapeHtml(sanitizeUrl(href));
+  if (!safeHref) {
+    return escapeHtml(text);
+  }
+  const titleAttr = title ? ' title="' + escapeHtml(title) + '"' : "";
+  // src/alt/title are sanitized + escaped above.
+  return (
+    '<img src="' +
+    safeHref +
+    '" alt="' +
+    escapeHtml(text) +
+    '"' +
+    titleAttr +
+    " />"
+  ); // nosemgrep
+};
+
+markdownRenderer.html = ({ text }: Tokens.HTML | Tokens.Tag): string =>
+  escapeHtml(text);
+/* eslint-enable xss/no-mixed-html */
+
+function parseMarkdownToSafeHtml(content: string): string {
+  return marked.parse(content, {
+    gfm: true,
+    breaks: true,
+    renderer: markdownRenderer,
+  }) as string;
+}
 
 type OnAskPayload = {
   text: string;
@@ -510,7 +651,10 @@ export function HighlightAskAI({
                             return <p key={index}>{part}</p>;
                           }
                           if (part.type === "text") {
-                            const html = marked.parse(part.text || "");
+                            // eslint-disable-next-line xss/no-mixed-html -- sanitized via parseMarkdownToSafeHtml
+                            const html = parseMarkdownToSafeHtml(
+                              part.text || "",
+                            );
                             return (
                               <div
                                 key={index}

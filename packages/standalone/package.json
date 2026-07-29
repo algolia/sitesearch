@@ -18,6 +18,7 @@
     "clean": "rm -rf dist",
     "dev": "rolldown -w -c rolldown.config.js",
     "prepublishOnly": "bun run clean && bun run build",
+    "test": "bun test src",
     "version": "bun pm version"
   },
   "dependencies": {

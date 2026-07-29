@@ -1,84 +1,10 @@
-import { marked, type Tokens } from "marked";
 import { memo, useEffect, useMemo, useRef } from "react";
+import { parseMarkdownToSafeHtml } from "./utils/markdown";
 
 interface MemoizedMarkdownProps {
   children: string;
   className?: string;
 }
-
-/** Replace unpaired UTF-16 surrogates (common in crawled index text). */
-function replaceUnpairedSurrogates(value: string): string {
-  return value.replace(
-    /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g,
-    "\uFFFD",
-  );
-}
-
-function toMarkdownString(value: unknown): string {
-  if (typeof value !== "string") return "";
-  return replaceUnpairedSurrogates(value);
-}
-
-function safeEncodeURIComponent(value: string): string {
-  const sanitized = replaceUnpairedSurrogates(value);
-  try {
-    return encodeURIComponent(sanitized);
-  } catch {
-    return "";
-  }
-}
-
-// Escape HTML special characters for safe insertion
-function escapeHtml(html: string): string {
-  return toMarkdownString(html)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-// Create a custom renderer
-const renderer = new marked.Renderer();
-
-// Custom code block renderer with copy functionality
-renderer.code = ({ text, lang = "", escaped }: Tokens.Code): string => {
-  const languageClass = lang ? `language-${lang}` : "";
-  const safeCode = escaped ? text : escapeHtml(text);
-  const encodedCode = safeEncodeURIComponent(text);
-
-  const copyIconSvg = `
-    <svg class="ss-markdown-copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-      <path d="m5 15-4-4 4-4"></path>
-    </svg>
-  `;
-
-  const checkIconSvg = `
-    <svg class="ss-markdown-check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="20,6 9,17 4,12"></polyline>
-    </svg>
-  `;
-
-  return `
-    <div class="ss-markdown-code-snippet">
-      <button class="ss-markdown-copy-button" data-code="${encodedCode}" aria-label="Copy code to clipboard" title="Copy code">
-        ${copyIconSvg}${checkIconSvg}
-        <span class="ss-markdown-copy-label">Copy</span>
-      </button>
-      <pre><code class="${languageClass}">${safeCode}</code></pre>
-    </div>
-  `;
-};
-
-// Ensure markdown links open in new tab with security attributes
-renderer.link = ({ href, title, text }: Tokens.Link): string => {
-  const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
-  const hrefAttr = href ? escapeHtml(href) : "";
-  const textContent = text || "";
-
-  return `<a href="${hrefAttr}" target="_blank" rel="noopener noreferrer"${titleAttr}>${textContent}</a>`;
-};
 
 export const MemoizedMarkdown = memo(function MemoizedMarkdown({
   children,
@@ -86,19 +12,9 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
 }: MemoizedMarkdownProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const html = useMemo(() => {
-    const source = toMarkdownString(children);
-    try {
-      return marked(source, {
-        renderer,
-        breaks: true,
-        gfm: true,
-      });
-    } catch (error) {
-      console.error("Error parsing markdown:", error);
-      return escapeHtml(source);
-    }
-  }, [children]);
+  // HTML is produced by parseMarkdownToSafeHtml (escapes raw HTML, sanitizes URLs).
+  // eslint-disable-next-line xss/no-mixed-html -- sanitized via parseMarkdownToSafeHtml
+  const html = useMemo(() => parseMarkdownToSafeHtml(children), [children]);
 
   // Handle copy button clicks
   // biome-ignore lint/correctness/useExhaustiveDependencies: expected
@@ -147,7 +63,8 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
     <div
       ref={containerRef}
       className={`ss-markdown-content ${className}`.trim()}
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: its alright :)
+      // eslint-disable-next-line xss/no-mixed-html -- sanitized via parseMarkdownToSafeHtml
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized via parseMarkdownToSafeHtml
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
